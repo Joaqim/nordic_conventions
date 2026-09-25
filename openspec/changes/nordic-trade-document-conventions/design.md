@@ -56,7 +56,7 @@ The PostNord Postpaket advisory and the invoice type advisory both read these fl
 For a Swedish PostNord shipment to Norway, `nordic_postnord_se_postpaket_commercial_invoice` and `nordic_postnord_se_no_digital_invoice` would both name the Norway invoice routes.
 The spec makes them exclusive: the digital-invoice rule first evaluates the Postpaket rule's applicability predicate (commercial shipment booked as `postnord_postpaket_utrikes`) and returns nothing when it holds, and the Postpaket rule then carries the CN23 statement together with the Norway routes.
 Both rules share one predicate function in `rules/postnord.py`, so the exclusivity cannot drift, and a test asserts that no SE to NO shipment receives both codes.
-Letters to Norway receive only the digital-invoice advisory, which adds the SEK 0 commercial invoice and VOEC statement for letter services.
+Letters to Norway receive only the digital-invoice advisory, which adds the SEK 0 commercial invoice and VOEC statement only for the Norway-named letter services (`UX`, `RR`) held as a separate set in `rules/postnord.py`.
 Alternative considered: always emitting both and trimming the routes from the Postpaket message; rejected because the consumer would then need two messages to learn one duty.
 
 Building `Lane` once per advisor call repeats a few dictionary reads ten times per shipment, which is negligible next to a carrier call.

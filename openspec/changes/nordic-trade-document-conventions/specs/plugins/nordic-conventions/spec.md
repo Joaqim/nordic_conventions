@@ -7,7 +7,9 @@ Defines the Nordic conventions plugin, an advisor-only karrio plugin that adds n
 Source references in this spec use FN for the karrio fork's `docs/notes/customs/nordic-trade-documents-facts.md` (branch `docs-openspec`, commit baf8eb3dd) with line numbers, and keep the note's evidence tags: S is repository code or vendored specification, W is public carrier or authority documentation, and I is inference.
 Connector behaviour cited as S refers to the karrio fork's main specs `openspec/specs/postnord/customs-declaration/spec.md` (PNS) and `openspec/specs/dhl-freight-sweden/customs/spec.md` (DFS), both on branch `docs-openspec` at commit 60312fe2e.
 PostNord parcel products are the PostNord services that are neither letter services nor International Parcel (`postnord_postpaket_utrikes`), as defined by PNS lines 10-11.
-PostNord letter services are `postnord_tracked` (`04`), `postnord_tracked_letter` (`34`), `postnord_export_letter` (`UX`), `postnord_varubrev_first_class` (`86`), `postnord_expressbrev` (`LX`), `postnord_rek` (`RR`), `postnord_rek_retur` (`RK`), `postnord_rek_extra` (`RL`), `postnord_rekommanderet_brev` (`RE`), `postnord_rekommanderet_quickbrev` (`RQ`), `postnord_varde` (`VV`), and `postnord_afleveringsattest` (`AF`), the letter set of the PostNord connector (karrio `develop` at 7a56ffa5b, `modules/connectors/postnord/karrio/providers/postnord/units.py:269-284`, S); they classify products but do not by themselves trigger any advisory.
+PostNord letter services are `postnord_tracked` (`04`), `postnord_tracked_letter` (`34`), `postnord_export_letter` (`UX`), `postnord_varubrev_first_class` (`86`), `postnord_expressbrev` (`LX`), `postnord_rek` (`RR`), `postnord_rek_retur` (`RK`), `postnord_rek_extra` (`RL`), `postnord_rekommanderet_brev` (`RE`), `postnord_rekommanderet_quickbrev` (`RQ`), `postnord_varde` (`VV`), and `postnord_afleveringsattest` (`AF`), the letter set of the PostNord connector (karrio `develop` at 7a56ffa5b, `modules/connectors/postnord/karrio/providers/postnord/units.py:269-284`, S).
+Norway-named letter services are the letter services named in the letters table of the PostNord SE Swedish customs documents page (Brev utrikes, PostNord Untracked letter, Spårbart brev utrikes, Rek utrikes; W, Wayback 2026-02-08, FN:108) that map to a connector code with clear evidence: `postnord_export_letter` (`UX`, connector label "Export Letter Sweden", live-verified as an SE export letter in the karrio fork's `docs/notes/postnord/customs-declaration-live-verification.md:5`, S) and `postnord_rek` (`RR`, connector label "registered mail", S).
+Spårbart brev utrikes (tracked) has no connector code identified with clear evidence and Varubrev is not named in that table, so neither is a Norway-named letter service.
 
 ## ADDED Requirements
 
@@ -139,7 +141,7 @@ A shipment without customs data is neither sale-like nor commercial.
 ### Requirement: PostNord Sweden to Norway invoices go digitally
 
 For a PostNord shipment from Sweden to Norway to which `nordic_postnord_se_postpaket_commercial_invoice` does not apply, the plugin SHALL return code `nordic_postnord_se_no_digital_invoice`, stating that PostNord requires the commercial invoice for Norway digitally rather than on paper with the parcel, and naming the routes: the booking itself (the connector transmits a customs invoice for parcel products booked with customs data, PNS lines 28-31, S), PostNord Skicka Direkt Business, the email address foravisering.export@postnord.com, and upload in PostNord MyCustoms.
-For a letter service the message SHALL also state that a commercial invoice and a VOEC number are required for letters to Norway from SEK 0, the invoice sent digitally through the same routes (FN:99, FN:108, W, SV page only).
+For a Norway-named letter service the message SHALL also state that a commercial invoice and a VOEC number are required for letters to Norway from SEK 0, the invoice sent digitally through the same routes (FN:99, FN:108, W, SV page only); other letter services receive this advisory without that statement.
 When `nordic_postnord_se_postpaket_commercial_invoice` applies to a shipment, it carries the Norway invoice routes itself and this advisory SHALL NOT be returned, so each shipment receives the invoice routes once.
 The level SHALL be `info` when the booking is a parcel product carrying customs data, because the connector already transmits the invoice data, and `warning` otherwise, because the invoice then reaches PostNord only through a route the consumer owns.
 Sources: FN:118 (W, Service Point special terms §4, "To Norway the commercial invoice and shipment list shall be sent digitally"), FN:142 and FN:147 (W, PostNord SE customs documents pages, Norway channels and MyCustoms), FN:149 (W, the separate channels are stated for Norway only), FN:108 (W, SV page, "Vid export till Norge behöver Handelsfaktura och VOEC* anges från 0 kr.").
@@ -153,6 +155,11 @@ Sources: FN:118 (W, Service Point special terms §4, "To Norway the commercial i
 
 - **WHEN** a PostNord `postnord_export_letter` shipment from Sweden to Norway is created with customs data whose `content_type` is `merchandise`
 - **THEN** the plugin returns code `nordic_postnord_se_no_digital_invoice` at level `warning`, stating that a commercial invoice and a VOEC number are required from SEK 0 and that the invoice is sent digitally, and citing the SV page
+
+#### Scenario: Letter not named by the Swedish page omits the SEK 0 statement
+
+- **WHEN** a PostNord `postnord_varubrev_first_class` shipment from Sweden to Norway is created with customs data whose `content_type` is `merchandise`
+- **THEN** the plugin returns code `nordic_postnord_se_no_digital_invoice` at level `warning` naming the Norway invoice routes, without the commercial invoice and VOEC from SEK 0 statement
 
 #### Scenario: Commercial Postpaket Utrikes to Norway receives the invoice routes once
 
