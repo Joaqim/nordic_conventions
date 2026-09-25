@@ -11,6 +11,7 @@ from karrio.plugins.nordic_conventions.rules import advisory
 SE_NO_DIGITAL_INVOICE = "nordic_postnord_se_no_digital_invoice"
 SE_POSTPAKET_COMMERCIAL_INVOICE = "nordic_postnord_se_postpaket_commercial_invoice"
 SE_EXPORT_PAPER_INVOICE = "nordic_postnord_se_export_paper_invoice"
+FI_EXPORT_INVOICE = "nordic_postnord_fi_export_invoice"
 
 # Letter services named in the letters table of the PostNord SE Swedish
 # customs documents page that map to a connector code with clear evidence.
@@ -173,5 +174,52 @@ def se_export_paper_invoice(request, context) -> typing.List[models.Message]:
                 sources.PN_SE_SERVICE_POINT_TERMS_PAPER,
                 sources.PN_SE_PLASTIC_POCKET_ORIGIN,
             ],
+        )
+    ]
+
+
+def fi_export_invoice(request, context) -> typing.List[models.Message]:
+    lane = lanes.lane_of(request, context)
+
+    if not (_postnord_from(lane, "FI") and lane.postnord_product_group == lanes.PARCEL):
+        return []
+
+    text = (
+        " ".join(
+            [
+                "PostNord Finland requires the invoice for Norway electronically, and it must reach PostNord before the shipment.",
+                "A copy of the invoice can be emailed to tullaus.fi@postnord.com.",
+            ]
+        )
+        if lane.to_norway
+        else " ".join(
+            [
+                "PostNord Finland clears customs primarily from the electronic customs data sent with the booking,",
+                "and a copy of the invoice can be emailed to tullaus.fi@postnord.com.",
+                "PostNord Finland's special terms for parcels also require a signed commercial invoice in English in triplicate",
+                "to accompany parcels to destinations outside the EU VAT area, which is stricter than its web page.",
+            ]
+        )
+    )
+
+    return [
+        advisory(
+            FI_EXPORT_INVOICE,
+            "warning",
+            text,
+            lane,
+            (
+                [
+                    sources.PN_FI_WEB_PAGE_NORWAY,
+                    sources.PN_FI_SPECIAL_TERMS,
+                    sources.PN_FI_WEB_PAGE,
+                ]
+                if lane.to_norway
+                else [
+                    sources.PN_FI_WEB_PAGE,
+                    sources.PN_FI_SPECIAL_TERMS,
+                    sources.PN_FI_GOVERNING_UNRESOLVED,
+                ]
+            ),
         )
     ]

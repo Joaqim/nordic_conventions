@@ -393,5 +393,61 @@ class TestNordicConventionsPostNordSEExportPaperInvoice(unittest.TestCase):
         )
 
 
+class TestNordicConventionsPostNordFIExportInvoice(unittest.TestCase):
+    def test_finnish_parcel_to_great_britain(self):
+        request = fixture.shipment("FI", "GB", "postnord_parcel")
+
+        self.assertListEqual(
+            fixture.messages(postnord.fi_export_invoice, request, CONTEXT),
+            [
+                dict(
+                    code="nordic_postnord_fi_export_invoice",
+                    level="warning",
+                    message=(
+                        "PostNord Finland clears customs primarily from the electronic customs data sent with the booking, "
+                        "and a copy of the invoice can be emailed to tullaus.fi@postnord.com. "
+                        "PostNord Finland's special terms for parcels also require a signed commercial invoice in English in triplicate "
+                        "to accompany parcels to destinations outside the EU VAT area, which is stricter than its web page."
+                    ),
+                    details=dict(
+                        plugin="nordic_conventions",
+                        lane="FI-GB",
+                        sources=[
+                            sources.PN_FI_WEB_PAGE.to_dict(),
+                            sources.PN_FI_SPECIAL_TERMS.to_dict(),
+                            sources.PN_FI_GOVERNING_UNRESOLVED.to_dict(),
+                        ],
+                    ),
+                )
+            ],
+        )
+
+    def test_finnish_parcel_to_norway(self):
+        request = fixture.shipment("FI", "NO", "postnord_parcel")
+
+        self.assertListEqual(
+            fixture.messages(postnord.fi_export_invoice, request, CONTEXT),
+            [
+                dict(
+                    code="nordic_postnord_fi_export_invoice",
+                    level="warning",
+                    message=(
+                        "PostNord Finland requires the invoice for Norway electronically, and it must reach PostNord before the shipment. "
+                        "A copy of the invoice can be emailed to tullaus.fi@postnord.com."
+                    ),
+                    details=dict(
+                        plugin="nordic_conventions",
+                        lane="FI-NO",
+                        sources=[
+                            sources.PN_FI_WEB_PAGE_NORWAY.to_dict(),
+                            sources.PN_FI_SPECIAL_TERMS.to_dict(),
+                            sources.PN_FI_WEB_PAGE.to_dict(),
+                        ],
+                    ),
+                )
+            ],
+        )
+
+
 if __name__ == "__main__":
     unittest.main()
