@@ -29,7 +29,7 @@
 - [x] 4.1 Implement `nordic_dhl_freight_sweden_customs_mode_missing` in `rules/dhl_freight_sweden.py`, and verify tests for no option to Norway, each of the four customs service options silencing it by unified name, each DHL key (for example `customsHandlingStandard`) not silencing it because the connector ignores DHL-keyed options, a string `"true"` value parsed as selected, and a string `"false"` value parsed as selected as the connector parses it
 - [x] 4.2 Implement `nordic_dhl_freight_sweden_invoice_copy`, and verify tests for Norway (390 kr) and Great Britain (650 kr), asserting the email address, myDHL Freight, and cited sources
 - [x] 4.3 Implement `nordic_dhl_freight_sweden_attached_documents`, and verify tests for Parcel Connect by `dhl_freight_sweden_parcel_connect_b2c` and by `109` to Norway (details state 112 and road freight unconfirmed) and for no advisory on `dhl_freight_sweden_parcel_connect_plus`
-- [ ] 4.4 Implement `nordic_dhl_freight_sweden_voec_marking`, and verify tests for a VOEC number to Norway, no VOEC number to Norway, and a VOEC number to Switzerland (no advisory)
+- [x] 4.4 Implement `nordic_dhl_freight_sweden_voec_marking`, and verify tests for a VOEC number to Norway, no VOEC number to Norway, and a VOEC number to Switzerland (no advisory)
 
 ## 5. Invoice type advisory and plugin wiring
 

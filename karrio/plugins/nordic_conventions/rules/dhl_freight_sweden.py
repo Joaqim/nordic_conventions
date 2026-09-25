@@ -11,6 +11,7 @@ from karrio.plugins.nordic_conventions.rules import advisory
 CUSTOMS_MODE_MISSING = "nordic_dhl_freight_sweden_customs_mode_missing"
 INVOICE_COPY = "nordic_dhl_freight_sweden_invoice_copy"
 ATTACHED_DOCUMENTS = "nordic_dhl_freight_sweden_attached_documents"
+VOEC_MARKING = "nordic_dhl_freight_sweden_voec_marking"
 
 PARCEL_CONNECT_SERVICES: typing.FrozenSet[str] = frozenset(
     {"dhl_freight_sweden_parcel_connect_b2c", "109"}
@@ -108,5 +109,31 @@ def attached_documents(request, context) -> typing.List[models.Message]:
                 "The requirement is unconfirmed for Parcel Connect Plus (112) and road-freight products, "
                 "which receive no such advisory."
             ),
+        )
+    ]
+
+
+def voec_marking(request, context) -> typing.List[models.Message]:
+    lane = lanes.lane_of(request, context)
+
+    if not (_dhl_freight_sweden(lane) and lane.to_norway and lane.voec_number):
+        return []
+
+    return [
+        advisory(
+            VOEC_MARKING,
+            "warning",
+            " ".join(
+                [
+                    "The connector sends the VOEC number to DHL Freight Sweden as the VOEC service,",
+                    "and DHL also requires the VOEC ID printed on the package or the label for Norway.",
+                ]
+            ),
+            lane,
+            [
+                sources.DFS_VOEC_SERVICE,
+                sources.DHL_MAN_VOEC_MARKING,
+                sources.DHL_MAN_VOEC_PARCEL_CONNECT,
+            ],
         )
     ]

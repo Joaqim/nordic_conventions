@@ -187,5 +187,54 @@ class TestNordicConventionsDHLFreightSwedenAttachedDocuments(unittest.TestCase):
         )
 
 
+class TestNordicConventionsDHLFreightSwedenVOECMarking(unittest.TestCase):
+    def test_voec_number_to_norway(self):
+        self.assertListEqual(
+            _advise(
+                dhl_freight_sweden.voec_marking,
+                customs=fixture.customs("merchandise", True, voec_number="VOEC2024001"),
+            ),
+            [
+                dict(
+                    code="nordic_dhl_freight_sweden_voec_marking",
+                    level="warning",
+                    message=(
+                        "The connector sends the VOEC number to DHL Freight Sweden as the VOEC service, "
+                        "and DHL also requires the VOEC ID printed on the package or the label for Norway."
+                    ),
+                    details=dict(
+                        plugin="nordic_conventions",
+                        lane="SE-NO",
+                        sources=[
+                            sources.DFS_VOEC_SERVICE.to_dict(),
+                            sources.DHL_MAN_VOEC_MARKING.to_dict(),
+                            sources.DHL_MAN_VOEC_PARCEL_CONNECT.to_dict(),
+                        ],
+                    ),
+                )
+            ],
+        )
+
+    def test_no_voec_number(self):
+        self.assertListEqual(
+            _advise(
+                dhl_freight_sweden.voec_marking,
+                customs=fixture.customs("merchandise", True),
+            ),
+            [],
+        )
+
+    def test_voec_number_to_switzerland_is_not_advised(self):
+        self.assertListEqual(
+            _advise(
+                dhl_freight_sweden.voec_marking,
+                recipient="CH",
+                service="dhl_freight_sweden_road_freight_standard",
+                customs=fixture.customs("merchandise", True, voec_number="VOEC2024001"),
+            ),
+            [],
+        )
+
+
 if __name__ == "__main__":
     unittest.main()
