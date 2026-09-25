@@ -108,7 +108,7 @@ class TestNordicConventionsPostNordSENoDigitalInvoice(unittest.TestCase):
                     ],
                 )
 
-    def test_commercial_postpaket_utrikes_to_norway_receives_no_digital_invoice_advisory(self):
+    def test_commercial_postpaket_utrikes_to_norway_receives_the_invoice_routes_once(self):
         request = fixture.shipment(
             "SE",
             "NO",
@@ -118,6 +118,9 @@ class TestNordicConventionsPostNordSENoDigitalInvoice(unittest.TestCase):
 
         self.assertListEqual(
             fixture.messages(postnord.se_no_digital_invoice, request, CONTEXT), []
+        )
+        self.assertListEqual(
+            _codes(request), ["nordic_postnord_se_postpaket_commercial_invoice"]
         )
 
     def test_non_commercial_postpaket_utrikes_to_norway_is_a_warning(self):
@@ -250,7 +253,6 @@ class TestNordicConventionsPostNordSEPostpaketCommercialInvoice(unittest.TestCas
                 )
             ],
         )
-        self.assertListEqual(_codes(request), ["nordic_postnord_se_postpaket_commercial_invoice"])
 
     def test_gift_postpaket_utrikes_is_not_advised(self):
         request = fixture.shipment(

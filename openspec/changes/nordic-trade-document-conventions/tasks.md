@@ -63,7 +63,7 @@
     - Parcel booking with customs data is informational: `test_postnord.TestNordicConventionsPostNordSENoDigitalInvoice.test_parcel_booking_with_customs_data_is_informational`
     - Letter to Norway states invoice and VOEC from SEK 0: `test_postnord.TestNordicConventionsPostNordSENoDigitalInvoice.test_letter_to_norway_states_invoice_and_voec_from_sek_0`
     - Letter not named by the Swedish page omits the SEK 0 statement: `test_postnord.TestNordicConventionsPostNordSENoDigitalInvoice.test_letter_not_named_by_the_swedish_page_omits_the_sek_0_statement`
-    - Commercial Postpaket Utrikes to Norway receives the invoice routes once: `test_postnord.TestNordicConventionsPostNordSEPostpaketCommercialInvoice.test_commercial_postpaket_utrikes_to_norway_sends_the_invoice_digitally` (asserts only the Postpaket code across both advisors) and test_postnord.TestNordicConventionsPostNordSENoDigitalInvoice.test_commercial_postpaket_utrikes_to_norway_receives_no_digital_invoice_advisory
+    - Commercial Postpaket Utrikes to Norway receives the invoice routes once: `test_postnord.TestNordicConventionsPostNordSENoDigitalInvoice.test_commercial_postpaket_utrikes_to_norway_receives_the_invoice_routes_once`
     - Non-commercial Postpaket Utrikes to Norway is a warning: `test_postnord.TestNordicConventionsPostNordSENoDigitalInvoice.test_non_commercial_postpaket_utrikes_to_norway_is_a_warning`
     - Parcel to Switzerland gets the paper invoice advisory: `test_postnord.TestNordicConventionsPostNordSEExportPaperInvoice.test_parcel_to_switzerland_gets_the_paper_invoice_advisory`
     - Norway is excluded: `test_postnord.TestNordicConventionsPostNordSEExportPaperInvoice.test_norway_is_excluded`
