@@ -22,7 +22,7 @@
 - [x] 3.2 Implement `nordic_postnord_se_postpaket_commercial_invoice`, and verify tests for commercial Postpaket Utrikes to the United States (CN23, three invoice copies, terms and web pages attributed with their copy counts and triggers), sale-like content with the flag false, commercial Postpaket Utrikes to Norway (CN23 and digital invoice routes, no paper copies, terms, web pages, and Norway rule cited), gift Postpaket Utrikes, a commercial letter, and a Finnish shipper, each as in the spec scenarios
 - [x] 3.3 Implement `nordic_postnord_se_export_paper_invoice`, and verify tests for the Switzerland scenario (triplicate, parcel no. 1, three attributed sources with their copy counts), the Norway exclusion, the International Parcel exclusion, and the Åland-by-postal-code scenario
 - [x] 3.4 Implement `nordic_postnord_fi_export_invoice`, and verify tests for the Great Britain scenario (tullaus.fi@postnord.com, signed triplicate, both sources attributed) and the Norway scenario (electronic before shipment, no triplicate)
-- [ ] 3.5 Implement `nordic_postnord_dk_export_documents`, and verify tests for Norway (2), Liechtenstein (3), Great Britain (2), and the United States (1 CN23 and 2 invoices, recommended), each asserting the conditional export-declaration copy to eksport@postnord.com without any value check
+- [x] 3.5 Implement `nordic_postnord_dk_export_documents`, and verify tests for Norway (2), Liechtenstein (3), Great Britain (2), and the United States (1 CN23 and 2 invoices, recommended), each asserting the conditional export-declaration copy to eksport@postnord.com without any value check
 
 ## 4. DHL Freight Sweden advisories
 

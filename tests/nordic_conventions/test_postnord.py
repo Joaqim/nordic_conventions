@@ -449,5 +449,53 @@ class TestNordicConventionsPostNordFIExportInvoice(unittest.TestCase):
         )
 
 
+class TestNordicConventionsPostNordDKExportDocuments(unittest.TestCase):
+    def _message(self, recipient: str, copies: str) -> dict:
+        return dict(
+            code="nordic_postnord_dk_export_documents",
+            level="warning",
+            message=(
+                "PostNord Denmark requires the export documents in a plastic pocket visible on the parcel: "
+                f"{copies} for {recipient}. "
+                "If an export declaration was lodged, send a copy of it to eksport@postnord.com."
+            ),
+            details=dict(
+                plugin="nordic_conventions",
+                lane=f"DK-{recipient}",
+                sources=[sources.PN_DK_EXPORT_PAGE.to_dict()],
+            ),
+        )
+
+    def _advise(self, recipient: str) -> list:
+        request = fixture.shipment("DK", recipient, "postnord_parcel")
+        return fixture.messages(postnord.dk_export_documents, request, CONTEXT)
+
+    def test_danish_parcel_to_norway(self):
+        self.assertListEqual(
+            self._advise("NO"), [self._message("NO", "2 commercial invoices")]
+        )
+
+    def test_danish_parcel_to_liechtenstein(self):
+        self.assertListEqual(
+            self._advise("LI"), [self._message("LI", "3 commercial invoices")]
+        )
+
+    def test_danish_parcel_to_great_britain(self):
+        self.assertListEqual(
+            self._advise("GB"), [self._message("GB", "2 commercial invoices")]
+        )
+
+    def test_danish_parcel_to_the_united_states(self):
+        self.assertListEqual(
+            self._advise("US"),
+            [
+                self._message(
+                    "US",
+                    "1 CN23 and 2 commercial invoices, the invoice not required but recommended by PostNord",
+                )
+            ],
+        )
+
+
 if __name__ == "__main__":
     unittest.main()

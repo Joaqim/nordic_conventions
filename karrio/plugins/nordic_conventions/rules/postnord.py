@@ -12,6 +12,17 @@ SE_NO_DIGITAL_INVOICE = "nordic_postnord_se_no_digital_invoice"
 SE_POSTPAKET_COMMERCIAL_INVOICE = "nordic_postnord_se_postpaket_commercial_invoice"
 SE_EXPORT_PAPER_INVOICE = "nordic_postnord_se_export_paper_invoice"
 FI_EXPORT_INVOICE = "nordic_postnord_fi_export_invoice"
+DK_EXPORT_DOCUMENTS = "nordic_postnord_dk_export_documents"
+
+DK_DOCUMENT_COPIES: typing.Dict[str, str] = {
+    "NO": "2 commercial invoices",
+    "CH": "3 commercial invoices",
+    "LI": "3 commercial invoices",
+    "GB": "2 commercial invoices",
+}
+DK_DEFAULT_DOCUMENT_COPIES = (
+    "1 CN23 and 2 commercial invoices, the invoice not required but recommended by PostNord"
+)
 
 # Letter services named in the letters table of the PostNord SE Swedish
 # customs documents page that map to a connector code with clear evidence.
@@ -221,5 +232,30 @@ def fi_export_invoice(request, context) -> typing.List[models.Message]:
                     sources.PN_FI_GOVERNING_UNRESOLVED,
                 ]
             ),
+        )
+    ]
+
+
+def dk_export_documents(request, context) -> typing.List[models.Message]:
+    lane = lanes.lane_of(request, context)
+
+    if not (_postnord_from(lane, "DK") and lane.postnord_product_group == lanes.PARCEL):
+        return []
+
+    copies = DK_DOCUMENT_COPIES.get(lane.recipient_country, DK_DEFAULT_DOCUMENT_COPIES)
+
+    return [
+        advisory(
+            DK_EXPORT_DOCUMENTS,
+            "warning",
+            " ".join(
+                [
+                    "PostNord Denmark requires the export documents in a plastic pocket visible on the parcel:",
+                    f"{copies} for {lane.recipient_country}.",
+                    "If an export declaration was lodged, send a copy of it to eksport@postnord.com.",
+                ]
+            ),
+            lane,
+            [sources.PN_DK_EXPORT_PAGE],
         )
     ]
