@@ -50,6 +50,13 @@ Every rule starts from `lanes.lane_of(request, context) -> Optional[Lane]`, whic
 `Lane` is a frozen attrs value holding the carrier name, shipper country, recipient country, whether the recipient is Norway, the service name, the PostNord product group (letter, international parcel, parcel product), whether customs data is present, `commercial_invoice`, the normalised content type, the VOEC number, the set of selected DHL customs service options, and the derived `sale_like` and `commercial` flags.
 `lanes.sale_like(customs)` and `lanes.commercial(customs)` implement the spec's single determination of commercial content; content types are compared by lower-casing the value and matching `CustomsContentType` names (`gift`, `sample`, `documents`, `return_merchandise`), so both `gift` and `GIFT` match.
 The PostNord commercial-letter advisory and the invoice type advisory both read these flags rather than re-deriving them.
+
+### Norway invoice routes are emitted once
+
+For a Swedish PostNord shipment to Norway, `nordic_postnord_se_export_cn23_invoice` and `nordic_postnord_se_no_digital_invoice` would both name the Norway invoice routes.
+The spec makes them exclusive: the digital-invoice rule first evaluates the commercial-letter rule's applicability predicate (commercial, named letter service or International Parcel) and returns nothing when it holds, and the commercial-letter rule then carries the CN23 statement together with the Norway routes.
+Both rules share one predicate function in `rules/postnord.py`, so the exclusivity cannot drift, and a test asserts that no SE to NO shipment receives both codes.
+Alternative considered: always emitting both and trimming the routes from the commercial-letter message; rejected because the consumer would then need two messages to learn one duty.
 Building `Lane` once per advisor call repeats a few dictionary reads ten times per shipment, which is negligible next to a carrier call.
 Alternative considered: a single advisor returning all messages; rejected because one exception would drop every advisory and the SDK's failure message could not tell which rule failed.
 
@@ -64,7 +71,7 @@ A test cross-checks the table against the connectors' tables when those modules 
 
 ### Service and option names without importing connectors
 
-`rules/postnord.py` holds the PostNord letter service names, copied from the connector's `LETTER_SERVICES` as listed in the spec, the International Parcel name `postnord_postpaket_utrikes`, and their carrier codes, and classifies every other `postnord` service as a parcel product, matching PNS lines 10-11.
+`rules/postnord.py` holds the PostNord letter service names, copied from the connector's `LETTER_SERVICES` as listed in the spec for product classification, the separate named PostNord SE letter services (`UX`, `RR`, `86`) that alone trigger the commercial-letter advisory, the International Parcel name `postnord_postpaket_utrikes`, and their carrier codes, and classifies every other `postnord` service as a parcel product, matching PNS lines 10-11.
 `rules/dhl_freight_sweden.py` recognises Parcel Connect by `dhl_freight_sweden_parcel_connect_b2c` or `109`, and the customs service options by their unified names and their DHL keys (`customsHandlingStandard`, `customsHandlingFullService`, `customsCustomersOwnDeclaration`, `customsJointDeclaration`).
 An option counts as selected when karrio's bool option parsing (`karrio.lib`) would select it, so the plugin and the connector agree on string values such as `"true"`.
 The same cross-check test compares these names with the connectors' enums when importable.

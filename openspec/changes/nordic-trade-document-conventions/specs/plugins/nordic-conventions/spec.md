@@ -7,7 +7,9 @@ Defines the Nordic conventions plugin, an advisor-only karrio plugin that adds n
 Source references in this spec use FN for the karrio fork's `docs/notes/customs/nordic-trade-documents-facts.md` (branch `docs-openspec`, commit 0d02edf3a) with line numbers, and keep the note's evidence tags: S is repository code or vendored specification, W is public carrier or authority documentation, and I is inference.
 Connector behaviour cited as S refers to the karrio fork's main specs `openspec/specs/postnord/customs-declaration/spec.md` (PNS) and `openspec/specs/dhl-freight-sweden/customs/spec.md` (DFS), both on branch `docs-openspec` at commit 60312fe2e.
 PostNord parcel products are the PostNord services that are neither letter services nor International Parcel (`postnord_postpaket_utrikes`), as defined by PNS lines 10-11.
-PostNord letter services are `postnord_tracked` (`04`), `postnord_tracked_letter` (`34`), `postnord_export_letter` (`UX`), `postnord_varubrev_first_class` (`86`), `postnord_expressbrev` (`LX`), `postnord_rek` (`RR`), `postnord_rek_retur` (`RK`), `postnord_rek_extra` (`RL`), `postnord_rekommanderet_brev` (`RE`), `postnord_rekommanderet_quickbrev` (`RQ`), `postnord_varde` (`VV`), and `postnord_afleveringsattest` (`AF`), the letter set of the PostNord connector (karrio `develop` at 7a56ffa5b, `modules/connectors/postnord/karrio/providers/postnord/units.py:269-284`, S).
+PostNord letter services are `postnord_tracked` (`04`), `postnord_tracked_letter` (`34`), `postnord_export_letter` (`UX`), `postnord_varubrev_first_class` (`86`), `postnord_expressbrev` (`LX`), `postnord_rek` (`RR`), `postnord_rek_retur` (`RK`), `postnord_rek_extra` (`RL`), `postnord_rekommanderet_brev` (`RE`), `postnord_rekommanderet_quickbrev` (`RQ`), `postnord_varde` (`VV`), and `postnord_afleveringsattest` (`AF`), the letter set of the PostNord connector (karrio `develop` at 7a56ffa5b, `modules/connectors/postnord/karrio/providers/postnord/units.py:269-284`, S); they classify products but do not by themselves trigger any advisory.
+The named PostNord SE letter services are the letter services the PostNord SE customs documents page names (FN:93, W) that map to a connector code without doubt: Export Letter as `postnord_export_letter` (`UX`, connector label "Export Letter Sweden", and live-verified as an SE export letter booking in the karrio fork's `docs/notes/postnord/customs-declaration-live-verification.md:5`, S), Registered as `postnord_rek` (`RR`, connector label "registered mail", S), and Varubrev as `postnord_varubrev_first_class` (`86`, "Varubrev 1:a Klass" per the karrio fork's `docs/notes/postnord/swagger-ingestion-findings.md:48`, S).
+The page's tracked export letter has no connector code identified without doubt, because `postnord_tracked` (`04`) carries a Danish label and no source ties `postnord_tracked_letter` (`34`) to export, and the registered variants `postnord_rek_retur` (`RK`) and `postnord_rek_extra` (`RL`) have no sourced export use; these are not named PostNord SE letter services until a mapping is confirmed.
 
 ## ADDED Requirements
 
@@ -138,7 +140,8 @@ A shipment without customs data is neither sale-like nor commercial.
 
 ### Requirement: PostNord Sweden to Norway invoices go digitally
 
-For a PostNord shipment from Sweden to Norway the plugin SHALL return code `nordic_postnord_se_no_digital_invoice`, stating that PostNord requires the commercial invoice for Norway digitally rather than on paper with the parcel, and naming the routes: the booking itself (the connector transmits a customs invoice for parcel products booked with customs data, PNS lines 28-31, S), the email address foravisering.export@postnord.com, and upload in PostNord MyCustoms.
+For a PostNord shipment from Sweden to Norway to which `nordic_postnord_se_export_cn23_invoice` does not apply, the plugin SHALL return code `nordic_postnord_se_no_digital_invoice`, stating that PostNord requires the commercial invoice for Norway digitally rather than on paper with the parcel, and naming the routes: the booking itself (the connector transmits a customs invoice for parcel products booked with customs data, PNS lines 28-31, S), PostNord Skicka Direkt Business, the email address foravisering.export@postnord.com, and upload in PostNord MyCustoms.
+When `nordic_postnord_se_export_cn23_invoice` applies to a shipment, it carries the Norway invoice routes itself and this advisory SHALL NOT be returned, so each shipment receives the invoice routes once.
 The level SHALL be `info` when the booking is a parcel product carrying customs data, because the connector already transmits the invoice data, and `warning` otherwise, because the invoice then reaches PostNord only through a route the consumer owns.
 Sources: FN:102 (W, Service Point special terms §4, "To Norway the commercial invoice and shipment list shall be sent digitally"), FN:126 and FN:131 (W, PostNord SE customs documents pages, Norway channels and MyCustoms), FN:133 (W, the separate channels are stated for Norway only).
 
@@ -147,10 +150,15 @@ Sources: FN:102 (W, Service Point special terms §4, "To Norway the commercial i
 - **WHEN** a PostNord `postnord_parcel` shipment from Sweden to Norway is created with customs data
 - **THEN** the plugin returns code `nordic_postnord_se_no_digital_invoice` at level `info`, naming foravisering.export@postnord.com and MyCustoms
 
-#### Scenario: Letter booking to Norway is a warning
+#### Scenario: Non-commercial letter booking to Norway is a warning
 
-- **WHEN** a PostNord `postnord_export_letter` shipment from Sweden to Norway is created with customs data
+- **WHEN** a PostNord `postnord_export_letter` shipment from Sweden to Norway is created with customs data whose `content_type` is `gift` and whose `commercial_invoice` is false
 - **THEN** the plugin returns code `nordic_postnord_se_no_digital_invoice` at level `warning`
+
+#### Scenario: Commercial letter to Norway receives the invoice routes once
+
+- **WHEN** a PostNord `postnord_export_letter` shipment from Sweden to Norway is created with customs data whose `content_type` is `merchandise`
+- **THEN** the plugin returns code `nordic_postnord_se_export_cn23_invoice` naming the Norway invoice routes and does not return code `nordic_postnord_se_no_digital_invoice`
 
 ### Requirement: PostNord Sweden parcels outside the EU VAT area carry a paper invoice
 
@@ -175,12 +183,14 @@ International Parcel and letter services are excluded because their invoice duty
 
 ### Requirement: PostNord Sweden commercial letters and International Parcel carry CN23 and an invoice
 
-For a commercial PostNord shipment from Sweden to a destination outside the EU VAT area booked with a letter service or International Parcel (`postnord_postpaket_utrikes`, `91`, marketed in Denmark as EMS), the plugin SHALL return code `nordic_postnord_se_export_cn23_invoice` at level `warning`, stating for letter services that a CN23 and a commercial invoice are required on the item, and for International Parcel that a CN23 and two copies of the invoice are required.
-The message SHALL state that the connector currently sends CN22 declaration data for letter services and International Parcel (PNS lines 10 and 13-16, S), so the consumer must supply the CN23 and the invoice.
-For Norway, where the PostNord SE customs documents page states that the invoice is sent digitally only (FN:126, W), the message SHALL state the stricter reading, the CN23 and invoice with the item as well as the digital invoice named by `nordic_postnord_se_no_digital_invoice`, and `details` SHALL name both sources.
+For a commercial PostNord shipment from Sweden to a destination outside the EU VAT area booked with a named PostNord SE letter service or International Parcel (`postnord_postpaket_utrikes`, `91`, "Z91 Postpaket Utrikes" in the connector's vendored general descriptions, FN:149, S; marketed in Denmark as EMS), the plugin SHALL return code `nordic_postnord_se_export_cn23_invoice` at level `warning`.
+For destinations other than Norway the message SHALL state, for letter services, that a CN23 and a commercial invoice are required on the item, and for International Parcel, that a CN23 and two copies of the invoice are required.
+For Norway the Norway-specific digital-only rule overrides the general product table: the message SHALL state that a CN23 is required and that the invoice is sent digitally and not attached to the item, naming PostNord's Norway routes (the Booking API, PostNord Skicka Direkt Business, foravisering.export@postnord.com, and MyCustoms upload), and `details` SHALL cite both the product table and the Norway rule.
+The message SHALL state that the connector currently sends CN22 declaration data and no invoice for letter services and International Parcel (PNS lines 10 and 13-16, S), so the consumer must supply the CN23 and the invoice.
 Goods-value triggers for non-commercial items (above SEK 2 000) are deferred.
-Sources: FN:92-94 (W, PostNord SE customs documents page, letters "> SEK 2 000 or commercial" need CN23 and commercial invoice), FN:97 (W, Postpaket Utrikes terms valid 2025-05-02, CN23 and invoice ×2), FN:149-151 (S and W, code 91 is the contract product).
+Other letter services (Expressbrev, Värde, the Danish letter services, and any other connector letter service that is not a named PostNord SE letter service) receive no such advisory until a source covers them.
 No letter rule was found for Danish or Finnish shippers, so they receive no such advisory.
+Sources: FN:92-97 (W, PostNord SE customs documents page, letters and International Parcel "> SEK 2 000 or commercial" need CN23 and an invoice, and Postpaket Utrikes terms valid 2025-05-02, CN23 and invoice ×2), FN:126 and FN:131 (W, PostNord SE customs documents pages, Norway takes the invoice digitally only through the named channels), FN:149-151 (S and W, code 91 is the contract product).
 
 #### Scenario: Commercial export letter to Switzerland
 
@@ -192,14 +202,24 @@ No letter rule was found for Danish or Finnish shippers, so they receive no such
 - **WHEN** a PostNord `postnord_postpaket_utrikes` shipment from Sweden to the United States is created with customs data whose `commercial_invoice` is true
 - **THEN** the plugin returns code `nordic_postnord_se_export_cn23_invoice` stating CN23 and two invoice copies
 
-#### Scenario: Commercial letter to Norway names both sources
+#### Scenario: Commercial letter to Norway sends the invoice digitally
 
 - **WHEN** a PostNord `postnord_varubrev_first_class` shipment from Sweden to Norway is created with customs data whose `content_type` is `other`
-- **THEN** the plugin returns code `nordic_postnord_se_export_cn23_invoice` whose message states the CN23 and invoice with the item and the digital invoice, and whose details list both the product table and the Norway digital-only statement
+- **THEN** the plugin returns code `nordic_postnord_se_export_cn23_invoice` whose message states a CN23, the invoice sent digitally and not on the item, and the Booking API, Skicka Direkt Business, foravisering.export@postnord.com, and MyCustoms routes, and whose details cite both the product table and the Norway digital-only rule
+
+#### Scenario: Commercial International Parcel to Norway sends the invoice digitally
+
+- **WHEN** a PostNord `postnord_postpaket_utrikes` shipment from Sweden to Norway is created with customs data whose `commercial_invoice` is true
+- **THEN** the plugin returns code `nordic_postnord_se_export_cn23_invoice` stating a CN23 and the invoice sent digitally, without the two paper copies
 
 #### Scenario: Gift letter is not advised
 
 - **WHEN** a PostNord `postnord_export_letter` shipment from Sweden to Switzerland is created with customs data whose `content_type` is `gift` and whose `commercial_invoice` is false
+- **THEN** the plugin does not return code `nordic_postnord_se_export_cn23_invoice`
+
+#### Scenario: Unnamed letter services are not advised
+
+- **WHEN** a commercial PostNord `postnord_expressbrev` shipment from Sweden to Switzerland is created
 - **THEN** the plugin does not return code `nordic_postnord_se_export_cn23_invoice`
 
 #### Scenario: Parcel products are not advised
@@ -209,7 +229,7 @@ No letter rule was found for Danish or Finnish shippers, so they receive no such
 
 #### Scenario: Finnish letters are not advised
 
-- **WHEN** a commercial PostNord `postnord_tracked_letter` shipment from Finland to Switzerland is created
+- **WHEN** a commercial PostNord `postnord_export_letter` shipment from Finland to Switzerland is created
 - **THEN** the plugin does not return code `nordic_postnord_se_export_cn23_invoice`
 
 ### Requirement: PostNord Finland parcels outside the EU VAT area
