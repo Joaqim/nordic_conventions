@@ -1,3 +1,4 @@
+import importlib
 import unittest
 
 import karrio.plugins.nordic_conventions.sources as sources
@@ -132,6 +133,57 @@ class TestNordicConventionsDHLFreightSwedenInvoiceCopy(unittest.TestCase):
                 service="dhl_freight_sweden_road_freight_standard",
             ),
             [self._message("GB", "650 kr")],
+        )
+
+
+class TestNordicConventionsDHLFreightSwedenAttachedDocuments(unittest.TestCase):
+    def test_parcel_connect_to_norway(self):
+        for service in (PARCEL_CONNECT, "109"):
+            with self.subTest(service=service):
+                self.assertListEqual(
+                    _advise(dhl_freight_sweden.attached_documents, service=service),
+                    [
+                        dict(
+                            code="nordic_dhl_freight_sweden_attached_documents",
+                            level="warning",
+                            message=(
+                                "DHL Freight Sweden requires two copies of the customs documents attached on the outside of the package "
+                                "for Parcel Connect (109) to destinations outside the EU VAT area."
+                            ),
+                            details=dict(
+                                plugin="nordic_conventions",
+                                lane="SE-NO",
+                                sources=[
+                                    sources.DHL_MAN_OUTSIDE_COPIES.to_dict(),
+                                    sources.DHL_OUTSIDE_COPIES_UNCONFIRMED.to_dict(),
+                                ],
+                                unconfirmed=(
+                                    "The requirement is unconfirmed for Parcel Connect Plus (112) and road-freight products, "
+                                    "which receive no such advisory."
+                                ),
+                            ),
+                        )
+                    ],
+                )
+
+    def test_parcel_connect_matches_connector(self):
+        try:
+            units = importlib.import_module("karrio.providers.dhl_freight_sweden.units")
+        except ImportError:
+            self.skipTest("dhl_freight_sweden connector is not importable")
+
+        service = units.ShippingService.dhl_freight_sweden_parcel_connect_b2c
+        self.assertSetEqual(
+            set(dhl_freight_sweden.PARCEL_CONNECT_SERVICES), {service.name, service.value}
+        )
+
+    def test_parcel_connect_plus_is_not_advised(self):
+        self.assertListEqual(
+            _advise(
+                dhl_freight_sweden.attached_documents,
+                service="dhl_freight_sweden_parcel_connect_plus",
+            ),
+            [],
         )
 
 
