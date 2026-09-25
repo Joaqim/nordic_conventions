@@ -1,0 +1,38 @@
+# Tasks
+
+## 1. Scaffolding and test environment
+
+- [ ] 1.1 Create `plugins/nordic_conventions/` following `plugins/hay_post/`: `pyproject.toml` (name `karrio_nordic_conventions`, version matching the siblings, `dependencies = ["karrio"]` unpinned, entry point `nordic_conventions = "karrio.plugins.nordic_conventions:METADATA"` in group `karrio.plugins`), an empty package `karrio/plugins/nordic_conventions/`, and `tests/__init__.py` plus `tests/nordic_conventions/__init__.py`, and verify `python -c "import tomllib; tomllib.load(open('plugins/nordic_conventions/pyproject.toml','rb'))"` succeeds and the file tree matches design.md
+- [ ] 1.2 In `nix develop 'git+file:///home/joaqim/projects/karrio?ref=dev-nix-flake#upstream'` started from `/home/joaqim/projects/karrio/.worktrees/feat-shipment-advisors`, create `plugins/nordic_conventions/.venv`, install `-e` the worktree's `modules/sdk` and `-e plugins/nordic_conventions`, and verify `python -m unittest discover -v -f plugins/nordic_conventions/tests` runs from the repository root with zero tests and exit status 0, or record the `PYTHONPATH` and `KARRIO_PLUGINS` fallback from design.md if the editable install fails
+
+## 2. Territories, sources, and scope gate
+
+- [ ] 2.1 Implement `territories.py` with the EU VAT area table and `in_eu_vat_area(country_code, postal_code)`, and verify unit tests for Greece (`GR`) inside, Åland by `AX` and by `FI` 22100 outside, the Canary Islands by `ES` "35 001" outside, `ES` 28001 inside, a non-numeric postal code falling back to the country, and a cross-check against the PostNord and DHL Freight Sweden connector tables that is skipped when those connectors are not importable
+- [ ] 2.2 Implement `sources.py` with one frozen `Source(tag, reference, statement)` per source cited in the spec (FN line, original URL or repository path, and the quoted statement), and verify a unit test that every source has a tag in `S`, `W`, `I` and a non-empty reference and statement
+- [ ] 2.3 Implement `lanes.py` with the frozen `Lane` value and `lane_of(request, context)`, and verify unit tests for every scenario of the requirement "Advice is limited to Nordic shippers at shipment creation" (rating, other carrier, Norwegian shipper, Danish shipper on DHL Freight Sweden, intra-EU, return from Norway, Åland shipper) and for the product-group classification of `postnord_parcel`, `postnord_export_letter`, `postnord_postpaket_utrikes`, and their carrier codes, including the connector enum cross-check skipped when not importable
+
+## 3. PostNord advisories
+
+- [ ] 3.1 Implement `nordic_postnord_se_no_digital_invoice` in `rules/postnord.py`, and verify tests for the parcel-with-customs `info` scenario and the export-letter `warning` scenario, asserting the full message dictionary including both email and MyCustoms routes and the cited sources
+- [ ] 3.2 Implement `nordic_postnord_se_export_paper_invoice`, and verify tests for the Switzerland scenario (triplicate, parcel no. 1, three attributed sources with their copy counts), the Norway exclusion, the International Parcel exclusion, and the Åland-by-postal-code scenario
+- [ ] 3.3 Implement `nordic_postnord_fi_export_invoice`, and verify tests for the Great Britain scenario (tullaus.fi@postnord.com, signed triplicate, both sources attributed) and the Norway scenario (electronic before shipment, no triplicate)
+- [ ] 3.4 Implement `nordic_postnord_dk_export_documents`, and verify tests for Norway (2), Liechtenstein (3), Great Britain (2), and the United States (1 CN23 and 2 invoices, recommended), each asserting that eksport@postnord.com is not mentioned
+
+## 4. DHL Freight Sweden advisories
+
+- [ ] 4.1 Implement `nordic_dhl_freight_sweden_customs_mode_missing` in `rules/dhl_freight_sweden.py`, and verify tests for no option to Norway, each of the four customs service options silencing it by unified name and by DHL key, and a string `"true"` value parsed as selected
+- [ ] 4.2 Implement `nordic_dhl_freight_sweden_invoice_copy`, and verify tests for Norway (390 kr) and Great Britain (650 kr), asserting the email address, myDHL Freight, and cited sources
+- [ ] 4.3 Implement `nordic_dhl_freight_sweden_attached_documents`, and verify tests for Parcel Connect by `dhl_freight_sweden_parcel_connect_b2c` and by `109` to Norway (details state 112 and road freight unconfirmed) and for no advisory on `dhl_freight_sweden_parcel_connect_plus`
+- [ ] 4.4 Implement `nordic_dhl_freight_sweden_voec_marking`, and verify tests for a VOEC number to Norway, no VOEC number to Norway, and a VOEC number to Switzerland (no advisory)
+
+## 5. Invoice type advisory and plugin wiring
+
+- [ ] 5.1 Implement `nordic_proforma_content_mismatch` in `rules/invoice_type.py`, and verify tests for merchandise with the flag omitted (DHL Freight Sweden), gift with the flag false (PostNord parcel, no advisory), merchandise on a PostNord export letter (no advisory), content type omitted with the flag false (advisory), upper-case `MERCHANDISE` (advisory), and documents and return merchandise (no advisory)
+- [ ] 5.2 Implement `__init__.py` with `METADATA` (id `nordic_conventions`, label, status `beta`, the nine advisors) and the hook guard, and verify the plugin test (collected through `references.import_extensions()` as type `advisor`, messages reaching `run_advisors`), the "Several advisories on one shipment" scenario through `run_advisors`, a test that every returned code starts with `nordic_` and levels are `info` or `warning`, and the guard test (stand-in `PluginMetadata` without the field, no advisors, one log record)
+- [ ] 5.3 Write `plugins/nordic_conventions/README.md` (purpose, the required karrio version or the fork branch `feat-shipment-advisors` until the hook is released, installation, the advisory table with codes, levels, triggers, and dated sources, the statement that the consumer owns compliance, and the non-goals), add a Nordic Conventions entry under utility plugins in the root `README.md`, one sentence per line, sentence-case headings, no emojis, and verify every code in the README matches a code constant and every spec requirement is represented
+
+## 6. Review and integration
+
+- [ ] 6.1 Run the full suite with `python -m unittest discover -v -f plugins/nordic_conventions/tests` in the environment from 1.2, and verify it passes with one test per spec scenario, listing the scenario-to-test mapping in the task notes
+- [ ] 6.2 Run `openspec validate nordic-trade-document-conventions --strict`, and verify it reports the change valid
+- [ ] 6.3 Run a fresh-context review gate with an agent that has not seen the implementation session, against the spec, design, facts note, and the karrio repository checklists (spec compliance with no scope creep, a test for every scenario, `karrio.lib` usage and functional style, no duplication of connector field errors or the intra-EU warning, every advisory citing its sources and tags, stricter wording on conflicts, no credentials or network access in advisors), address findings, and verify the reviewer reports no blocking issue
