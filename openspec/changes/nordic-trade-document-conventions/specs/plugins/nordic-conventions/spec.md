@@ -7,6 +7,7 @@ Defines the Nordic conventions plugin, an advisor-only karrio plugin that adds n
 Source references in this spec use FN for the karrio fork's `docs/notes/customs/nordic-trade-documents-facts.md` (branch `docs-openspec`, commit 0d02edf3a) with line numbers, and keep the note's evidence tags: S is repository code or vendored specification, W is public carrier or authority documentation, and I is inference.
 Connector behaviour cited as S refers to the karrio fork's main specs `openspec/specs/postnord/customs-declaration/spec.md` (PNS) and `openspec/specs/dhl-freight-sweden/customs/spec.md` (DFS), both on branch `docs-openspec` at commit 60312fe2e.
 PostNord parcel products are the PostNord services that are neither letter services nor International Parcel (`postnord_postpaket_utrikes`), as defined by PNS lines 10-11.
+PostNord letter services are `postnord_tracked` (`04`), `postnord_tracked_letter` (`34`), `postnord_export_letter` (`UX`), `postnord_varubrev_first_class` (`86`), `postnord_expressbrev` (`LX`), `postnord_rek` (`RR`), `postnord_rek_retur` (`RK`), `postnord_rek_extra` (`RL`), `postnord_rekommanderet_brev` (`RE`), `postnord_rekommanderet_quickbrev` (`RQ`), `postnord_varde` (`VV`), and `postnord_afleveringsattest` (`AF`), the letter set of the PostNord connector (karrio `develop` at 7a56ffa5b, `modules/connectors/postnord/karrio/providers/postnord/units.py:269-284`, S).
 
 ## ADDED Requirements
 
@@ -73,6 +74,7 @@ Norwegian shippers are out of scope because PostNord Norway export rules were no
 
 The plugin SHALL decide EU VAT area membership from its own territory table, independent of karrio's `EUCountry`, which lists Greece as `EL` and lacks `AX` and `XI` (FN:219, FN:258, S).
 The table SHALL match the definition applied by the PostNord and DHL Freight Sweden connectors (PNS line 188, DFS line 114, S), itself taken from Tullverket's list of EU customs and fiscal territories (FN:58-65, W): the EU member states with Greece as `GR` are inside, and Åland (`AX`, or `FI` 22000-22999), the Canary Islands (`IC`, or `ES` 35000-35999 and 38000-38999), Ceuta (`ES` 51000-51999), Melilla (`ES` 52000-52999), Büsingen (`DE` 78266), Heligoland (`DE` 27498), Livigno (`IT` 23041), Campione d'Italia (`IT` 22061), and the French overseas departments (`GP`, `GF`, `MQ`, `RE`, `YT`) are outside.
+Monaco, Northern Ireland, and Mount Athos, which Tullverket lists with a different status (FN:58-65, W), SHALL follow the connectors' country-level treatment; changing them is deferred to a change covering both connectors and this plugin.
 Postal codes SHALL be compared after removing spaces, and a postal code that is not purely numeric SHALL leave the country-level decision unchanged.
 
 #### Scenario: Åland by postal code is outside
@@ -106,6 +108,33 @@ Several advisories MAY apply to one shipment, and the plugin SHALL return each a
 
 - **WHEN** a DHL Freight Sweden Parcel Connect (`109`) shipment from Sweden to Norway is created without customs data and without a customs handling option
 - **THEN** the response carries exactly one message each with codes `nordic_dhl_freight_sweden_customs_mode_missing`, `nordic_dhl_freight_sweden_invoice_copy`, and `nordic_dhl_freight_sweden_attached_documents`
+
+### Requirement: Commercial content is determined once
+
+The plugin SHALL use one determination of sale-like content and of commercial shipments for every advisory that depends on them.
+A shipment's content is sale-like when its customs data carries a `content_type` that, compared case-insensitively against karrio's customs content type names and values, is neither gift nor sample nor documents nor return merchandise, or carries no `content_type`.
+A shipment is commercial when it carries customs data and either `customs.commercial_invoice` is true or its content is sale-like.
+A shipment without customs data is neither sale-like nor commercial.
+
+#### Scenario: Merchandise is sale-like
+
+- **WHEN** customs data carries `content_type` `MERCHANDISE` and `commercial_invoice` false
+- **THEN** the content is sale-like and the shipment is commercial
+
+#### Scenario: Omitted content type is sale-like
+
+- **WHEN** customs data carries no `content_type`
+- **THEN** the content is sale-like
+
+#### Scenario: Gift with commercial flag is commercial but not sale-like
+
+- **WHEN** customs data carries `content_type` `gift` and `commercial_invoice` true
+- **THEN** the content is not sale-like and the shipment is commercial
+
+#### Scenario: Return merchandise without commercial flag is not commercial
+
+- **WHEN** customs data carries `content_type` `return_merchandise` and `commercial_invoice` false
+- **THEN** the content is not sale-like and the shipment is not commercial
 
 ### Requirement: PostNord Sweden to Norway invoices go digitally
 
@@ -144,6 +173,45 @@ International Parcel and letter services are excluded because their invoice duty
 - **WHEN** a PostNord `postnord_postpaket_utrikes` shipment from Sweden to Switzerland is created
 - **THEN** the plugin does not return code `nordic_postnord_se_export_paper_invoice`
 
+### Requirement: PostNord Sweden commercial letters and International Parcel carry CN23 and an invoice
+
+For a commercial PostNord shipment from Sweden to a destination outside the EU VAT area booked with a letter service or International Parcel (`postnord_postpaket_utrikes`, `91`, marketed in Denmark as EMS), the plugin SHALL return code `nordic_postnord_se_export_cn23_invoice` at level `warning`, stating for letter services that a CN23 and a commercial invoice are required on the item, and for International Parcel that a CN23 and two copies of the invoice are required.
+The message SHALL state that the connector currently sends CN22 declaration data for letter services and International Parcel (PNS lines 10 and 13-16, S), so the consumer must supply the CN23 and the invoice.
+For Norway, where the PostNord SE customs documents page states that the invoice is sent digitally only (FN:126, W), the message SHALL state the stricter reading, the CN23 and invoice with the item as well as the digital invoice named by `nordic_postnord_se_no_digital_invoice`, and `details` SHALL name both sources.
+Goods-value triggers for non-commercial items (above SEK 2 000) are deferred.
+Sources: FN:92-94 (W, PostNord SE customs documents page, letters "> SEK 2 000 or commercial" need CN23 and commercial invoice), FN:97 (W, Postpaket Utrikes terms valid 2025-05-02, CN23 and invoice ×2), FN:149-151 (S and W, code 91 is the contract product).
+No letter rule was found for Danish or Finnish shippers, so they receive no such advisory.
+
+#### Scenario: Commercial export letter to Switzerland
+
+- **WHEN** a PostNord `postnord_export_letter` shipment from Sweden to Switzerland is created with customs data whose `content_type` is `merchandise`
+- **THEN** the plugin returns code `nordic_postnord_se_export_cn23_invoice` at level `warning` stating CN23 and commercial invoice on the item and that the connector sends CN22 data
+
+#### Scenario: Commercial International Parcel states two invoice copies
+
+- **WHEN** a PostNord `postnord_postpaket_utrikes` shipment from Sweden to the United States is created with customs data whose `commercial_invoice` is true
+- **THEN** the plugin returns code `nordic_postnord_se_export_cn23_invoice` stating CN23 and two invoice copies
+
+#### Scenario: Commercial letter to Norway names both sources
+
+- **WHEN** a PostNord `postnord_varubrev_first_class` shipment from Sweden to Norway is created with customs data whose `content_type` is `other`
+- **THEN** the plugin returns code `nordic_postnord_se_export_cn23_invoice` whose message states the CN23 and invoice with the item and the digital invoice, and whose details list both the product table and the Norway digital-only statement
+
+#### Scenario: Gift letter is not advised
+
+- **WHEN** a PostNord `postnord_export_letter` shipment from Sweden to Switzerland is created with customs data whose `content_type` is `gift` and whose `commercial_invoice` is false
+- **THEN** the plugin does not return code `nordic_postnord_se_export_cn23_invoice`
+
+#### Scenario: Parcel products are not advised
+
+- **WHEN** a commercial PostNord `postnord_parcel` shipment from Sweden to Switzerland is created
+- **THEN** the plugin does not return code `nordic_postnord_se_export_cn23_invoice`
+
+#### Scenario: Finnish letters are not advised
+
+- **WHEN** a commercial PostNord `postnord_tracked_letter` shipment from Finland to Switzerland is created
+- **THEN** the plugin does not return code `nordic_postnord_se_export_cn23_invoice`
+
 ### Requirement: PostNord Finland parcels outside the EU VAT area
 
 For a PostNord parcel product from Finland to a destination outside the EU VAT area, the plugin SHALL return code `nordic_postnord_fi_export_invoice` at level `warning`, stating that a copy of the invoice can be emailed to tullaus.fi@postnord.com and, for destinations other than Norway, that a signed commercial invoice in English in triplicate must accompany the parcel, or, for Norway, that the invoice must reach PostNord electronically before the shipment.
@@ -163,12 +231,12 @@ The Norway statement rests on the same page and terms (FN:137-138, W).
 ### Requirement: PostNord Denmark parcels outside the EU VAT area
 
 For a PostNord parcel product from Denmark to a destination outside the EU VAT area, the plugin SHALL return code `nordic_postnord_dk_export_documents` at level `warning`, stating that the documents go in a plastic pocket visible on the parcel and the copy count for the destination: 2 invoices for Norway, 3 for Switzerland and Liechtenstein, 2 for Great Britain, and 1 CN23 with 2 invoices for any other destination, where the invoice is described by PostNord as not required but recommended (FN:128, W, postnord.dk/erhverv/eksport via Wayback 2026-03-10, FN:141).
-The advisory SHALL NOT mention the export-declaration copy to eksport@postnord.com, which PostNord ties to the DKK 7 500 threshold (FN:128) that this change defers.
+The message SHALL also state, without evaluating any value threshold, that if an export declaration was lodged a copy goes to eksport@postnord.com (FN:128, W); the DKK 7 500 threshold at which PostNord requires the export declaration is deferred.
 
 #### Scenario: Danish parcel to Liechtenstein
 
 - **WHEN** a PostNord `postnord_parcel` shipment from Denmark to `LI` is created
-- **THEN** the plugin returns code `nordic_postnord_dk_export_documents` at level `warning` stating 3 copies and a plastic pocket, and not mentioning eksport@postnord.com
+- **THEN** the plugin returns code `nordic_postnord_dk_export_documents` at level `warning` stating 3 copies, a plastic pocket, and that a lodged export declaration is copied to eksport@postnord.com
 
 #### Scenario: Danish parcel to the United States
 
@@ -231,23 +299,39 @@ Sources: FN:201 (W, MAN pp.97 and 99), FN:190 (W, VOEC with Parcel Connect to No
 - **WHEN** a DHL Freight Sweden shipment from Sweden to Norway is created with customs data carrying no VOEC number
 - **THEN** the plugin does not return code `nordic_dhl_freight_sweden_voec_marking`
 
-### Requirement: Proforma invoices are declared only for gifts and samples
+### Requirement: The invoice type matches the content type
 
-For an in-scope shipment whose booking carries an invoice type, meaning a PostNord parcel product or any DHL Freight Sweden service booked with customs data, the plugin SHALL return code `nordic_proforma_content_mismatch` at level `warning` when `customs.commercial_invoice` is false or omitted while `customs.content_type` is neither gift nor sample nor documents nor return merchandise, compared case-insensitively, including when `content_type` is omitted.
-The message SHALL state that the connector declares a proforma invoice from the flag, that a proforma invoice is for gifts and samples for which the recipient makes no payment, and that goods sold need `commercial_invoice` set to true.
+For an in-scope shipment whose booking carries an invoice type, meaning a PostNord parcel product or any DHL Freight Sweden service booked with customs data, the plugin SHALL return code `nordic_invoice_type_content_mismatch` at level `warning` when `customs.commercial_invoice` is false or omitted while the content is sale-like, and at level `info` when `customs.commercial_invoice` is true while `customs.content_type` is gift or sample.
+The warning message SHALL state that the connector declares a proforma invoice from the flag, that a proforma invoice is for gifts and samples for which the recipient makes no payment, and that goods sold need `commercial_invoice` set to true; the info message SHALL state that a commercial invoice is declared for content described as a gift or sample, for which a proforma invoice is the usual document.
+The levels differ because the sources restrict the proforma invoice to goods not sold but do not forbid a commercial invoice for gifts or samples.
 Sources: PNS lines 155-168 and DFS lines 51-64 (S, the connectors apply the flag literally and leave mismatch detection to advisory tooling), FN:56 (W, Bring tulldokument and DHL CIE p.5, a proforma invoice is used for goods not sold), FN:30-36 (S, connector mapping of the flag).
 
 #### Scenario: Merchandise declared as proforma
 
 - **WHEN** a DHL Freight Sweden shipment from Sweden to Norway is created with customs data whose `content_type` is `merchandise` and whose `commercial_invoice` is omitted
-- **THEN** the plugin returns code `nordic_proforma_content_mismatch` at level `warning`
+- **THEN** the plugin returns code `nordic_invoice_type_content_mismatch` at level `warning`
+
+#### Scenario: Omitted content type declared as proforma
+
+- **WHEN** a PostNord `postnord_parcel` shipment from Sweden to Norway is created with customs data carrying no `content_type` and `commercial_invoice` false
+- **THEN** the plugin returns code `nordic_invoice_type_content_mismatch` at level `warning`
 
 #### Scenario: Gift declared as proforma is consistent
 
 - **WHEN** a PostNord `postnord_parcel` shipment from Sweden to Norway is created with customs data whose `content_type` is `gift` and whose `commercial_invoice` is false
-- **THEN** the plugin does not return code `nordic_proforma_content_mismatch`
+- **THEN** the plugin does not return code `nordic_invoice_type_content_mismatch`
+
+#### Scenario: Return merchandise declared as proforma is consistent
+
+- **WHEN** a DHL Freight Sweden shipment from Sweden to Norway is created with customs data whose `content_type` is `return_merchandise` and whose `commercial_invoice` is false
+- **THEN** the plugin does not return code `nordic_invoice_type_content_mismatch`
+
+#### Scenario: Sample declared as commercial is informational
+
+- **WHEN** a DHL Freight Sweden shipment from Sweden to Switzerland is created with customs data whose `content_type` is `sample` and whose `commercial_invoice` is true
+- **THEN** the plugin returns code `nordic_invoice_type_content_mismatch` at level `info`
 
 #### Scenario: Letters carry no invoice type
 
 - **WHEN** a PostNord `postnord_export_letter` shipment from Sweden to Norway is created with customs data whose `content_type` is `merchandise` and whose `commercial_invoice` is false
-- **THEN** the plugin does not return code `nordic_proforma_content_mismatch`, because the connector sends a CN22 without an invoice type for letters
+- **THEN** the plugin does not return code `nordic_invoice_type_content_mismatch`, because the connector sends a CN22 without an invoice type for letters

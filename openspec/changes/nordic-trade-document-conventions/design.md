@@ -18,7 +18,7 @@ The template for plugin layout is `plugins/hay_post/` in this repository: setupt
 
 ## Goals / Non-Goals
 
-Goals: nine independent, pure advisory rules sharing one scope gate and one territory table; every message traceable to its sources; no import of carrier connector code at runtime; a plugin that loads harmlessly on karrio without the hook.
+Goals: ten independent, pure advisory rules sharing one scope gate and one territory table; every message traceable to its sources; no import of carrier connector code at runtime; a plugin that loads harmlessly on karrio without the hook.
 Non-goals: configurable rules or per-organisation overrides, localisation of message texts, rating-time advice, and any check that duplicates a connector field error.
 
 ## Decisions
@@ -34,9 +34,9 @@ plugins/nordic_conventions/
     territories.py               EU VAT area table and territory test
     lanes.py                     Lane value and the scope gate
     sources.py                   Source values cited by the rules
-    rules/postnord.py            advisories 1-4
-    rules/dhl_freight_sweden.py  advisories 5-8
-    rules/invoice_type.py        advisory 9
+    rules/postnord.py            the five PostNord advisories
+    rules/dhl_freight_sweden.py  the four DHL Freight Sweden advisories
+    rules/invoice_type.py        the invoice type advisory
   tests/__init__.py
   tests/nordic_conventions/      fixture.py and one test module per rules module, territories, and the plugin
 ```
@@ -45,10 +45,12 @@ The logic lives under `karrio.plugins.nordic_conventions` rather than `karrio.pr
 
 ### One advisor per rule behind a shared scope gate
 
-Each advisory is its own advisor callable registered in `shipment_advisors`, so the SDK's per-advisor isolation keeps one faulty rule from silencing the other eight.
+Each advisory is its own advisor callable registered in `shipment_advisors`, so the SDK's per-advisor isolation keeps one faulty rule from silencing the other nine.
 Every rule starts from `lanes.lane_of(request, context) -> Optional[Lane]`, which returns `None` unless the operation is `shipping`, the carrier and shipper country are in scope, the shipper is inside and the recipient outside the EU VAT area; rules then return an empty list or one message.
-`Lane` is a frozen attrs value holding the carrier name, shipper country, recipient country, whether the recipient is Norway, the service name, the PostNord product group (letter, international parcel, parcel product), whether customs data is present, `commercial_invoice`, the normalised content type, the VOEC number, and the set of selected DHL customs service options.
-Building `Lane` once per advisor call repeats a few dictionary reads nine times per shipment, which is negligible next to a carrier call.
+`Lane` is a frozen attrs value holding the carrier name, shipper country, recipient country, whether the recipient is Norway, the service name, the PostNord product group (letter, international parcel, parcel product), whether customs data is present, `commercial_invoice`, the normalised content type, the VOEC number, the set of selected DHL customs service options, and the derived `sale_like` and `commercial` flags.
+`lanes.sale_like(customs)` and `lanes.commercial(customs)` implement the spec's single determination of commercial content; content types are compared by lower-casing the value and matching `CustomsContentType` names (`gift`, `sample`, `documents`, `return_merchandise`), so both `gift` and `GIFT` match.
+The PostNord commercial-letter advisory and the invoice type advisory both read these flags rather than re-deriving them.
+Building `Lane` once per advisor call repeats a few dictionary reads ten times per shipment, which is negligible next to a carrier call.
 Alternative considered: a single advisor returning all messages; rejected because one exception would drop every advisory and the SDK's failure message could not tell which rule failed.
 
 ### Own territory table instead of `EUCountry`
@@ -56,13 +58,13 @@ Alternative considered: a single advisor returning all messages; rejected becaus
 `territories.in_eu_vat_area(country_code, postal_code) -> bool` uses a literal frozenset of the 27 member states with `GR` (and `EL`, which the connectors also accept through `EUCountry`) and a tuple of `(country, low, high)` postal ranges equal to the connectors' `NON_EU_VAT_POSTAL_RANGES`, with `AX`, `IC`, and the French overseas departments outside by country code.
 Postal codes are stripped of spaces and compared numerically only when purely numeric.
 Mirroring the connectors keeps the plugin's notion of "outside the EU VAT area" identical to where the connectors send customs data, so an advisory never talks about customs documents for a shipment whose customs data the connector dropped.
-Monaco, Northern Ireland, and Mount Athos are listed by Tullverket (FN:58-65) but not handled by the connectors; they follow the connectors' country-level treatment here, and any change belongs in both connectors and this table together.
+Monaco, Northern Ireland, and Mount Athos are listed by Tullverket (FN:58-65) but not handled by the connectors; they follow the connectors' country-level treatment here, and changing them is a deferred cross-repository change covering both connectors and this table together.
 Alternative considered: importing the connectors' tables; rejected because the plugin must work with either connector absent and must not couple its release to connector internals.
 A test cross-checks the table against the connectors' tables when those modules are importable and is skipped otherwise.
 
 ### Service and option names without importing connectors
 
-`rules/postnord.py` holds the PostNord letter service names, the International Parcel name `postnord_postpaket_utrikes`, and their carrier codes, and classifies every other `postnord` service as a parcel product, matching PNS lines 10-11.
+`rules/postnord.py` holds the PostNord letter service names, copied from the connector's `LETTER_SERVICES` as listed in the spec, the International Parcel name `postnord_postpaket_utrikes`, and their carrier codes, and classifies every other `postnord` service as a parcel product, matching PNS lines 10-11.
 `rules/dhl_freight_sweden.py` recognises Parcel Connect by `dhl_freight_sweden_parcel_connect_b2c` or `109`, and the customs service options by their unified names and their DHL keys (`customsHandlingStandard`, `customsHandlingFullService`, `customsCustomersOwnDeclaration`, `customsJointDeclaration`).
 An option counts as selected when karrio's bool option parsing (`karrio.lib`) would select it, so the plugin and the connector agree on string values such as `"true"`.
 The same cross-check test compares these names with the connectors' enums when importable.
@@ -79,6 +81,7 @@ Codes are module-level constants prefixed `nordic_` and are part of the plugin's
 | Code | Level | Reason |
 |---|---|---|
 | `nordic_postnord_se_no_digital_invoice` | `info` for parcel products with customs data, else `warning` | the connector already transmits the invoice data for parcel products (PNS lines 28-31), so the consumer only needs to know no paper is needed; otherwise the consumer must supply the digital invoice through a route they own |
+| `nordic_postnord_se_export_cn23_invoice` | `warning` | the connector sends CN22 data, so the consumer must supply the CN23 and the invoice |
 | `nordic_postnord_se_export_paper_invoice` | `warning` | a physical action by the consumer is required |
 | `nordic_postnord_fi_export_invoice` | `warning` | the stricter source requires a signed paper invoice, or for Norway electronic data before the shipment |
 | `nordic_postnord_dk_export_documents` | `warning` | a physical action by the consumer is required |
@@ -86,11 +89,11 @@ Codes are module-level constants prefixed `nordic_` and are part of the plugin's
 | `nordic_dhl_freight_sweden_invoice_copy` | `warning` | a separate consumer action is required and missing documents stop the shipment with a fee (FN:200) |
 | `nordic_dhl_freight_sweden_attached_documents` | `warning` | a physical action by the consumer is required |
 | `nordic_dhl_freight_sweden_voec_marking` | `warning` | a marking the connector does not guarantee is required |
-| `nordic_proforma_content_mismatch` | `warning` | the declared invoice type likely misstates the transaction |
+| `nordic_invoice_type_content_mismatch` | `warning` for proforma with sale-like content, `info` for commercial with gift or sample | the sources restrict the proforma invoice to goods not sold (FN:56) but do not forbid a commercial invoice for gifts or samples |
 
 ### Hook guard
 
-`__init__.py` checks `"shipment_advisors" in attr.fields_dict(metadata.PluginMetadata)`; when present it passes the nine advisors, and when absent it builds `METADATA` without the field and emits one `logging.getLogger(__name__).warning` at import, which Python performs once per process.
+`__init__.py` checks `"shipment_advisors" in attr.fields_dict(metadata.PluginMetadata)`; when present it passes the ten advisors, and when absent it builds `METADATA` without the field and emits one `logging.getLogger(__name__).warning` at import, which Python performs once per process.
 The stdlib logger is used because `karrio.core.utils.logger` is not guaranteed on older karrio versions.
 Without advisors the plugin is typed `unknown` by older karrio, which is harmless.
 
