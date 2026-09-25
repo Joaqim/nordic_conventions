@@ -31,7 +31,6 @@ def _codes(request) -> list:
         for advisor in (
             postnord.se_no_digital_invoice,
             postnord.se_postpaket_commercial_invoice,
-            postnord.se_export_paper_invoice,
         )
         for message in fixture.messages(advisor, request, CONTEXT)
     ]
@@ -142,6 +141,184 @@ class TestNordicConventionsPostNordSENoDigitalInvoice(unittest.TestCase):
                     ),
                 )
             ],
+        )
+
+
+POSTPAKET_CONNECTOR_NOTE = (
+    "The connector currently sends CN22 declaration data and no invoice for International Parcel, "
+    "so supply the CN23 and the invoice yourself."
+)
+POSTPAKET_SOURCES = [
+    sources.PN_SE_POSTPAKET_TERMS.to_dict(),
+    sources.PN_SE_EN_PAGE_POSTPAKET.to_dict(),
+    sources.PN_SE_SV_PAGE_POSTPAKET.to_dict(),
+]
+POSTPAKET_CODE_SOURCES = [
+    sources.PNS_INTERNATIONAL_PARCEL_CN22.to_dict(),
+    sources.PN_POSTPAKET_CODE_91.to_dict(),
+    sources.PN_POSTPAKET_CODE_95.to_dict(),
+]
+
+
+class TestNordicConventionsPostNordSEPostpaketCommercialInvoice(unittest.TestCase):
+    def test_commercial_postpaket_utrikes_to_the_united_states(self):
+        request = fixture.shipment(
+            "SE",
+            "US",
+            "postnord_postpaket_utrikes",
+            customs=fixture.customs(commercial_invoice=True),
+        )
+
+        self.assertListEqual(
+            fixture.messages(postnord.se_postpaket_commercial_invoice, request, CONTEXT),
+            [
+                dict(
+                    code="nordic_postnord_se_postpaket_commercial_invoice",
+                    level="warning",
+                    message=(
+                        "Commercial PostNord Postpaket Utrikes (International Parcel, 91) outside the EU VAT area needs the CN23 export declaration "
+                        "and a commercial invoice in three copies with the parcel. "
+                        "Three copies satisfies both the Postpaket Utrikes terms (two copies above SEK 2 000 or for commercial purposes) "
+                        "and the PostNord web pages (triplicate above SEK 2 000). "
+                        f"{POSTPAKET_CONNECTOR_NOTE}"
+                    ),
+                    details=dict(
+                        plugin="nordic_conventions",
+                        lane="SE-US",
+                        sources=[*POSTPAKET_SOURCES, *POSTPAKET_CODE_SOURCES],
+                    ),
+                )
+            ],
+        )
+        self.assertListEqual(
+            [source["reference"].split(";")[0] for source in POSTPAKET_SOURCES],
+            ["FN:103, FN:111", "FN:102, FN:107", "FN:102, FN:109"],
+        )
+        self.assertIn("i 2 exemplar", POSTPAKET_SOURCES[0]["statement"])
+        self.assertIn("triplicate", POSTPAKET_SOURCES[1]["statement"])
+        self.assertIn("tre exemplar", POSTPAKET_SOURCES[2]["statement"])
+
+    def test_sale_like_content_triggers_the_advisory(self):
+        request = fixture.shipment(
+            "SE",
+            "CH",
+            "postnord_postpaket_utrikes",
+            customs=fixture.customs("merchandise", False),
+        )
+
+        self.assertListEqual(
+            [
+                message["code"]
+                for message in fixture.messages(
+                    postnord.se_postpaket_commercial_invoice, request, CONTEXT
+                )
+            ],
+            ["nordic_postnord_se_postpaket_commercial_invoice"],
+        )
+
+    def test_commercial_postpaket_utrikes_to_norway_sends_the_invoice_digitally(self):
+        request = fixture.shipment(
+            "SE",
+            "NO",
+            "postnord_postpaket_utrikes",
+            customs=fixture.customs(commercial_invoice=True),
+        )
+
+        self.assertListEqual(
+            fixture.messages(postnord.se_postpaket_commercial_invoice, request, CONTEXT),
+            [
+                dict(
+                    code="nordic_postnord_se_postpaket_commercial_invoice",
+                    level="warning",
+                    message=(
+                        "Commercial PostNord Postpaket Utrikes (International Parcel, 91) to Norway needs the CN23 export declaration, "
+                        "and PostNord requires the commercial invoice for Norway digitally, not attached to the parcel: "
+                        "send it through the Booking API, PostNord Skicka Direkt Business, email to foravisering.export@postnord.com, "
+                        "or upload in PostNord MyCustoms. "
+                        f"{POSTPAKET_CONNECTOR_NOTE}"
+                    ),
+                    details=dict(
+                        plugin="nordic_conventions",
+                        lane="SE-NO",
+                        sources=[
+                            *POSTPAKET_SOURCES,
+                            sources.PN_SE_NORWAY_CHANNELS.to_dict(),
+                            *POSTPAKET_CODE_SOURCES,
+                        ],
+                    ),
+                )
+            ],
+        )
+        self.assertListEqual(_codes(request), ["nordic_postnord_se_postpaket_commercial_invoice"])
+
+    def test_gift_postpaket_utrikes_is_not_advised(self):
+        request = fixture.shipment(
+            "SE",
+            "CH",
+            "postnord_postpaket_utrikes",
+            customs=fixture.customs("gift", False),
+        )
+
+        self.assertListEqual(
+            fixture.messages(postnord.se_postpaket_commercial_invoice, request, CONTEXT),
+            [],
+        )
+
+    def test_letters_are_not_advised(self):
+        request = fixture.shipment(
+            "SE",
+            "CH",
+            "postnord_export_letter",
+            customs=fixture.customs("merchandise", True),
+        )
+
+        self.assertListEqual(
+            fixture.messages(postnord.se_postpaket_commercial_invoice, request, CONTEXT),
+            [],
+        )
+
+    def test_finnish_postpaket_utrikes_is_not_advised(self):
+        request = fixture.shipment(
+            "FI",
+            "CH",
+            "postnord_postpaket_utrikes",
+            customs=fixture.customs("merchandise", True),
+        )
+
+        self.assertListEqual(
+            fixture.messages(postnord.se_postpaket_commercial_invoice, request, CONTEXT),
+            [],
+        )
+
+    def test_no_swedish_shipment_to_norway_receives_the_invoice_routes_twice(self):
+        requests = [
+            fixture.shipment("SE", "NO", service, customs=customs)
+            for service in (
+                "postnord_parcel",
+                "postnord_postpaket_utrikes",
+                "91",
+                "postnord_export_letter",
+                "postnord_varubrev_first_class",
+            )
+            for customs in (
+                None,
+                fixture.customs("merchandise", True),
+                fixture.customs("gift", False),
+                fixture.customs("gift", True),
+            )
+        ]
+
+        self.assertListEqual(
+            [
+                codes
+                for codes in map(_codes, requests)
+                if {
+                    "nordic_postnord_se_no_digital_invoice",
+                    "nordic_postnord_se_postpaket_commercial_invoice",
+                }
+                <= set(codes)
+            ],
+            [],
         )
 
 

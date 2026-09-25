@@ -9,6 +9,7 @@ import karrio.plugins.nordic_conventions.sources as sources
 from karrio.plugins.nordic_conventions.rules import advisory
 
 SE_NO_DIGITAL_INVOICE = "nordic_postnord_se_no_digital_invoice"
+SE_POSTPAKET_COMMERCIAL_INVOICE = "nordic_postnord_se_postpaket_commercial_invoice"
 
 # Letter services named in the letters table of the PostNord SE Swedish
 # customs documents page that map to a connector code with clear evidence.
@@ -88,6 +89,56 @@ def se_no_digital_invoice(request, context) -> typing.List[models.Message]:
                 sources.PN_SE_NORWAY_ONLY_CHANNELS,
                 sources.PNS_PARCEL_CUSTOMS_INVOICE,
                 *([sources.PN_SE_SV_PAGE_NORWAY_LETTERS] if norway_named_letter else []),
+            ],
+        )
+    ]
+
+
+def se_postpaket_commercial_invoice(request, context) -> typing.List[models.Message]:
+    lane = lanes.lane_of(request, context)
+
+    if not postpaket_commercial_applies(lane):
+        return []
+
+    connector_note = (
+        "The connector currently sends CN22 declaration data and no invoice for International Parcel, "
+        "so supply the CN23 and the invoice yourself."
+    )
+    text = (
+        " ".join(
+            [
+                "Commercial PostNord Postpaket Utrikes (International Parcel, 91) to Norway needs the CN23 export declaration,",
+                "and PostNord requires the commercial invoice for Norway digitally, not attached to the parcel:",
+                f"send it through the Booking API, {NORWAY_ROUTES}.",
+                connector_note,
+            ]
+        )
+        if lane.to_norway
+        else " ".join(
+            [
+                "Commercial PostNord Postpaket Utrikes (International Parcel, 91) outside the EU VAT area needs the CN23 export declaration",
+                "and a commercial invoice in three copies with the parcel.",
+                "Three copies satisfies both the Postpaket Utrikes terms (two copies above SEK 2 000 or for commercial purposes)",
+                "and the PostNord web pages (triplicate above SEK 2 000).",
+                connector_note,
+            ]
+        )
+    )
+
+    return [
+        advisory(
+            SE_POSTPAKET_COMMERCIAL_INVOICE,
+            "warning",
+            text,
+            lane,
+            [
+                sources.PN_SE_POSTPAKET_TERMS,
+                sources.PN_SE_EN_PAGE_POSTPAKET,
+                sources.PN_SE_SV_PAGE_POSTPAKET,
+                *([sources.PN_SE_NORWAY_CHANNELS] if lane.to_norway else []),
+                sources.PNS_INTERNATIONAL_PARCEL_CN22,
+                sources.PN_POSTPAKET_CODE_91,
+                sources.PN_POSTPAKET_CODE_95,
             ],
         )
     ]
