@@ -39,6 +39,57 @@
 
 ## 6. Review and integration
 
-- [ ] 6.1 Run the full suite with `python -m unittest discover -v -f plugins/nordic_conventions/tests` in the environment from 1.2, and verify it passes with one test per spec scenario, listing the scenario-to-test mapping in the task notes
+- [x] 6.1 Run the full suite with `python -m unittest discover -v -f plugins/nordic_conventions/tests` in the environment from 1.2, and verify it passes with one test per spec scenario, listing the scenario-to-test mapping in the task notes
+  - Result: 80 tests, all passing, none skipped (connector cross-checks ran against karrio `develop` 7a56ffa5b); the 49 spec scenarios map one-to-one to the tests below, and the remaining 31 tests cover task-level checks (territory table, sources, product groups, cross-checks, message invariants, DHL option parsing).
+  - Scenario to test (modules under `plugins/nordic_conventions/tests/nordic_conventions/`):
+    - Installed plugin is collected as an advisor: `test_plugin.TestNordicConventionsPlugin.test_installed_plugin_is_collected_as_an_advisor`
+    - Older karrio loads the plugin without advisors: `test_plugin.TestNordicConventionsHookGuard.test_older_karrio_loads_the_plugin_without_advisors`
+    - Rating receives no advice: `test_lanes.TestNordicConventionsScope.test_rating_receives_no_advice`
+    - Other carriers receive no advice: `test_lanes.TestNordicConventionsScope.test_other_carriers_receive_no_advice`
+    - Norwegian shippers receive no advice: `test_lanes.TestNordicConventionsScope.test_norwegian_shippers_receive_no_advice`
+    - Danish shippers receive no DHL Freight Sweden advice: `test_lanes.TestNordicConventionsScope.test_danish_shippers_receive_no_dhl_freight_sweden_advice`
+    - Intra-EU shipments receive no advice: `test_lanes.TestNordicConventionsScope.test_intra_eu_shipments_receive_no_advice`
+    - Return from Norway receives no advice: `test_lanes.TestNordicConventionsScope.test_return_from_norway_receives_no_advice`
+    - Åland shipper receives no advice: `test_lanes.TestNordicConventionsScope.test_aland_shipper_receives_no_advice`
+    - Åland by postal code is outside: `test_postnord.TestNordicConventionsPostNordSEExportPaperInvoice.test_aland_by_postal_code_gets_the_paper_invoice_advisory`
+    - Greece is inside: `test_lanes.TestNordicConventionsScope.test_greece_recipient_is_out_of_scope`
+    - Canary Islands by postal code are outside: `test_lanes.TestNordicConventionsScope.test_canary_islands_recipient_by_postal_code_is_in_scope`
+    - Conflicting sources are both attributed: `test_postnord.TestNordicConventionsPostNordSEExportPaperInvoice.test_conflicting_sources_are_both_attributed`
+    - Several advisories on one shipment: `test_plugin.TestNordicConventionsPlugin.test_several_advisories_on_one_shipment`
+    - Merchandise is sale-like: `test_lanes.TestNordicConventionsCommercialContent.test_merchandise_is_sale_like`
+    - Omitted content type is sale-like: `test_lanes.TestNordicConventionsCommercialContent.test_omitted_content_type_is_sale_like`
+    - Gift with commercial flag is commercial but not sale-like: `test_lanes.TestNordicConventionsCommercialContent.test_gift_with_commercial_flag_is_commercial_but_not_sale_like`
+    - Return merchandise without commercial flag is not commercial: `test_lanes.TestNordicConventionsCommercialContent.test_return_merchandise_without_commercial_flag_is_not_commercial`
+    - Parcel booking with customs data is informational: `test_postnord.TestNordicConventionsPostNordSENoDigitalInvoice.test_parcel_booking_with_customs_data_is_informational`
+    - Letter to Norway states invoice and VOEC from SEK 0: `test_postnord.TestNordicConventionsPostNordSENoDigitalInvoice.test_letter_to_norway_states_invoice_and_voec_from_sek_0`
+    - Letter not named by the Swedish page omits the SEK 0 statement: `test_postnord.TestNordicConventionsPostNordSENoDigitalInvoice.test_letter_not_named_by_the_swedish_page_omits_the_sek_0_statement`
+    - Commercial Postpaket Utrikes to Norway receives the invoice routes once: `test_postnord.TestNordicConventionsPostNordSEPostpaketCommercialInvoice.test_commercial_postpaket_utrikes_to_norway_sends_the_invoice_digitally` (asserts only the Postpaket code across both advisors) and test_postnord.TestNordicConventionsPostNordSENoDigitalInvoice.test_commercial_postpaket_utrikes_to_norway_receives_no_digital_invoice_advisory
+    - Non-commercial Postpaket Utrikes to Norway is a warning: `test_postnord.TestNordicConventionsPostNordSENoDigitalInvoice.test_non_commercial_postpaket_utrikes_to_norway_is_a_warning`
+    - Parcel to Switzerland gets the paper invoice advisory: `test_postnord.TestNordicConventionsPostNordSEExportPaperInvoice.test_parcel_to_switzerland_gets_the_paper_invoice_advisory`
+    - Norway is excluded: `test_postnord.TestNordicConventionsPostNordSEExportPaperInvoice.test_norway_is_excluded`
+    - International Parcel is excluded: `test_postnord.TestNordicConventionsPostNordSEExportPaperInvoice.test_international_parcel_is_excluded`
+    - Commercial Postpaket Utrikes to the United States: `test_postnord.TestNordicConventionsPostNordSEPostpaketCommercialInvoice.test_commercial_postpaket_utrikes_to_the_united_states`
+    - Sale-like content triggers the advisory: `test_postnord.TestNordicConventionsPostNordSEPostpaketCommercialInvoice.test_sale_like_content_triggers_the_advisory`
+    - Commercial Postpaket Utrikes to Norway sends the invoice digitally: `test_postnord.TestNordicConventionsPostNordSEPostpaketCommercialInvoice.test_commercial_postpaket_utrikes_to_norway_sends_the_invoice_digitally`
+    - Gift Postpaket Utrikes is not advised: `test_postnord.TestNordicConventionsPostNordSEPostpaketCommercialInvoice.test_gift_postpaket_utrikes_is_not_advised`
+    - Letters are not advised: `test_postnord.TestNordicConventionsPostNordSEPostpaketCommercialInvoice.test_letters_are_not_advised`
+    - Finnish Postpaket Utrikes is not advised: `test_postnord.TestNordicConventionsPostNordSEPostpaketCommercialInvoice.test_finnish_postpaket_utrikes_is_not_advised`
+    - Finnish parcel to Great Britain: `test_postnord.TestNordicConventionsPostNordFIExportInvoice.test_finnish_parcel_to_great_britain`
+    - Finnish parcel to Norway: `test_postnord.TestNordicConventionsPostNordFIExportInvoice.test_finnish_parcel_to_norway`
+    - Danish parcel to Liechtenstein: `test_postnord.TestNordicConventionsPostNordDKExportDocuments.test_danish_parcel_to_liechtenstein`
+    - Danish parcel to the United States: `test_postnord.TestNordicConventionsPostNordDKExportDocuments.test_danish_parcel_to_the_united_states`
+    - No customs option to Norway: `test_dhl_freight_sweden.TestNordicConventionsDHLFreightSwedenCustomsModeMissing.test_no_customs_option_to_norway`
+    - Selected customs option silences the advisory: `test_dhl_freight_sweden.TestNordicConventionsDHLFreightSwedenCustomsModeMissing.test_selected_customs_option_silences_the_advisory`
+    - Invoice copy advisory to Great Britain states the higher fee: `test_dhl_freight_sweden.TestNordicConventionsDHLFreightSwedenInvoiceCopy.test_invoice_copy_advisory_to_great_britain_states_the_higher_fee`
+    - Parcel Connect to Norway: `test_dhl_freight_sweden.TestNordicConventionsDHLFreightSwedenAttachedDocuments.test_parcel_connect_to_norway`
+    - Parcel Connect Plus is not advised: `test_dhl_freight_sweden.TestNordicConventionsDHLFreightSwedenAttachedDocuments.test_parcel_connect_plus_is_not_advised`
+    - VOEC number to Norway: `test_dhl_freight_sweden.TestNordicConventionsDHLFreightSwedenVOECMarking.test_voec_number_to_norway`
+    - No VOEC number: `test_dhl_freight_sweden.TestNordicConventionsDHLFreightSwedenVOECMarking.test_no_voec_number`
+    - Merchandise declared as proforma: `test_invoice_type.TestNordicConventionsInvoiceTypeContentMismatch.test_merchandise_declared_as_proforma`
+    - Omitted content type declared as proforma: `test_invoice_type.TestNordicConventionsInvoiceTypeContentMismatch.test_omitted_content_type_declared_as_proforma`
+    - Gift declared as proforma is consistent: `test_invoice_type.TestNordicConventionsInvoiceTypeContentMismatch.test_gift_declared_as_proforma_is_consistent`
+    - Return merchandise declared as proforma is consistent: `test_invoice_type.TestNordicConventionsInvoiceTypeContentMismatch.test_return_merchandise_declared_as_proforma_is_consistent`
+    - Sample declared as commercial is informational: `test_invoice_type.TestNordicConventionsInvoiceTypeContentMismatch.test_sample_declared_as_commercial_is_informational`
+    - Letters carry no invoice type: `test_invoice_type.TestNordicConventionsInvoiceTypeContentMismatch.test_letters_carry_no_invoice_type`
 - [ ] 6.2 Run `openspec validate nordic-trade-document-conventions --strict`, and verify it reports the change valid
 - [ ] 6.3 Run a fresh-context review gate with an agent that has not seen the implementation session, against the spec, design, facts note, and the karrio repository checklists (spec compliance with no scope creep, a test for every scenario, `karrio.lib` usage and functional style, no duplication of connector field errors or the intra-EU warning, every advisory citing its sources and tags, stricter wording on conflicts, no credentials or network access in advisors), address findings, and verify the reviewer reports no blocking issue
