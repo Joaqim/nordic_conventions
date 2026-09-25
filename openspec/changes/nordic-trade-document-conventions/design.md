@@ -74,8 +74,9 @@ A test cross-checks the table against the connectors' tables when those modules 
 ### Service and option names without importing connectors
 
 `rules/postnord.py` holds the PostNord letter service names, copied from the connector's `LETTER_SERVICES` as listed in the spec, the International Parcel name `postnord_postpaket_utrikes`, and their carrier codes, and classifies every other `postnord` service as a parcel product, matching PNS lines 10-11.
-`rules/dhl_freight_sweden.py` recognises Parcel Connect by `dhl_freight_sweden_parcel_connect_b2c` or `109`, and the customs service options by their unified names and their DHL keys (`customsHandlingStandard`, `customsHandlingFullService`, `customsCustomersOwnDeclaration`, `customsJointDeclaration`).
-An option counts as selected when karrio's bool option parsing (`karrio.lib`) would select it, so the plugin and the connector agree on string values such as `"true"`.
+`rules/dhl_freight_sweden.py` recognises Parcel Connect by `dhl_freight_sweden_parcel_connect_b2c` or `109`, and the customs service options by their unified names only (`dhl_freight_sweden_customs_handling_standard`, `_customs_handling_full_service`, `_customs_own_declaration`, `_customs_joint_declaration`).
+The DHL keys (`customsHandlingStandard` and siblings) are not recognised, because the connector's `shipping_options_initializer` accepts options keyed by enum member name only: an option keyed `customsHandlingStandard` leaves the connector's selector unset and no customs service is sent (verified against karrio `develop` at 7a56ffa5b), so recognising it would silence the advisory on a booking without a customs mode.
+An option counts as selected when karrio's bool option parsing (`karrio.lib`) would select it, so the plugin and the connector agree on string values such as `"true"`, and also on `"false"`, which that parsing selects (a known karrio quirk recorded as an upstream candidate, not corrected by the plugin).
 The same cross-check test compares these names with the connectors' enums when importable.
 
 ### Messages and sources
