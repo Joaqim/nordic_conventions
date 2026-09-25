@@ -96,5 +96,44 @@ class TestNordicConventionsDHLFreightSwedenCustomsModeMissing(unittest.TestCase)
         )
 
 
+class TestNordicConventionsDHLFreightSwedenInvoiceCopy(unittest.TestCase):
+    def _message(self, recipient: str, fee: str) -> dict:
+        return dict(
+            code="nordic_dhl_freight_sweden_invoice_copy",
+            level="warning",
+            message=(
+                "DHL Freight Sweden requires a copy of the invoice even when complete customs data is sent with the booking: "
+                "email it to dhlfreight.int.se@dhl.com shortly after booking or upload it in myDHL Freight, "
+                "one document per shipment with a clear reference, because the DHL API has no document upload. "
+                f"Missing documents stop the shipment with a reminder fee of {fee}."
+            ),
+            details=dict(
+                plugin="nordic_conventions",
+                lane=f"SE-{recipient}",
+                sources=[
+                    sources.DHL_MAN_INVOICE_COPY.to_dict(),
+                    sources.DHL_CIE_INVOICE_ROUTES.to_dict(),
+                    sources.DHL_CIE_REMINDER_FEES.to_dict(),
+                    sources.DHL_API_NO_UPLOAD.to_dict(),
+                ],
+            ),
+        )
+
+    def test_invoice_copy_advisory_to_norway(self):
+        self.assertListEqual(
+            _advise(dhl_freight_sweden.invoice_copy), [self._message("NO", "390 kr")]
+        )
+
+    def test_invoice_copy_advisory_to_great_britain_states_the_higher_fee(self):
+        self.assertListEqual(
+            _advise(
+                dhl_freight_sweden.invoice_copy,
+                recipient="GB",
+                service="dhl_freight_sweden_road_freight_standard",
+            ),
+            [self._message("GB", "650 kr")],
+        )
+
+
 if __name__ == "__main__":
     unittest.main()

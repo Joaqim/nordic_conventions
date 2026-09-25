@@ -9,6 +9,10 @@ import karrio.plugins.nordic_conventions.sources as sources
 from karrio.plugins.nordic_conventions.rules import advisory
 
 CUSTOMS_MODE_MISSING = "nordic_dhl_freight_sweden_customs_mode_missing"
+INVOICE_COPY = "nordic_dhl_freight_sweden_invoice_copy"
+
+REMINDER_FEES: typing.Dict[str, str] = {"GB": "650 kr"}
+DEFAULT_REMINDER_FEE = "390 kr"
 
 
 def _dhl_freight_sweden(lane: typing.Optional[lanes.Lane]) -> bool:
@@ -42,5 +46,36 @@ def customs_mode_missing(request, context) -> typing.List[models.Message]:
                 sources.DHL_OWN_DECLARATION_FEE_INFERENCE,
             ],
             fees="No fee-free customs mode exists for destinations outside the EU VAT area.",
+        )
+    ]
+
+
+def invoice_copy(request, context) -> typing.List[models.Message]:
+    lane = lanes.lane_of(request, context)
+
+    if not _dhl_freight_sweden(lane):
+        return []
+
+    fee = REMINDER_FEES.get(lane.recipient_country, DEFAULT_REMINDER_FEE)
+
+    return [
+        advisory(
+            INVOICE_COPY,
+            "warning",
+            " ".join(
+                [
+                    "DHL Freight Sweden requires a copy of the invoice even when complete customs data is sent with the booking:",
+                    "email it to dhlfreight.int.se@dhl.com shortly after booking or upload it in myDHL Freight,",
+                    "one document per shipment with a clear reference, because the DHL API has no document upload.",
+                    f"Missing documents stop the shipment with a reminder fee of {fee}.",
+                ]
+            ),
+            lane,
+            [
+                sources.DHL_MAN_INVOICE_COPY,
+                sources.DHL_CIE_INVOICE_ROUTES,
+                sources.DHL_CIE_REMINDER_FEES,
+                sources.DHL_API_NO_UPLOAD,
+            ],
         )
     ]
