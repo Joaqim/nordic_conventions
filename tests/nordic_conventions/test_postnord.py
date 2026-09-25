@@ -31,6 +31,7 @@ def _codes(request) -> list:
         for advisor in (
             postnord.se_no_digital_invoice,
             postnord.se_postpaket_commercial_invoice,
+            postnord.se_export_paper_invoice,
         )
         for message in fixture.messages(advisor, request, CONTEXT)
     ]
@@ -319,6 +320,76 @@ class TestNordicConventionsPostNordSEPostpaketCommercialInvoice(unittest.TestCas
                 <= set(codes)
             ],
             [],
+        )
+
+
+class TestNordicConventionsPostNordSEExportPaperInvoice(unittest.TestCase):
+    def test_parcel_to_switzerland_gets_the_paper_invoice_advisory(self):
+        request = fixture.shipment("SE", "CH", "postnord_mypack_home")
+
+        self.assertListEqual(
+            fixture.messages(postnord.se_export_paper_invoice, request, CONTEXT),
+            [
+                dict(
+                    code="nordic_postnord_se_export_paper_invoice",
+                    level="warning",
+                    message=(
+                        "PostNord requires a commercial invoice in English in triplicate to accompany parcels from Sweden "
+                        "to destinations outside the EU VAT area, in a plastic pocket on parcel no. 1. "
+                        "The digital customs data sent with the booking prevails over the paper invoice on any discrepancy."
+                    ),
+                    details=dict(
+                        plugin="nordic_conventions",
+                        lane="SE-CH",
+                        sources=[
+                            sources.PN_SE_EN_PAGE_PARCEL_TRIPLICATE.to_dict(),
+                            sources.PN_SE_SV_PAGE_PARCEL_TWO_COPIES.to_dict(),
+                            sources.PN_SE_SERVICE_POINT_TERMS_PAPER.to_dict(),
+                            sources.PN_SE_PLASTIC_POCKET_ORIGIN.to_dict(),
+                        ],
+                    ),
+                )
+            ],
+        )
+
+    def test_conflicting_sources_are_both_attributed(self):
+        self.assertListEqual(
+            [
+                (source.tag, marker in source.statement)
+                for source, marker in (
+                    (sources.PN_SE_EN_PAGE_PARCEL_TRIPLICATE, "in triplicate"),
+                    (sources.PN_SE_SV_PAGE_PARCEL_TWO_COPIES, "två exemplar"),
+                    (sources.PN_SE_SERVICE_POINT_TERMS_PAPER, "at least two copies"),
+                )
+            ],
+            [("W", True), ("W", True), ("W", True)],
+        )
+
+    def test_norway_is_excluded(self):
+        request = fixture.shipment("SE", "NO", "postnord_parcel")
+
+        self.assertListEqual(
+            fixture.messages(postnord.se_export_paper_invoice, request, CONTEXT), []
+        )
+
+    def test_international_parcel_is_excluded(self):
+        request = fixture.shipment("SE", "CH", "postnord_postpaket_utrikes")
+
+        self.assertListEqual(
+            fixture.messages(postnord.se_export_paper_invoice, request, CONTEXT), []
+        )
+
+    def test_aland_by_postal_code_gets_the_paper_invoice_advisory(self):
+        request = fixture.shipment("SE", "AX", "postnord_parcel")
+
+        self.assertListEqual(
+            [
+                (message["code"], message["details"]["lane"])
+                for message in fixture.messages(
+                    postnord.se_export_paper_invoice, request, CONTEXT
+                )
+            ],
+            [("nordic_postnord_se_export_paper_invoice", "SE-FI")],
         )
 
 

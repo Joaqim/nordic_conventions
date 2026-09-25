@@ -10,6 +10,7 @@ from karrio.plugins.nordic_conventions.rules import advisory
 
 SE_NO_DIGITAL_INVOICE = "nordic_postnord_se_no_digital_invoice"
 SE_POSTPAKET_COMMERCIAL_INVOICE = "nordic_postnord_se_postpaket_commercial_invoice"
+SE_EXPORT_PAPER_INVOICE = "nordic_postnord_se_export_paper_invoice"
 
 # Letter services named in the letters table of the PostNord SE Swedish
 # customs documents page that map to a connector code with clear evidence.
@@ -139,6 +140,38 @@ def se_postpaket_commercial_invoice(request, context) -> typing.List[models.Mess
                 sources.PNS_INTERNATIONAL_PARCEL_CN22,
                 sources.PN_POSTPAKET_CODE_91,
                 sources.PN_POSTPAKET_CODE_95,
+            ],
+        )
+    ]
+
+
+def se_export_paper_invoice(request, context) -> typing.List[models.Message]:
+    lane = lanes.lane_of(request, context)
+
+    if not (
+        _postnord_from(lane, "SE")
+        and lane.postnord_product_group == lanes.PARCEL
+        and not lane.to_norway
+    ):
+        return []
+
+    return [
+        advisory(
+            SE_EXPORT_PAPER_INVOICE,
+            "warning",
+            " ".join(
+                [
+                    "PostNord requires a commercial invoice in English in triplicate to accompany parcels from Sweden",
+                    "to destinations outside the EU VAT area, in a plastic pocket on parcel no. 1.",
+                    "The digital customs data sent with the booking prevails over the paper invoice on any discrepancy.",
+                ]
+            ),
+            lane,
+            [
+                sources.PN_SE_EN_PAGE_PARCEL_TRIPLICATE,
+                sources.PN_SE_SV_PAGE_PARCEL_TWO_COPIES,
+                sources.PN_SE_SERVICE_POINT_TERMS_PAPER,
+                sources.PN_SE_PLASTIC_POCKET_ORIGIN,
             ],
         )
     ]
