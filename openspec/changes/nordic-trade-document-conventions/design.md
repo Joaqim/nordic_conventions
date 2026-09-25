@@ -49,14 +49,16 @@ Each advisory is its own advisor callable registered in `shipment_advisors`, so 
 Every rule starts from `lanes.lane_of(request, context) -> Optional[Lane]`, which returns `None` unless the operation is `shipping`, the carrier and shipper country are in scope, the shipper is inside and the recipient outside the EU VAT area; rules then return an empty list or one message.
 `Lane` is a frozen attrs value holding the carrier name, shipper country, recipient country, whether the recipient is Norway, the service name, the PostNord product group (letter, international parcel, parcel product), whether customs data is present, `commercial_invoice`, the normalised content type, the VOEC number, the set of selected DHL customs service options, and the derived `sale_like` and `commercial` flags.
 `lanes.sale_like(customs)` and `lanes.commercial(customs)` implement the spec's single determination of commercial content; content types are compared by lower-casing the value and matching `CustomsContentType` names (`gift`, `sample`, `documents`, `return_merchandise`), so both `gift` and `GIFT` match.
-The PostNord commercial-letter advisory and the invoice type advisory both read these flags rather than re-deriving them.
+The PostNord Postpaket advisory and the invoice type advisory both read these flags rather than re-deriving them.
 
 ### Norway invoice routes are emitted once
 
-For a Swedish PostNord shipment to Norway, `nordic_postnord_se_export_cn23_invoice` and `nordic_postnord_se_no_digital_invoice` would both name the Norway invoice routes.
-The spec makes them exclusive: the digital-invoice rule first evaluates the commercial-letter rule's applicability predicate (commercial, named letter service or International Parcel) and returns nothing when it holds, and the commercial-letter rule then carries the CN23 statement together with the Norway routes.
+For a Swedish PostNord shipment to Norway, `nordic_postnord_se_postpaket_commercial_invoice` and `nordic_postnord_se_no_digital_invoice` would both name the Norway invoice routes.
+The spec makes them exclusive: the digital-invoice rule first evaluates the Postpaket rule's applicability predicate (commercial shipment booked as `postnord_postpaket_utrikes`) and returns nothing when it holds, and the Postpaket rule then carries the CN23 statement together with the Norway routes.
 Both rules share one predicate function in `rules/postnord.py`, so the exclusivity cannot drift, and a test asserts that no SE to NO shipment receives both codes.
-Alternative considered: always emitting both and trimming the routes from the commercial-letter message; rejected because the consumer would then need two messages to learn one duty.
+Letters to Norway receive only the digital-invoice advisory, which adds the SEK 0 commercial invoice and VOEC statement for letter services.
+Alternative considered: always emitting both and trimming the routes from the Postpaket message; rejected because the consumer would then need two messages to learn one duty.
+
 Building `Lane` once per advisor call repeats a few dictionary reads ten times per shipment, which is negligible next to a carrier call.
 Alternative considered: a single advisor returning all messages; rejected because one exception would drop every advisory and the SDK's failure message could not tell which rule failed.
 
@@ -71,7 +73,7 @@ A test cross-checks the table against the connectors' tables when those modules 
 
 ### Service and option names without importing connectors
 
-`rules/postnord.py` holds the PostNord letter service names, copied from the connector's `LETTER_SERVICES` as listed in the spec for product classification, the separate named PostNord SE letter services (`UX`, `RR`, `86`) that alone trigger the commercial-letter advisory, the International Parcel name `postnord_postpaket_utrikes`, and their carrier codes, and classifies every other `postnord` service as a parcel product, matching PNS lines 10-11.
+`rules/postnord.py` holds the PostNord letter service names, copied from the connector's `LETTER_SERVICES` as listed in the spec, the International Parcel name `postnord_postpaket_utrikes`, and their carrier codes, and classifies every other `postnord` service as a parcel product, matching PNS lines 10-11.
 `rules/dhl_freight_sweden.py` recognises Parcel Connect by `dhl_freight_sweden_parcel_connect_b2c` or `109`, and the customs service options by their unified names and their DHL keys (`customsHandlingStandard`, `customsHandlingFullService`, `customsCustomersOwnDeclaration`, `customsJointDeclaration`).
 An option counts as selected when karrio's bool option parsing (`karrio.lib`) would select it, so the plugin and the connector agree on string values such as `"true"`.
 The same cross-check test compares these names with the connectors' enums when importable.
@@ -88,12 +90,12 @@ Codes are module-level constants prefixed `nordic_` and are part of the plugin's
 | Code | Level | Reason |
 |---|---|---|
 | `nordic_postnord_se_no_digital_invoice` | `info` for parcel products with customs data, else `warning` | the connector already transmits the invoice data for parcel products (PNS lines 28-31), so the consumer only needs to know no paper is needed; otherwise the consumer must supply the digital invoice through a route they own |
-| `nordic_postnord_se_export_cn23_invoice` | `warning` | the connector sends CN22 data, so the consumer must supply the CN23 and the invoice |
+| `nordic_postnord_se_postpaket_commercial_invoice` | `warning` | the connector sends CN22 data and no invoice, so the consumer must supply the CN23 and the invoice |
 | `nordic_postnord_se_export_paper_invoice` | `warning` | a physical action by the consumer is required |
 | `nordic_postnord_fi_export_invoice` | `warning` | the stricter source requires a signed paper invoice, or for Norway electronic data before the shipment |
 | `nordic_postnord_dk_export_documents` | `warning` | a physical action by the consumer is required |
-| `nordic_dhl_freight_sweden_customs_mode_missing` | `warning` | DHL requires a selection the booking lacks (FN:180) |
-| `nordic_dhl_freight_sweden_invoice_copy` | `warning` | a separate consumer action is required and missing documents stop the shipment with a fee (FN:200) |
+| `nordic_dhl_freight_sweden_customs_mode_missing` | `warning` | DHL requires a selection the booking lacks (FN:196) |
+| `nordic_dhl_freight_sweden_invoice_copy` | `warning` | a separate consumer action is required and missing documents stop the shipment with a fee (FN:216) |
 | `nordic_dhl_freight_sweden_attached_documents` | `warning` | a physical action by the consumer is required |
 | `nordic_dhl_freight_sweden_voec_marking` | `warning` | a marking the connector does not guarantee is required |
 | `nordic_invoice_type_content_mismatch` | `warning` for proforma with sale-like content, `info` for commercial with gift or sample | the sources restrict the proforma invoice to goods not sold (FN:56) but do not forbid a commercial invoice for gifts or samples |
@@ -130,5 +132,5 @@ Work happens on branch `feat-nordic-conventions` of the fork `Joaqim/karrio-comm
 
 ## Open Questions
 
-- Whether PostNord FI's web guidance or its 2026 contract terms govern (FN:249), and PostNord SE's copy count (FN:248); the advisories already state the stricter reading, so resolving either only changes wording and cited sources.
-- Whether DHL Freight Sweden requires outside copies for 112 and road freight (FN:250); a confirmation would extend the attached-documents advisory's service set.
+- Whether PostNord FI's web guidance or its 2026 contract terms govern (FN:267), and PostNord SE's copy count (FN:264); the advisories already state the stricter reading, so resolving either only changes wording and cited sources.
+- Whether DHL Freight Sweden requires outside copies for 112 and road freight (FN:268); a confirmation would extend the attached-documents advisory's service set.
