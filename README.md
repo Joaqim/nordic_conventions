@@ -14,7 +14,7 @@ On a karrio SDK without the hook the plugin still loads, registers no advisors, 
 ## Installation
 
 ```bash
-pip install "git+https://github.com/Joaqim/karrio-community-plugins.git@feat-nordic-conventions#subdirectory=plugins/nordic_conventions"
+pip install "git+https://github.com/Joaqim/nordic_conventions.git"
 ```
 
 The plugin registers through the `karrio.plugins` entry point group under the id `nordic_conventions` and is reported with the plugin type `advisor`.
@@ -79,9 +79,9 @@ It never reads connection credentials and makes no network calls.
 Tests use `unittest` and run from the repository root with an interpreter that can import a karrio SDK providing the advisors hook:
 
 ```bash
-PYTHONDONTWRITEBYTECODE=1 python -m unittest discover -v -f plugins/nordic_conventions/tests
+PYTHONDONTWRITEBYTECODE=1 python -m unittest discover -v -f tests
 ```
 
 The karrio fork's `develop` dev shell (`nix develop 'git+file:///home/joaqim/projects/karrio?ref=dev-nix-flake#upstream'`, entered from the karrio checkout) provides such an interpreter, with the SDK and the PostNord and DHL Freight Sweden connectors on `PYTHONPATH`.
-Inside it, a virtual environment created with `python -m venv --system-site-packages plugins/nordic_conventions/.venv` and the plugin installed with `pip install --no-deps -e plugins/nordic_conventions` registers the plugin's entry point.
+Inside it, a virtual environment created with `python -m venv --system-site-packages .venv` and the plugin installed with `pip install --no-deps -e .` registers the plugin's entry point.
 The connector cross-check tests run when the PostNord and DHL Freight Sweden connectors are importable and are skipped otherwise.

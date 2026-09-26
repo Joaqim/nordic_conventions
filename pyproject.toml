@@ -22,7 +22,7 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/karrioapi/karrio"
+Homepage = "https://github.com/Joaqim/nordic_conventions"
 
 [project.entry-points."karrio.plugins"]
 nordic_conventions = "karrio.plugins.nordic_conventions:METADATA"
