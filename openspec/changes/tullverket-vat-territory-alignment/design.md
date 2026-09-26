@@ -39,12 +39,13 @@ Alternative considered: renaming to `in_eu_vat_area_for_goods` across the plugin
 
 Both connectors receive byte-identical changes: `"MC"` appended beside `"GR"` in the set construction, the Mount Athos range, the prefix tuple, and the prefix disjunct in their `in_eu_vat_area`.
 The plugin's cross-check test extends to assert tuple equality of `EU_VAT_POSTAL_PREFIXES` as well, so equality of all three tables remains the invariant that fails loudly on divergence.
-Because the cross-check runs against whichever connectors are importable, either side merging alone leaves a window in which the test fails against the mixed state; the window closes by merging in one session, connectors first (fork branch `fix-eu-vat-area-territories`, then regenerate `develop`), then this plugin branch, so the plugin's final test run sees the new connector tables and passes.
+Because the cross-check runs against whichever connectors are importable, either side merging alone leaves a window in which the test fails against the mixed state; the window closes by merging in one session, connectors first (both connector branches, then a `develop` rebuild), then this plugin branch, so the plugin's final test run sees the new connector tables and passes.
 
 ### Karrio-side distribution
 
 The facts note gains, on `docs-openspec` and append-only so existing FN citations stay valid, the Skatteverket quotation and GOV.UK VAT Notice 725 ("VAT on movements of goods between Northern Ireland and the EU") as corroboration of the Northern Ireland row; the karrio-side spec deltas cite the new line numbers.
-Connector code and connector unit tests go on the fork feature branch `fix-eu-vat-area-territories`, upstream-bound like its siblings; the PNS and DFS requirement texts gain the same three territories on `docs-openspec`; `develop` is regenerated with `docs/notes/workflow/assemble-develop.sh -f` after the feature branch lands and is never committed to directly.
+Connector code and connector unit tests go on two per-stack branches, because the connectors live on separate unmerged stacks and no single branch can carry both files: `fix-postnord-eu-vat-territories`, branched from `feat-postnord-customs-invoice`, and `fix-dhl-freight-se-eu-vat-territories`, branched from `feat-dhl-freight-se-customs`, both upstream-bound like their parents and registered in `BRANCHES` in `assemble-develop.sh` on `docs-openspec` right after their parents.
+The PNS and DFS requirement texts gain the same three territories on `docs-openspec`; `develop` is regenerated with `rebuild-develop.sh`, which assembles `develop-next`, runs the touched connector suites and the SDK suite, and moves `develop` only when every check passes, and `develop` is never committed to directly.
 
 ### Nothing else in the plugin changes
 
