@@ -17,10 +17,10 @@ Follow the design's landing order: groups 1 and 2 land in the fork first, then g
 ## 3. Plugin territory table (this repository, branch `tullverket-vat-territory-alignment`)
 
 - [x] 3.1 Update `karrio/plugins/nordic_conventions/territories.py`: add `"MC"` to `EU_VAT_AREA_COUNTRIES`, add `("GR", 63086, 63086)` to `NON_EU_VAT_POSTAL_RANGES`, add `EU_VAT_POSTAL_PREFIXES` with `("GB", "BT")`, extend `in_eu_vat_area` with the prefix disjunct on the space-stripped upper-cased postal code, and state the Northern Ireland goods-movement caveat in the module docstring, and verify `python -m unittest tests.nordic_conventions.test_territories -v` passes with the existing cases before the new tests land
-- [ ] 3.2 Extend `tests/nordic_conventions/test_territories.py` with the spec's scenarios (Mount Athos `630 86` outside, `MC` inside, `FR` `98000` inside, `GB` `BT1 1AA` inside, `GB` `EC1A 1BB` outside) and extend `test_matches_connector_tables` to assert tuple equality of `EU_VAT_POSTAL_PREFIXES`, and verify `python -m unittest discover -v -f tests` from the repository root inside the karrio `develop` dev shell
-- [ ] 3.3 Update the README: drop the non-goal sentence that Monaco, Northern Ireland, and Mount Athos follow the connectors' treatment and state the Tullverket goods-movement alignment instead, and verify the sentence against the modified requirement in `specs/plugins/nordic-conventions/spec.md`
+- [x] 3.2 Extend `tests/nordic_conventions/test_territories.py` with the spec's scenarios (Mount Athos `630 86` outside, `MC` inside, `FR` `98000` inside, `GB` `BT1 1AA` inside, `GB` `EC1A 1BB` outside) and extend `test_matches_connector_tables` to assert tuple equality of `EU_VAT_POSTAL_PREFIXES`, and verify `python -m unittest discover -v -f tests` from the repository root inside the karrio `develop` dev shell
+- [x] 3.3 Update the README: drop the non-goal sentence that Monaco, Northern Ireland, and Mount Athos follow the connectors' treatment and state the Tullverket goods-movement alignment instead, and verify the sentence against the modified requirement in `specs/plugins/nordic-conventions/spec.md`
 
 ## 4. Integration checks
 
-- [ ] 4.1 Run the full plugin suite against the regenerated karrio `develop` (both connectors importable) and verify every test passes with no cross-check skips, confirming all three territory tables are equal
-- [ ] 4.2 Verify `openspec validate tullverket-vat-territory-alignment --strict` passes and the change is ready for review
+- [x] 4.1 Run the full plugin suite against the regenerated karrio `develop` (both connectors importable) and verify every test passes with no cross-check skips, confirming all three territory tables are equal
+- [x] 4.2 Verify `openspec validate tullverket-vat-territory-alignment --strict` passes and the change is ready for review
