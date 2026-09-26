@@ -36,6 +36,21 @@ class TestNordicConventionsTerritories(unittest.TestCase):
             [True, False],
         )
 
+    def test_monaco_is_inside(self):
+        self.assertTrue(territories.in_eu_vat_area("MC", "98000"))
+
+    def test_france_with_monaco_postal_code_is_inside(self):
+        self.assertTrue(territories.in_eu_vat_area("FR", "98000"))
+
+    def test_northern_ireland_by_postal_prefix_is_inside(self):
+        self.assertTrue(territories.in_eu_vat_area("GB", "BT1 1AA"))
+
+    def test_great_britain_is_outside(self):
+        self.assertFalse(territories.in_eu_vat_area("GB", "EC1A 1BB"))
+
+    def test_mount_athos_by_postal_code_is_outside(self):
+        self.assertFalse(territories.in_eu_vat_area("GR", "630 86"))
+
     def test_matches_connector_tables(self):
         for carrier_name in ("postnord", "dhl_freight_sweden"):
             with self.subTest(carrier_name=carrier_name):
@@ -50,6 +65,10 @@ class TestNordicConventionsTerritories(unittest.TestCase):
                 self.assertTupleEqual(
                     territories.NON_EU_VAT_POSTAL_RANGES,
                     units.NON_EU_VAT_POSTAL_RANGES,
+                )
+                self.assertTupleEqual(
+                    territories.EU_VAT_POSTAL_PREFIXES,
+                    units.EU_VAT_POSTAL_PREFIXES,
                 )
 
 
