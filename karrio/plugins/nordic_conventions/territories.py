@@ -1,11 +1,14 @@
-"""EU VAT area membership, mirroring the PostNord and DHL Freight Sweden connectors.
+"""EU VAT area membership for goods movements, following Tullverket.
 
-The table follows Tullverket's list of EU customs and fiscal territories as
-applied by both connectors: member states are inside, with Greece under its
-ISO code ``GR`` as well as its VAT prefix ``EL``; special fiscal territories
-are outside either by their own country code (``AX``, ``IC``, ``GP``, ``GF``,
-``MQ``, ``RE``, ``YT``), which is absent from the member-state set, or by
-postal-code range within a member state.
+The table matches the definition applied by the PostNord and DHL Freight
+Sweden connectors: member states are inside, with Greece under its ISO code
+``GR`` as well as its VAT prefix ``EL``, and Monaco (``MC``) treated as EU;
+special fiscal territories are outside either by their own country code
+(``AX``, ``IC``, ``GP``, ``GF``, ``MQ``, ``RE``, ``YT``), which is absent
+from the member-state set, or by postal-code range within a member state,
+with Mount Athos excluded by ``GR`` 63086. Northern Ireland is inside the
+EU VAT area for goods and outside it for services; the plugin advises on
+goods shipments, so ``GB`` postal codes beginning ``BT`` are inside.
 """
 
 import typing
@@ -31,6 +34,7 @@ EU_VAT_AREA_COUNTRIES: typing.FrozenSet[str] = frozenset(
         "LV",
         "LT",
         "LU",
+        "MC",
         "MT",
         "NL",
         "PL",
@@ -51,8 +55,13 @@ NON_EU_VAT_POSTAL_RANGES: typing.Tuple[typing.Tuple[str, int, int], ...] = (
     ("ES", 52000, 52999),  # Melilla
     ("DE", 78266, 78266),  # Büsingen
     ("DE", 27498, 27498),  # Heligoland
+    ("GR", 63086, 63086),  # Mount Athos
     ("IT", 23041, 23041),  # Livigno
     ("IT", 22061, 22061),  # Campione d'Italia
+)
+
+EU_VAT_POSTAL_PREFIXES: typing.Tuple[typing.Tuple[str, str], ...] = (
+    ("GB", "BT"),  # Northern Ireland
 )
 
 
@@ -60,18 +69,24 @@ def in_eu_vat_area(
     country_code: typing.Optional[str],
     postal_code: typing.Optional[str],
 ) -> bool:
-    """Whether an address lies inside the EU VAT area.
+    """Whether an address lies inside the EU VAT area for goods.
 
-    A postal code is compared after removing spaces and only when it is
-    purely numeric; otherwise the country-level decision stands.
+    A postal code is compared after removing spaces; the exclusion ranges
+    apply only when the code is purely numeric, the inclusion prefixes in
+    any case, and a code matching neither leaves the country-level decision
+    standing.
     """
     country = (country_code or "").upper()
     postal = str(postal_code or "").replace(" ", "")
     postal_number = int(postal) if postal.isdigit() else None
 
-    return country in EU_VAT_AREA_COUNTRIES and not any(
+    inside_member_state = country in EU_VAT_AREA_COUNTRIES and not any(
         country == range_country
         and postal_number is not None
         and low <= postal_number <= high
         for range_country, low, high in NON_EU_VAT_POSTAL_RANGES
+    )
+    return inside_member_state or any(
+        country == prefix_country and postal.upper().startswith(prefix)
+        for prefix_country, prefix in EU_VAT_POSTAL_PREFIXES
     )
