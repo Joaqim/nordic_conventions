@@ -28,10 +28,11 @@ It advises on `postnord` shipments from Sweden, Denmark, or Finland and on `dhl_
 Norwegian shippers are out of scope because PostNord Norway export rules were not found.
 For return shipments the SDK swaps shipper and recipient before advisors run, so the returning party is the shipper.
 
-The EU VAT area follows the PostNord and DHL Freight Sweden connectors' definition rather than karrio's `EUCountry`.
-The member states are inside, with Greece as `GR` or `EL`.
-Åland (`AX`, or `FI` 22000-22999), the Canary Islands (`IC`, or `ES` 35000-35999 and 38000-38999), Ceuta, Melilla, Büsingen, Heligoland, Livigno, Campione d'Italia, and the French overseas departments are outside.
-Postal codes are compared after removing spaces, and only when purely numeric.
+The EU VAT area follows Tullverket's list of EU customs and fiscal territories as it applies to goods movements, shared with the PostNord and DHL Freight Sweden connectors, rather than karrio's `EUCountry`.
+The member states are inside, with Greece as `GR` or `EL`, and Monaco (`MC`) is treated as EU.
+Northern Ireland (`GB` with a postal code beginning `BT`) is inside for goods, which is the verdict this plugin gives; it is outside the EU VAT area for services.
+Åland (`AX`, or `FI` 22000-22999), the Canary Islands (`IC`, or `ES` 35000-35999 and 38000-38999), Ceuta, Melilla, Büsingen, Heligoland, Livigno, Campione d'Italia, Mount Athos (`GR` 63086), and the French overseas departments are outside.
+Postal codes are compared after removing spaces; the exclusion ranges apply only when the code is purely numeric, and the Northern Ireland prefix in any case.
 
 A shipment's content is sale-like when its customs `content_type` is omitted or is none of gift, sample, documents, or return merchandise, compared case-insensitively.
 A shipment is commercial when it carries customs data and either `customs.commercial_invoice` is true or its content is sale-like.
@@ -70,7 +71,6 @@ The API consumer owns compliance with carrier terms and customs rules, and shoul
 The plugin does not advise at rating time, and has no configuration or per-organisation overrides.
 It does not evaluate goods-value thresholds (SEK 2 000, EUR 1 000, DKK 7 500), give CN22 or CN23 selection guidance, check invoice contents, or advise CN22 or CN23 for PostNord letters.
 It does not advise Norwegian shippers.
-It does not treat Monaco, Northern Ireland, or Mount Athos differently from the connectors.
 It repeats nothing the connectors already enforce, such as field errors for missing customs data, the intra-EU customs omission warning, or the mapping of `commercial_invoice` to the invoice type.
 It never reads connection credentials and makes no network calls.
 
