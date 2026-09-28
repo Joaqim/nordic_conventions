@@ -2,10 +2,10 @@
 
 ## 1. Procedures core
 
-- [ ] 1.1 Add `karrio/plugins/nordic_conventions/procedures.py` with the `Procedure` enum of the five members whose values are the option-key suffixes, and verify a new `tests/nordic_conventions/test_procedures.py` case asserting the five members and their option-key spellings passes
-- [ ] 1.2 Add the lane-aware answering map over all ten `AdvisoryClassification` members with the two empty entries, and verify a completeness test asserting the map covers every classification exactly passes
-- [ ] 1.3 Add `expected_procedures(request, context)` deriving its result from the unwrapped rules, and verify test cases for a PostNord SE parcel to a non-Norway destination, a PostNord SE postpaket to Norway, and an intra-EU shipment pass
-- [ ] 1.4 Export `Procedure` and `expected_procedures` from the package `__init__` when the hook is available, and verify an import test `from karrio.plugins.nordic_conventions import expected_procedures` passes
+- [x] 1.1 Add `karrio/plugins/nordic_conventions/procedures.py` with the `Procedure` enum of the five members whose values are the option-key suffixes, and verify a new `tests/nordic_conventions/test_procedures.py` case asserting the five members and their option-key spellings passes
+- [x] 1.2 Add the lane-aware answering map over all ten `AdvisoryClassification` members with the two empty entries, and verify a completeness test asserting the map covers every classification exactly passes
+- [x] 1.3 Add `expected_procedures(request, context)` deriving its result from the unwrapped rules, and verify test cases for a PostNord SE parcel to a non-Norway destination, a PostNord SE postpaket to Norway, and an intra-EU shipment pass
+- [x] 1.4 Export `Procedure` and `expected_procedures` from the package `__init__` when the hook is available, and verify an import test `from karrio.plugins.nordic_conventions import expected_procedures` passes
 
 ## 2. Attestation resolver
 
