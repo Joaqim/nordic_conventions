@@ -43,7 +43,7 @@ The parser is a total function: any value shape yields a claim or no claim, neve
 Alternative rejected: parsing attestations into `Lane` and consulting them inside each rule distributes the answering and conflict logic across ten rules, touches every rule file and test, and duplicates the invalid-answers-nothing invariant; a cross-advisor post-pass is impossible under the contract, as noted in Context.
 
 ### One lane-aware answering map, completeness-tested
-`procedures.py` defines `Procedure` and a mapping from `AdvisoryClassification` to its answering set, lane-aware for the four advisories whose remedy differs by destination, exactly as the spec delta states.
+`procedures.py` defines `Procedure` and a mapping from `AdvisoryClassification` to its answering set, lane-aware for the three advisories whose remedy differs by destination, exactly as the spec delta states.
 Every classification has an entry, empty for the two un-attestable ones, and a test fails if a classification lacks one, so a future advisory cannot ship without deciding its attestation story.
 The map lives centrally rather than beside each rule because the conflict advisor and `expected_procedures` read the same map; one location keeps the three consumers in step.
 
