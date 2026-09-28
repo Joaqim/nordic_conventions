@@ -10,6 +10,7 @@ import karrio.core.settings as settings
 import karrio.references as references
 
 import karrio.plugins.nordic_conventions as nordic_conventions
+import karrio.plugins.nordic_conventions.procedures as procedures
 from . import fixture
 
 
@@ -70,7 +71,7 @@ class TestNordicConventionsPlugin(unittest.TestCase):
             ],
             nordic_conventions.ADVISORS,
         )
-        self.assertEqual(len(nordic_conventions.ADVISORS), 10)
+        self.assertEqual(len(nordic_conventions.ADVISORS), 11)
 
     def test_messages_reach_the_sdk_runner(self):
         references.import_extensions()
@@ -203,6 +204,93 @@ class TestNordicConventionsMessages(unittest.TestCase):
         )
 
         self.assertListEqual(_advise_all(request, fixture.context("postnord")), [])
+
+
+class TestNordicConventionsAttestations(unittest.TestCase):
+    def tearDown(self):
+        references.import_extensions()
+
+    def test_attested_option_removes_the_answered_advisory(self):
+        references.import_extensions()
+        request = fixture.shipment(
+            "SE",
+            "CH",
+            "postnord_mypack_home",
+            options={"nordic_conventions_commercial_invoice_paper_copy": True},
+        )
+
+        self.assertListEqual(
+            _plugin_messages(
+                advisors.run_advisors(request, _connection("postnord"), "shipping")
+            ),
+            [],
+        )
+
+    def test_contradicted_attestation_keeps_the_advisory_and_adds_the_conflict(self):
+        references.import_extensions()
+        request = fixture.shipment(
+            "SE",
+            "NO",
+            "postnord_parcel",
+            customs=fixture.customs("merchandise", True),
+            options={"nordic_conventions_commercial_invoice_paper_copy": True},
+        )
+
+        self.assertListEqual(
+            sorted(
+                (message.code, message.level)
+                for message in _plugin_messages(
+                    advisors.run_advisors(request, _connection("postnord"), "shipping")
+                )
+            ),
+            [
+                ("nordic_conventions_attestation_conflict", "warning"),
+                ("nordic_conventions_postnord_se_no_digital_invoice", "info"),
+            ],
+        )
+
+    def test_no_attestation_options_match_the_unwrapped_rules(self):
+        cases = [
+            ("postnord", "SE", "NO", "postnord_parcel", fixture.customs("merchandise", True)),
+            (
+                "postnord",
+                "SE",
+                "NO",
+                "postnord_postpaket_utrikes",
+                fixture.customs(commercial_invoice=True),
+            ),
+            (
+                "postnord",
+                "SE",
+                "US",
+                "postnord_postpaket_utrikes",
+                fixture.customs(commercial_invoice=True),
+            ),
+            ("postnord", "SE", "CH", "postnord_mypack_home", None),
+            ("postnord", "FI", "GB", "postnord_parcel", None),
+            ("postnord", "DK", "US", "postnord_parcel", None),
+            (
+                "dhl_freight_sweden",
+                "SE",
+                "NO",
+                "109",
+                fixture.customs("sample", True, voec_number="VOEC2024001"),
+            ),
+        ]
+
+        for carrier, shipper, recipient, service, customs in cases:
+            with self.subTest(lane=f"{shipper}-{recipient}", service=service):
+                request = fixture.shipment(shipper, recipient, service, customs=customs)
+                context = fixture.context(carrier)
+
+                self.assertListEqual(
+                    _advise_all(request, context),
+                    [
+                        message
+                        for rule in procedures.RULES
+                        for message in fixture.messages(rule, request, context)
+                    ],
+                )
 
 
 class TestNordicConventionsHookGuard(unittest.TestCase):

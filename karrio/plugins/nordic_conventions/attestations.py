@@ -136,7 +136,7 @@ def attestation_conflicts(
 
     return [
         advisory(
-            "nordic_conventions_attestation_conflict",
+            AdvisoryClassification.attestation_conflict,
             "warning",
             f"The attested procedure {option_key(procedure)} does not hold on this lane: "
             f"{contradiction.convention}.",

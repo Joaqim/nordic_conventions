@@ -20,3 +20,4 @@ class AdvisoryClassification(str, enum.Enum):
     dhl_freight_sweden_attached_documents = "nordic_conventions_dhl_freight_sweden_attached_documents"
     dhl_freight_sweden_voec_marking = "nordic_conventions_dhl_freight_sweden_voec_marking"
     invoice_type_content_mismatch = "nordic_conventions_invoice_type_content_mismatch"
+    attestation_conflict = "nordic_conventions_attestation_conflict"

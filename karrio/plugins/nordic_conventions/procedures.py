@@ -117,6 +117,7 @@ ANSWERING: typing.Dict[AdvisoryClassification, AnsweringSet] = {
         Procedure.voec_marking_printed
     ),
     AdvisoryClassification.invoice_type_content_mismatch: _always(),
+    AdvisoryClassification.attestation_conflict: _always(),
 }
 
 
