@@ -56,19 +56,56 @@ Several advisories may apply to one shipment, and each is returned once.
 | `nordic_conventions_dhl_freight_sweden_attached_documents` | `warning` | DHL Freight Sweden Parcel Connect (`dhl_freight_sweden_parcel_connect_b2c`, 109) | DHL Freight Sweden product manual v5.23 (valid 2025-04-14) |
 | `nordic_conventions_dhl_freight_sweden_voec_marking` | `warning` | DHL Freight Sweden to Norway with `customs.options.voec_number` | DHL Freight Sweden product manual v5.23 (valid 2025-04-14), connector spec |
 | `nordic_conventions_invoice_type_content_mismatch` | `warning` for proforma with sale-like content, `info` for commercial with gift or sample | PostNord parcel product or any DHL Freight Sweden service booked with customs data | Bring customs documents page, DHL Freight Sweden customs information export (2025-02-03), Postpaket Utrikes terms §2 (valid 2025-05-02), connector specs |
+| `nordic_conventions_attestation_conflict` | `warning` | an attested procedure contradicted by the conventions of the lane; in this version `nordic_conventions_commercial_invoice_paper_copy` from Sweden to Norway with PostNord | PostNord Service Point special terms §4 (valid 2026-01-01), PostNord SE Swedish customs documents page (Wayback 2026-02-08), connector spec |
 
 The DHL Freight Sweden customs service options are recognised by their unified names only (`dhl_freight_sweden_customs_handling_standard`, `dhl_freight_sweden_customs_handling_full_service`, `dhl_freight_sweden_customs_own_declaration`, `dhl_freight_sweden_customs_joint_declaration`), exactly as the connector parses them.
 The codes are part of the plugin's public contract, and renaming one is a breaking change.
 The full source references, including URLs and the facts note line numbers, are in `karrio/plugins/nordic_conventions/sources.py`.
 
+## Attestations
+
+A consumer that has arranged an out-of-booking procedure for one shipment attests it by setting the matching shipment option to the boolean `true`.
+
+| Option | Procedure it attests |
+|---|---|
+| `nordic_conventions_commercial_invoice_paper_copy` | a printed commercial invoice travelling with the parcel |
+| `nordic_conventions_customs_declaration_paper_copy` | a printed customs declaration, CN22 or CN23, travelling with the parcel |
+| `nordic_conventions_customs_documents_attached_outside` | copies of the customs documents attached on the outside of the package |
+| `nordic_conventions_commercial_invoice_electronic` | a commercial invoice transmitted electronically outside the booking |
+| `nordic_conventions_voec_marking_printed` | the VOEC ID printed on the package or label |
+
+Only the boolean `true` attests: an absent option, `false`, and any other value, including the string `"false"`, carry no claim, unlike karrio carrier-option parsing.
+An option key in the `nordic_conventions_` namespace that the plugin does not define is ignored, with no message and no change to any advisory.
+An advisory is omitted only when its answering procedures are non-empty and every one is covered by an attestation that holds on the lane; partial coverage returns the advisory unchanged, and an attestation contradicted by the lane's conventions covers nothing and returns `nordic_conventions_attestation_conflict` naming the claim and the contradicting convention with its sources.
+The answering sets are lane-aware for the PostNord Postpaket Utrikes, Finland, and Denmark advisories, whose procedures differ for Norway, and for Denmark's paper-only destinations Norway, Switzerland, Liechtenstein, and Great Britain, from the other destinations.
+The advisories whose fix lies inside the booking request — the DHL Freight Sweden customs service options and the `customs.commercial_invoice` flag — are answered by no procedure, so an attestation never replaces correct request data.
+
+## Utilities
+
+`expected_procedures` returns the procedures the conventions expect for a request before any booking, for example to show a pre-booking document checklist:
+
+```python
+import karrio.core.advisors as advisors
+from karrio.plugins.nordic_conventions import expected_procedures
+
+procedures = expected_procedures(
+    shipment_request,
+    advisors.AdvisorContext(carrier_name="postnord", operation="shipping"),
+)
+```
+
+It takes the same request and context pair an advisor receives, returns the empty set outside the plugin's scope — the rating operation, a carrier or lane out of scope, a shipment inside the EU VAT area — and otherwise returns the union of the answering sets of the advisories that would be returned with no attestations.
+It derives its result from the same rules that produce the advisories, so the function and the advisories cannot disagree.
+
 ## Compliance
 
 The advisories are reminders, not compliance guarantees.
 The API consumer owns compliance with carrier terms and customs rules, and should verify each advisory against the cited sources, which may change.
+An attestation is the consumer's own commitment to perform the procedure; the plugin checks claims against the conventions that govern the lane, not against the consumer's warehouse.
 
 ## Non-goals
 
-The plugin does not advise at rating time, and has no configuration or per-organisation overrides.
+The plugin does not advise at rating time, and has no per-organisation overrides or connection-level attestation defaults; attestations are per-shipment claims only.
 It does not evaluate goods-value thresholds (SEK 2 000, EUR 1 000, DKK 7 500), give CN22 or CN23 selection guidance, check invoice contents, or advise CN22 or CN23 for PostNord letters.
 It does not advise Norwegian shippers.
 It repeats nothing the connectors already enforce, such as field errors for missing customs data, the intra-EU customs omission warning, or the mapping of `commercial_invoice` to the invoice type.
