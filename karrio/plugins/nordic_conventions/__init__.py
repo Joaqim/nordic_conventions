@@ -6,6 +6,7 @@ import karrio.core.metadata as metadata
 import karrio.plugins.nordic_conventions.rules.dhl_freight_sweden as dhl_freight_sweden
 import karrio.plugins.nordic_conventions.rules.invoice_type as invoice_type
 import karrio.plugins.nordic_conventions.rules.postnord as postnord
+from karrio.plugins.nordic_conventions.procedures import Procedure, expected_procedures
 
 ADVISORS = [
     postnord.se_no_digital_invoice,
