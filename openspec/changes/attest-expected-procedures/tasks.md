@@ -21,5 +21,5 @@
 
 ## 4. Documentation and release
 
-- [ ] 4.1 Update `README.md` with the attestation options table, the `nordic_conventions_attestation_conflict` row in the code table, a utilities section showing the `expected_procedures` import, and the reworded non-goal line, and verify every key, code, and symbol in the README matches the implementation
-- [ ] 4.2 Bump the package version and verify `python -m unittest discover -v -f tests` is green and `openspec validate attest-expected-procedures --strict` passes
+- [x] 4.1 Update `README.md` with the attestation options table, the `nordic_conventions_attestation_conflict` row in the code table, a utilities section showing the `expected_procedures` import, and the reworded non-goal line, and verify every key, code, and symbol in the README matches the implementation
+- [x] 4.2 Bump the package version and verify `python -m unittest discover -v -f tests` is green and `openspec validate attest-expected-procedures --strict` passes
