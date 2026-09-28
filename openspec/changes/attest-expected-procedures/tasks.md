@@ -16,8 +16,8 @@
 
 ## 3. Composition and code
 
-- [ ] 3.1 Add `attestation_conflict` to `AdvisoryClassification` following the namespace rule, and verify the codes enumeration test covers eleven classifications
-- [ ] 3.2 Recompose `ADVISORS` as wrapped rules plus the conflict advisor in `__init__.py`, and verify `test_plugin.py` end-to-end cases pass: an attested option removes the answered advisory through `run_advisors`, a contradicted attestation yields the original advisory plus the conflict, and a request with no `nordic_conventions_*` options yields byte-identical output to the unwrapped rules
+- [x] 3.1 Add `attestation_conflict` to `AdvisoryClassification` following the namespace rule, and verify the codes enumeration test covers eleven classifications
+- [x] 3.2 Recompose `ADVISORS` as wrapped rules plus the conflict advisor in `__init__.py`, and verify `test_plugin.py` end-to-end cases pass: an attested option removes the answered advisory through `run_advisors`, a contradicted attestation yields the original advisory plus the conflict, and a request with no `nordic_conventions_*` options yields byte-identical output to the unwrapped rules
 
 ## 4. Documentation and release
 
