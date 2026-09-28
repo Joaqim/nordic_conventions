@@ -6,12 +6,8 @@ import karrio.core.models as models
 
 import karrio.plugins.nordic_conventions.lanes as lanes
 import karrio.plugins.nordic_conventions.sources as sources
+from karrio.plugins.nordic_conventions.codes import AdvisoryClassification
 from karrio.plugins.nordic_conventions.rules import advisory
-
-CUSTOMS_MODE_MISSING = "nordic_dhl_freight_sweden_customs_mode_missing"
-INVOICE_COPY = "nordic_dhl_freight_sweden_invoice_copy"
-ATTACHED_DOCUMENTS = "nordic_dhl_freight_sweden_attached_documents"
-VOEC_MARKING = "nordic_dhl_freight_sweden_voec_marking"
 
 PARCEL_CONNECT_SERVICES: typing.FrozenSet[str] = frozenset(
     {"dhl_freight_sweden_parcel_connect_b2c", "109"}
@@ -33,7 +29,7 @@ def customs_mode_missing(request, context) -> typing.List[models.Message]:
 
     return [
         advisory(
-            CUSTOMS_MODE_MISSING,
+            AdvisoryClassification.dhl_freight_sweden_customs_mode_missing,
             "warning",
             " ".join(
                 [
@@ -66,7 +62,7 @@ def invoice_copy(request, context) -> typing.List[models.Message]:
 
     return [
         advisory(
-            INVOICE_COPY,
+            AdvisoryClassification.dhl_freight_sweden_invoice_copy,
             "warning",
             " ".join(
                 [
@@ -95,7 +91,7 @@ def attached_documents(request, context) -> typing.List[models.Message]:
 
     return [
         advisory(
-            ATTACHED_DOCUMENTS,
+            AdvisoryClassification.dhl_freight_sweden_attached_documents,
             "warning",
             " ".join(
                 [
@@ -121,7 +117,7 @@ def voec_marking(request, context) -> typing.List[models.Message]:
 
     return [
         advisory(
-            VOEC_MARKING,
+            AdvisoryClassification.dhl_freight_sweden_voec_marking,
             "warning",
             " ".join(
                 [

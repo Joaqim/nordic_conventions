@@ -6,13 +6,8 @@ import karrio.core.models as models
 
 import karrio.plugins.nordic_conventions.lanes as lanes
 import karrio.plugins.nordic_conventions.sources as sources
+from karrio.plugins.nordic_conventions.codes import AdvisoryClassification
 from karrio.plugins.nordic_conventions.rules import advisory
-
-SE_NO_DIGITAL_INVOICE = "nordic_postnord_se_no_digital_invoice"
-SE_POSTPAKET_COMMERCIAL_INVOICE = "nordic_postnord_se_postpaket_commercial_invoice"
-SE_EXPORT_PAPER_INVOICE = "nordic_postnord_se_export_paper_invoice"
-FI_EXPORT_INVOICE = "nordic_postnord_fi_export_invoice"
-DK_EXPORT_DOCUMENTS = "nordic_postnord_dk_export_documents"
 
 DK_DOCUMENT_COPIES: typing.Dict[str, str] = {
     "NO": "2 commercial invoices",
@@ -92,7 +87,7 @@ def se_no_digital_invoice(request, context) -> typing.List[models.Message]:
 
     return [
         advisory(
-            SE_NO_DIGITAL_INVOICE,
+            AdvisoryClassification.postnord_se_no_digital_invoice,
             "info" if transmitted else "warning",
             text,
             lane,
@@ -140,7 +135,7 @@ def se_postpaket_commercial_invoice(request, context) -> typing.List[models.Mess
 
     return [
         advisory(
-            SE_POSTPAKET_COMMERCIAL_INVOICE,
+            AdvisoryClassification.postnord_se_postpaket_commercial_invoice,
             "warning",
             text,
             lane,
@@ -169,7 +164,7 @@ def se_export_paper_invoice(request, context) -> typing.List[models.Message]:
 
     return [
         advisory(
-            SE_EXPORT_PAPER_INVOICE,
+            AdvisoryClassification.postnord_se_export_paper_invoice,
             "warning",
             " ".join(
                 [
@@ -215,7 +210,7 @@ def fi_export_invoice(request, context) -> typing.List[models.Message]:
 
     return [
         advisory(
-            FI_EXPORT_INVOICE,
+            AdvisoryClassification.postnord_fi_export_invoice,
             "warning",
             text,
             lane,
@@ -246,7 +241,7 @@ def dk_export_documents(request, context) -> typing.List[models.Message]:
 
     return [
         advisory(
-            DK_EXPORT_DOCUMENTS,
+            AdvisoryClassification.postnord_dk_export_documents,
             "warning",
             " ".join(
                 [

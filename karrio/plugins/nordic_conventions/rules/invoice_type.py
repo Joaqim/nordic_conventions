@@ -7,9 +7,8 @@ import karrio.core.units as units
 
 import karrio.plugins.nordic_conventions.lanes as lanes
 import karrio.plugins.nordic_conventions.sources as sources
+from karrio.plugins.nordic_conventions.codes import AdvisoryClassification
 from karrio.plugins.nordic_conventions.rules import advisory
-
-INVOICE_TYPE_CONTENT_MISMATCH = "nordic_invoice_type_content_mismatch"
 
 GIFT_OR_SAMPLE: typing.FrozenSet[str] = frozenset(
     {units.CustomsContentType.gift.name, units.CustomsContentType.sample.name}
@@ -74,7 +73,7 @@ def invoice_type_content_mismatch(request, context) -> typing.List[models.Messag
 
     return [
         advisory(
-            INVOICE_TYPE_CONTENT_MISMATCH,
+            AdvisoryClassification.invoice_type_content_mismatch,
             level,
             text,
             lane,
