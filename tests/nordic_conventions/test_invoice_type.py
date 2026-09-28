@@ -37,7 +37,7 @@ def _advise(carrier, service, customs, recipient="NO") -> list:
 
 def _message(level, text, lane, cited) -> dict:
     return dict(
-        code="nordic_invoice_type_content_mismatch",
+        code="nordic_conventions_invoice_type_content_mismatch",
         level=level,
         message=text,
         details=dict(plugin="nordic_conventions", lane=lane, sources=cited),

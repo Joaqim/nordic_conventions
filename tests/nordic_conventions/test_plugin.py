@@ -83,7 +83,13 @@ class TestNordicConventionsPlugin(unittest.TestCase):
                     advisors.run_advisors(request, _connection("postnord"), "shipping")
                 )
             ],
-            [("postnord", "postnord_se", "nordic_postnord_se_export_paper_invoice")],
+            [
+                (
+                    "postnord",
+                    "postnord_se",
+                    "nordic_conventions_postnord_se_export_paper_invoice",
+                )
+            ],
         )
 
     def test_several_advisories_on_one_shipment(self):
@@ -100,9 +106,9 @@ class TestNordicConventionsPlugin(unittest.TestCase):
                 )
             ),
             [
-                "nordic_dhl_freight_sweden_attached_documents",
-                "nordic_dhl_freight_sweden_customs_mode_missing",
-                "nordic_dhl_freight_sweden_invoice_copy",
+                "nordic_conventions_dhl_freight_sweden_attached_documents",
+                "nordic_conventions_dhl_freight_sweden_customs_mode_missing",
+                "nordic_conventions_dhl_freight_sweden_invoice_copy",
             ],
         )
 
@@ -152,7 +158,7 @@ class TestNordicConventionsMessages(unittest.TestCase):
             [
                 message
                 for message in messages
-                if not message["code"].startswith("nordic_")
+                if not message["code"].startswith("nordic_conventions_")
                 or "SHIPPING_SDK_" in message["code"]
                 or message["level"] not in advisors.ADVISORY_LEVELS
                 or not message["message"]

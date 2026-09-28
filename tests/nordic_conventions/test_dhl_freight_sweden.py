@@ -26,7 +26,7 @@ class TestNordicConventionsDHLFreightSwedenCustomsModeMissing(unittest.TestCase)
             _advise(dhl_freight_sweden.customs_mode_missing),
             [
                 dict(
-                    code="nordic_dhl_freight_sweden_customs_mode_missing",
+                    code="nordic_conventions_dhl_freight_sweden_customs_mode_missing",
                     level="warning",
                     message=(
                         "DHL Freight Sweden requires customs handling (standard or full service) or an own declaration "
@@ -73,7 +73,7 @@ class TestNordicConventionsDHLFreightSwedenCustomsModeMissing(unittest.TestCase)
                             options={key: True},
                         )
                     ],
-                    ["nordic_dhl_freight_sweden_customs_mode_missing"],
+                    ["nordic_conventions_dhl_freight_sweden_customs_mode_missing"],
                 )
 
     def test_string_true_is_parsed_as_selected(self):
@@ -100,7 +100,7 @@ class TestNordicConventionsDHLFreightSwedenCustomsModeMissing(unittest.TestCase)
 class TestNordicConventionsDHLFreightSwedenInvoiceCopy(unittest.TestCase):
     def _message(self, recipient: str, fee: str) -> dict:
         return dict(
-            code="nordic_dhl_freight_sweden_invoice_copy",
+            code="nordic_conventions_dhl_freight_sweden_invoice_copy",
             level="warning",
             message=(
                 "DHL Freight Sweden requires a copy of the invoice even when complete customs data is sent with the booking: "
@@ -144,7 +144,7 @@ class TestNordicConventionsDHLFreightSwedenAttachedDocuments(unittest.TestCase):
                     _advise(dhl_freight_sweden.attached_documents, service=service),
                     [
                         dict(
-                            code="nordic_dhl_freight_sweden_attached_documents",
+                            code="nordic_conventions_dhl_freight_sweden_attached_documents",
                             level="warning",
                             message=(
                                 "DHL Freight Sweden requires two copies of the customs documents attached on the outside of the package "
@@ -196,7 +196,7 @@ class TestNordicConventionsDHLFreightSwedenVOECMarking(unittest.TestCase):
             ),
             [
                 dict(
-                    code="nordic_dhl_freight_sweden_voec_marking",
+                    code="nordic_conventions_dhl_freight_sweden_voec_marking",
                     level="warning",
                     message=(
                         "The connector sends the VOEC number to DHL Freight Sweden as the VOEC service, "
