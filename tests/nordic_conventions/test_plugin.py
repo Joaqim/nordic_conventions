@@ -124,6 +124,33 @@ class TestNordicConventionsPlugin(unittest.TestCase):
             [],
         )
 
+    def test_dhl_attestations_drop_answered_advisories_but_not_unanswerable_ones(self):
+        references.import_extensions()
+        request = fixture.shipment(
+            "SE",
+            "NO",
+            "dhl_freight_sweden_parcel_connect_b2c",
+            customs=fixture.customs("merchandise", True, voec_number="VOEC2024001"),
+            options={
+                "nordic_conventions_commercial_invoice_electronic": True,
+                "nordic_conventions_customs_declaration_paper_copy": True,
+                "nordic_conventions_customs_documents_attached_outside": True,
+                "nordic_conventions_voec_marking_printed": True,
+            },
+        )
+
+        self.assertListEqual(
+            sorted(
+                message.code
+                for message in _plugin_messages(
+                    advisors.run_advisors(
+                        request, _connection("dhl_freight_sweden"), "shipping"
+                    )
+                )
+            ),
+            ["nordic_conventions_dhl_freight_sweden_customs_mode_missing"],
+        )
+
 
 class TestNordicConventionsMessages(unittest.TestCase):
     def test_every_message_is_coded_levelled_and_attributed(self):
