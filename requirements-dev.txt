@@ -1,0 +1,6 @@
+# karrio SDK with the shipment advisors hook (fork branch feat-shipment-advisors
+# at 92c5d1ec05c64147e871c755c9453ffdeb07f393, subdirectory modules/sdk).
+# git+https cannot install the fork: pip recursively fetches the monorepo's
+# private karrioapi submodules (ee/insiders, ee/platform) and fails, although
+# modules/sdk needs neither. Install from a local checkout instead.
+-e ../karrio/.worktrees/feat-shipment-advisors/modules/sdk
