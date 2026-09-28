@@ -237,6 +237,8 @@ Three copies is the stricter reading of conflicting sources and satisfies both a
 For Norway the Norway-specific digital-only rule overrides the general copy count: the message SHALL state that the CN23 is required and that the invoice is sent digitally and not attached to the parcel, naming PostNord's Norway routes (the Booking API, PostNord Skicka Direkt Business, foravisering.export@postnord.com, and MyCustoms upload), and `details` SHALL cite the terms, the web pages, and the Norway rule (FN:142, FN:147, W).
 The message SHALL state that the connector currently sends CN22 declaration data and no invoice for International Parcel (PNS lines 10 and 13-16, S), so the consumer must supply the CN23 and the invoice.
 Non-commercial Postpaket Utrikes above SEK 2 000 is deferred with the other value thresholds, and letter services receive no such advisory because the letter rule depends on goods value only and the EN and SV pages conflict on CN22 versus CN23 above SEK 2 000 (FN:98, FN:105-110, W and I).
+Recorded gap, not addressed: PostNord requires the CN23 for International Parcel at every value, including non-commercial content such as gifts, samples, documents, and returned goods (FN:101, FN:111, W), while the connector sends CN22 declaration data for it (PNS lines 10 and 13-16, S).
+For non-commercial International Parcel the plugin returns no advisory for destinations other than Norway, and for Norway returns only `nordic_conventions_postnord_se_no_digital_invoice`, whose message does not mention the CN23.
 Sources: FN:101-103 and FN:105-112 (W, verbatim web page and terms rules), FN:165-167 (S and W, code 91 is the contract product).
 
 #### Scenario: Commercial Postpaket Utrikes to the United States
@@ -257,7 +259,7 @@ Sources: FN:101-103 and FN:105-112 (W, verbatim web page and terms rules), FN:16
 #### Scenario: Gift Postpaket Utrikes is not advised
 
 - **WHEN** a PostNord `postnord_postpaket_utrikes` shipment from Sweden to Switzerland is created with customs data whose `content_type` is `gift` and whose `commercial_invoice` is false
-- **THEN** the plugin does not return code `nordic_conventions_postnord_se_postpaket_commercial_invoice`
+- **THEN** the plugin does not return code `nordic_conventions_postnord_se_postpaket_commercial_invoice`, although PostNord requires the CN23 for this shipment at every value (FN:101, FN:111, W), a recorded gap the plugin does not advise
 
 #### Scenario: Letters are not advised
 
@@ -274,6 +276,7 @@ Sources: FN:101-103 and FN:105-112 (W, verbatim web page and terms rules), FN:16
 For a PostNord parcel product from Finland to a destination outside the EU VAT area, the plugin SHALL return code `nordic_conventions_postnord_fi_export_invoice` at level `warning`, stating that a copy of the invoice can be emailed to tullaus.fi@postnord.com and, for destinations other than Norway, that a signed commercial invoice in English in triplicate must accompany the parcel, or, for Norway, that the invoice must reach PostNord electronically before the shipment.
 The signed-triplicate statement is the stricter of the conflicting sources: the postnord.fi customs information page says the invoice "can be attached to the shipment or submitted separately" and signed "if necessary" (FN:143, FN:152, W), while the PostNord FI special terms for parcels valid 2026-05-01 require "a signed commercial invoice in English in triplicate" for non-EU parcels and electronic invoices to Norway (FN:143, FN:154, W); which governs is unresolved (FN:155, I; FN:267).
 The Norway statement rests on the same page and terms (FN:153-154, W).
+Recorded gap, not addressed: this advisory is limited to PostNord parcel products, so International Parcel and letter services from Finland to destinations outside the EU VAT area receive no advisory, and this specification records no PostNord Finland requirement for those services.
 
 #### Scenario: Finnish parcel to Great Britain
 
@@ -289,6 +292,7 @@ The Norway statement rests on the same page and terms (FN:153-154, W).
 
 For a PostNord parcel product from Denmark to a destination outside the EU VAT area, the plugin SHALL return code `nordic_conventions_postnord_dk_export_documents` at level `warning`, stating that the documents go in a plastic pocket visible on the parcel and the copy count for the destination: 2 invoices for Norway, 3 for Switzerland and Liechtenstein, 2 for Great Britain, and 1 CN23 with 2 invoices for any other destination, where the invoice is described by PostNord as not required but recommended (FN:144, W, postnord.dk/erhverv/eksport via Wayback 2026-03-10, FN:157).
 The message SHALL also state, without evaluating any value threshold, that if an export declaration was lodged a copy goes to eksport@postnord.com (FN:144, W); the DKK 7 500 threshold at which PostNord requires the export declaration is deferred.
+Recorded gap, not addressed: this advisory is limited to PostNord parcel products, so International Parcel and letter services from Denmark to destinations outside the EU VAT area receive no advisory, and this specification records no PostNord Denmark requirement for those services.
 
 #### Scenario: Danish parcel to Liechtenstein
 
@@ -361,6 +365,9 @@ Sources: FN:217 (W, MAN pp.97 and 99), FN:206 (W, VOEC with Parcel Connect to No
 For an in-scope shipment whose booking carries an invoice type, meaning a PostNord parcel product or any DHL Freight Sweden service booked with customs data, the plugin SHALL return code `nordic_conventions_invoice_type_content_mismatch` at level `warning` when `customs.commercial_invoice` is false or omitted while the content is sale-like, and at level `info` when `customs.commercial_invoice` is true while `customs.content_type` is gift or sample.
 The warning message SHALL state that the connector declares a proforma invoice from the flag, that a proforma invoice is for gifts and samples for which the recipient makes no payment, and that goods sold need `commercial_invoice` set to true; the info message SHALL state that a commercial invoice is declared for content described as a gift or sample, for which a proforma invoice is the usual document.
 The levels differ because the sources restrict the proforma invoice to goods not sold but do not forbid a commercial invoice for gifts or samples.
+Recorded gap, not addressed: the Postpaket Utrikes terms §2 permit a proforma invoice only for gifts or samples (FN:111, FN:113, W), but this advisory does not apply to International Parcel, whose booking carries no invoice type.
+Recorded gap, not addressed: for International Parcel and letter services the connector sends CN22 declaration data and builds `customs.commercial_invoice`, `customs.invoice`, and `customs.invoice_date` only into the customs invoice of parcel products (PNS lines 10 and 13-16, S; karrio `feat-postnord-customs-invoice` at 1b40eeb7e, `shipment/create.py:608-635` and `shipment/create.py:775`, S), so it drops those fields for these services without a warning.
+`nordic_conventions_postnord_se_postpaket_commercial_invoice` tells the consumer to supply the invoice for commercial International Parcel, and no advisory states the drop.
 Sources: PNS lines 155-168 and DFS lines 51-64 (S, the connectors apply the flag literally and leave mismatch detection to advisory tooling), FN:56 (W, Bring tulldokument and DHL CIE p.5, a proforma invoice is used for goods not sold), FN:111 and FN:113 (W, Postpaket Utrikes terms §2, "Proformafaktura … får endast användas vid gåva eller varuprov"), FN:30-36 (S, connector mapping of the flag).
 
 #### Scenario: Merchandise declared as proforma
