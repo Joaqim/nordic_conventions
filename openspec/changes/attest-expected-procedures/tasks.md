@@ -9,10 +9,10 @@
 
 ## 2. Attestation resolver
 
-- [ ] 2.1 Add `karrio/plugins/nordic_conventions/attestations.py` with `parse(request)` counting only boolean `true` as a claim and ignoring unknown `nordic_conventions_` keys, and verify tests covering boolean true, boolean false, the string `"false"`, and an unknown key pass
-- [ ] 2.2 Add the contradiction table with the single PostNord Sweden-to-Norway predicate for `commercial_invoice_paper_copy`, and verify tests pass for a contradicting Norway lane, a non-contradicting Sweden lane, and a Finland-to-Norway lane that does not contradict
-- [ ] 2.3 Add `with_attestations(rule)` dropping a message only on full coverage by effective attestations, and verify tests pass for full coverage dropping the advisory, partial coverage keeping it unchanged, and a contradicted attestation keeping it
-- [ ] 2.4 Add the `attestation_conflicts` advisor emitting one warning per contradicted claim with the convention's sources in `details`, and verify tests pass asserting the code, the level, the named procedure, and silence when nothing contradicts
+- [x] 2.1 Add `karrio/plugins/nordic_conventions/attestations.py` with `parse(request)` counting only boolean `true` as a claim and ignoring unknown `nordic_conventions_` keys, and verify tests covering boolean true, boolean false, the string `"false"`, and an unknown key pass
+- [x] 2.2 Add the contradiction table with the single PostNord Sweden-to-Norway predicate for `commercial_invoice_paper_copy`, and verify tests pass for a contradicting Norway lane, a non-contradicting Sweden lane, and a Finland-to-Norway lane that does not contradict
+- [x] 2.3 Add `with_attestations(rule)` dropping a message only on full coverage by effective attestations, and verify tests pass for full coverage dropping the advisory, partial coverage keeping it unchanged, and a contradicted attestation keeping it
+- [x] 2.4 Add the `attestation_conflicts` advisor emitting one warning per contradicted claim with the convention's sources in `details`, and verify tests pass asserting the code, the level, the named procedure, and silence when nothing contradicts
 
 ## 3. Composition and code
 
