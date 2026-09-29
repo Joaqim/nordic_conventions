@@ -102,213 +102,43 @@ The codes are public contract; renaming one is a breaking change.
 The DHL Freight Sweden customs service options are recognised by their unified names only (`dhl_freight_sweden_customs_handling_standard`, `dhl_freight_sweden_customs_handling_full_service`, `dhl_freight_sweden_customs_own_declaration`, `dhl_freight_sweden_customs_joint_declaration`), exactly as the connector parses them.
 The footnotes cite each document once, named after its constant in `karrio/plugins/nordic_conventions/sources.py`; that module and the [specification](openspec/specs/plugins/nordic-conventions/spec.md) add the section, page, and facts-note line numbers behind each claim.
 
-The advisories are grouped by carrier and origin like [Requirements at a glance](#requirements-at-a-glance), and each one states whether it applies to Norway, to the other destinations outside the EU VAT area, or to both.
-Expand an advisory to see its trigger and sources.
+The advisories are grouped by carrier and origin like [Requirements at a glance](#requirements-at-a-glance); the group heading names the carrier and origin each trigger assumes.
 
-### PostNord from Sweden
+### PostNord from Sweden advisories
 
-<a id="nordic_conventions_postnord_se_no_digital_invoice"></a>
-<details>
-<summary><code>nordic_conventions_postnord_se_no_digital_invoice</code> · info or warning · Norway only</summary>
+| Advisory | Level | Destinations | Trigger | Sources |
+|---|---|---|---|---|
+| <a id="nordic_conventions_postnord_se_no_digital_invoice"></a>`nordic_conventions_postnord_se_no_digital_invoice` | `info` for a parcel product with customs data, else `warning` | Norway only | Any service to Norway, unless the [Postpaket Utrikes advisory](#nordic_conventions_postnord_se_postpaket_commercial_invoice) applies; adds the SEK 0 invoice and VOEC statement for `postnord_export_letter` and `postnord_rek` | Service Point terms §4[^pn-se-service-point-terms], Swedish customs page[^pn-se-sv-page], PostNord connector spec[^pns] |
+| <a id="nordic_conventions_postnord_se_postpaket_commercial_invoice"></a>`nordic_conventions_postnord_se_postpaket_commercial_invoice` | `warning` | all destinations outside the EU VAT area | Commercial `postnord_postpaket_utrikes` (91); Norway receives the digital invoice routes instead of paper copies | Postpaket Utrikes terms §2[^pn-se-postpaket-terms], English customs page[^pn-se-en-page], Swedish customs page[^pn-se-sv-page], PostNord connector spec[^pns] |
+| <a id="nordic_conventions_postnord_se_export_paper_invoice"></a>`nordic_conventions_postnord_se_export_paper_invoice` | `warning` | outside the EU VAT area except Norway | Parcel product to a destination other than Norway | English customs page[^pn-se-en-page], Swedish customs page[^pn-se-sv-page], Service Point terms §4[^pn-se-service-point-terms] |
 
-Level: `info` for a parcel product with customs data, else `warning`.
+### PostNord from Finland advisories
 
-Destinations: Norway only.
+| Advisory | Level | Destinations | Trigger | Sources |
+|---|---|---|---|---|
+| <a id="nordic_conventions_postnord_fi_export_invoice"></a>`nordic_conventions_postnord_fi_export_invoice` | `warning` | all destinations outside the EU VAT area | Parcel product | postnord.fi customs page[^pn-fi-page], PostNord FI parcel terms[^pn-fi-terms] |
 
-Trigger: PostNord, Sweden to Norway, unless `nordic_conventions_postnord_se_postpaket_commercial_invoice` applies; adds the SEK 0 invoice and VOEC statement for `postnord_export_letter` and `postnord_rek`.
+### PostNord from Denmark advisories
 
-Sources:
+| Advisory | Level | Destinations | Trigger | Sources |
+|---|---|---|---|---|
+| <a id="nordic_conventions_postnord_dk_export_documents"></a>`nordic_conventions_postnord_dk_export_documents` | `warning` | all destinations outside the EU VAT area | Parcel product | postnord.dk export page[^pn-dk-page] |
 
-- PostNord Service Point special terms §4 (valid 2026-01-01)[^pn-se-service-point-terms]
-- PostNord SE Swedish customs documents page (Wayback 2026-02-08)[^pn-se-sv-page]
-- PostNord connector spec[^pns]
+### DHL Freight Sweden from Sweden advisories
 
-</details>
+| Advisory | Level | Destinations | Trigger | Sources |
+|---|---|---|---|---|
+| <a id="nordic_conventions_dhl_freight_sweden_customs_mode_missing"></a>`nordic_conventions_dhl_freight_sweden_customs_mode_missing` | `warning` | all destinations outside the EU VAT area | None of the customs service options set by unified name | DHL product manual[^dhl-man], DHL price list[^dhl-prl], DHL connector spec[^dfs] |
+| <a id="nordic_conventions_dhl_freight_sweden_invoice_copy"></a>`nordic_conventions_dhl_freight_sweden_invoice_copy` | `warning` | all destinations outside the EU VAT area | Any service | DHL product manual[^dhl-man], DHL export customs information[^dhl-cie], DHL price list[^dhl-prl] |
+| <a id="nordic_conventions_dhl_freight_sweden_attached_documents"></a>`nordic_conventions_dhl_freight_sweden_attached_documents` | `warning` | all destinations outside the EU VAT area | Parcel Connect (`dhl_freight_sweden_parcel_connect_b2c`, 109) | DHL product manual[^dhl-man] |
+| <a id="nordic_conventions_dhl_freight_sweden_voec_marking"></a>`nordic_conventions_dhl_freight_sweden_voec_marking` | `warning` | Norway only | Norway with `customs.options.voec_number` | DHL product manual[^dhl-man], DHL connector spec[^dfs] |
 
-<a id="nordic_conventions_postnord_se_postpaket_commercial_invoice"></a>
-<details>
-<summary><code>nordic_conventions_postnord_se_postpaket_commercial_invoice</code> · warning · all destinations outside the EU VAT area</summary>
+### Advisories across carriers
 
-Level: `warning`.
-
-Destinations: Norway and other destinations outside the EU VAT area.
-
-Trigger: PostNord, Sweden, commercial `postnord_postpaket_utrikes` (91); Norway receives the digital invoice routes instead of paper copies.
-
-Sources:
-
-- Postpaket Utrikes terms §2 (valid 2025-05-02)[^pn-se-postpaket-terms]
-- PostNord SE English customs documents page (Wayback 2026-01-16)[^pn-se-en-page]
-- PostNord SE Swedish customs documents page (Wayback 2026-02-08)[^pn-se-sv-page]
-- PostNord connector spec[^pns]
-
-</details>
-
-<a id="nordic_conventions_postnord_se_export_paper_invoice"></a>
-<details>
-<summary><code>nordic_conventions_postnord_se_export_paper_invoice</code> · warning · outside the EU VAT area except Norway</summary>
-
-Level: `warning`.
-
-Destinations: destinations outside the EU VAT area other than Norway.
-
-Trigger: PostNord, Sweden, parcel product, destination other than Norway.
-
-Sources:
-
-- PostNord SE English customs documents page (Wayback 2026-01-16)[^pn-se-en-page]
-- PostNord SE Swedish customs documents page (Wayback 2026-02-08)[^pn-se-sv-page]
-- PostNord Service Point special terms §4 (valid 2026-01-01)[^pn-se-service-point-terms]
-
-</details>
-
-### PostNord from Finland
-
-<a id="nordic_conventions_postnord_fi_export_invoice"></a>
-<details>
-<summary><code>nordic_conventions_postnord_fi_export_invoice</code> · warning · all destinations outside the EU VAT area</summary>
-
-Level: `warning`.
-
-Destinations: Norway and other destinations outside the EU VAT area; for Norway the invoice is required electronically before the shipment.
-
-Trigger: PostNord, Finland, parcel product.
-
-Sources:
-
-- postnord.fi customs information (read 2026-09-25)[^pn-fi-page]
-- PostNord FI special terms for parcels (valid 2026-05-01)[^pn-fi-terms]
-
-</details>
-
-### PostNord from Denmark
-
-<a id="nordic_conventions_postnord_dk_export_documents"></a>
-<details>
-<summary><code>nordic_conventions_postnord_dk_export_documents</code> · warning · all destinations outside the EU VAT area</summary>
-
-Level: `warning`.
-
-Destinations: Norway and other destinations outside the EU VAT area; the number of document copies depends on the destination.
-
-Trigger: PostNord, Denmark, parcel product.
-
-Sources:
-
-- postnord.dk export page (Wayback 2026-03-10)[^pn-dk-page]
-
-</details>
-
-### DHL Freight Sweden from Sweden
-
-<a id="nordic_conventions_dhl_freight_sweden_customs_mode_missing"></a>
-<details>
-<summary><code>nordic_conventions_dhl_freight_sweden_customs_mode_missing</code> · warning · all destinations outside the EU VAT area</summary>
-
-Level: `warning`.
-
-Destinations: Norway and other destinations outside the EU VAT area.
-
-Trigger: DHL Freight Sweden with none of the customs service options set by unified name.
-
-Sources:
-
-- DHL Freight Sweden product manual v5.23 (valid 2025-04-14)[^dhl-man]
-- DHL Freight Sweden price list for customs services (valid 2026-05-01)[^dhl-prl]
-- DHL Freight Sweden connector spec[^dfs]
-
-</details>
-
-<a id="nordic_conventions_dhl_freight_sweden_invoice_copy"></a>
-<details>
-<summary><code>nordic_conventions_dhl_freight_sweden_invoice_copy</code> · warning · all destinations outside the EU VAT area</summary>
-
-Level: `warning`.
-
-Destinations: Norway and other destinations outside the EU VAT area; the reminder fee depends on the destination.
-
-Trigger: DHL Freight Sweden, any service.
-
-Sources:
-
-- DHL Freight Sweden product manual v5.23 (valid 2025-04-14)[^dhl-man]
-- DHL Freight Sweden customs information export (2025-02-03)[^dhl-cie]
-- DHL Freight Sweden price list (valid 2026-05-01)[^dhl-prl]
-
-</details>
-
-<a id="nordic_conventions_dhl_freight_sweden_attached_documents"></a>
-<details>
-<summary><code>nordic_conventions_dhl_freight_sweden_attached_documents</code> · warning · all destinations outside the EU VAT area</summary>
-
-Level: `warning`.
-
-Destinations: Norway and other destinations outside the EU VAT area.
-
-Trigger: DHL Freight Sweden Parcel Connect (`dhl_freight_sweden_parcel_connect_b2c`, 109).
-
-Sources:
-
-- DHL Freight Sweden product manual v5.23 (valid 2025-04-14)[^dhl-man]
-
-</details>
-
-<a id="nordic_conventions_dhl_freight_sweden_voec_marking"></a>
-<details>
-<summary><code>nordic_conventions_dhl_freight_sweden_voec_marking</code> · warning · Norway only</summary>
-
-Level: `warning`.
-
-Destinations: Norway only.
-
-Trigger: DHL Freight Sweden to Norway with `customs.options.voec_number`.
-
-Sources:
-
-- DHL Freight Sweden product manual v5.23 (valid 2025-04-14)[^dhl-man]
-- DHL Freight Sweden connector spec[^dfs]
-
-</details>
-
-### Across carriers
-
-<a id="nordic_conventions_invoice_type_content_mismatch"></a>
-<details>
-<summary><code>nordic_conventions_invoice_type_content_mismatch</code> · info or warning · all destinations outside the EU VAT area</summary>
-
-Level: `warning` for proforma with sale-like content, `info` for commercial with gift or sample.
-
-Destinations: Norway and other destinations outside the EU VAT area.
-
-Trigger: PostNord parcel product or any DHL Freight Sweden service booked with customs data.
-
-Sources:
-
-- Bring customs documents page[^bring]
-- DHL Freight Sweden customs information export (2025-02-03)[^dhl-cie]
-- Postpaket Utrikes terms §2 (valid 2025-05-02)[^pn-se-postpaket-terms]
-- PostNord connector spec[^pns]
-- DHL Freight Sweden connector spec[^dfs]
-
-</details>
-
-<a id="nordic_conventions_attestation_conflict"></a>
-<details>
-<summary><code>nordic_conventions_attestation_conflict</code> · warning · Norway only</summary>
-
-Level: `warning`.
-
-Destinations: Norway only, in this version.
-
-Trigger: an attested procedure contradicted by the conventions of the lane; in this version `nordic_conventions_commercial_invoice_paper_copy` from Sweden to Norway with PostNord.
-
-Sources:
-
-- PostNord Service Point special terms §4 (valid 2026-01-01)[^pn-se-service-point-terms]
-- PostNord SE Swedish customs documents page (Wayback 2026-02-08)[^pn-se-sv-page]
-- PostNord connector spec[^pns]
-
-</details>
+| Advisory | Level | Destinations | Trigger | Sources |
+|---|---|---|---|---|
+| <a id="nordic_conventions_invoice_type_content_mismatch"></a>`nordic_conventions_invoice_type_content_mismatch` | `warning` for proforma with sale-like content, `info` for commercial with gift or sample | all destinations outside the EU VAT area | PostNord parcel product or any DHL Freight Sweden service, booked with customs data | Bring customs page[^bring], DHL export customs information[^dhl-cie], Postpaket Utrikes terms §2[^pn-se-postpaket-terms], PostNord connector spec[^pns], DHL connector spec[^dfs] |
+| <a id="nordic_conventions_attestation_conflict"></a>`nordic_conventions_attestation_conflict` | `warning` | Norway only | An attested procedure the lane's conventions contradict; in this version `nordic_conventions_commercial_invoice_paper_copy` on PostNord from Sweden to Norway | Service Point terms §4[^pn-se-service-point-terms], Swedish customs page[^pn-se-sv-page], PostNord connector spec[^pns] |
 
 ## Attestations
 
