@@ -34,7 +34,7 @@ Several advisories may apply to one shipment, and each is returned once.
 The codes are public contract; renaming one is a breaking change.
 
 The DHL Freight Sweden customs service options are recognised by their unified names only (`dhl_freight_sweden_customs_handling_standard`, `dhl_freight_sweden_customs_handling_full_service`, `dhl_freight_sweden_customs_own_declaration`, `dhl_freight_sweden_customs_joint_declaration`), exactly as the connector parses them.
-Full source references, with URLs and facts-note line numbers, live in `karrio/plugins/nordic_conventions/sources.py` and the [specification](openspec/specs/plugins/nordic-conventions/spec.md).
+The footnotes cite each document once, named after its constant in `karrio/plugins/nordic_conventions/sources.py`; that module and the [specification](openspec/specs/plugins/nordic-conventions/spec.md) add the section, page, and facts-note line numbers behind each claim.
 
 Each advisory below lists its level, the trigger that raises it, and the sources behind it.
 
@@ -46,9 +46,9 @@ Trigger: PostNord, Sweden to Norway, unless `nordic_conventions_postnord_se_post
 
 Sources:
 
-- PostNord Service Point special terms §4 (valid 2026-01-01)
-- PostNord SE Swedish customs documents page (Wayback 2026-02-08)
-- connector spec
+- PostNord Service Point special terms §4 (valid 2026-01-01)[^pn-se-service-point-terms]
+- PostNord SE Swedish customs documents page (Wayback 2026-02-08)[^pn-se-sv-page]
+- PostNord connector spec[^pns]
 
 ### `nordic_conventions_postnord_se_postpaket_commercial_invoice`
 
@@ -58,10 +58,10 @@ Trigger: PostNord, Sweden, commercial `postnord_postpaket_utrikes` (91); Norway 
 
 Sources:
 
-- Postpaket Utrikes terms §2 (valid 2025-05-02)
-- PostNord SE English page (Wayback 2026-01-16)
-- PostNord SE Swedish page (Wayback 2026-02-08)
-- connector spec
+- Postpaket Utrikes terms §2 (valid 2025-05-02)[^pn-se-postpaket-terms]
+- PostNord SE English customs documents page (Wayback 2026-01-16)[^pn-se-en-page]
+- PostNord SE Swedish customs documents page (Wayback 2026-02-08)[^pn-se-sv-page]
+- PostNord connector spec[^pns]
 
 ### `nordic_conventions_postnord_se_export_paper_invoice`
 
@@ -71,9 +71,9 @@ Trigger: PostNord, Sweden, parcel product, destination other than Norway.
 
 Sources:
 
-- PostNord SE English page (Wayback 2026-01-16)
-- PostNord SE Swedish page (Wayback 2026-02-08)
-- PostNord Service Point special terms §4 (valid 2026-01-01)
+- PostNord SE English customs documents page (Wayback 2026-01-16)[^pn-se-en-page]
+- PostNord SE Swedish customs documents page (Wayback 2026-02-08)[^pn-se-sv-page]
+- PostNord Service Point special terms §4 (valid 2026-01-01)[^pn-se-service-point-terms]
 
 ### `nordic_conventions_postnord_fi_export_invoice`
 
@@ -83,8 +83,8 @@ Trigger: PostNord, Finland, parcel product.
 
 Sources:
 
-- postnord.fi customs information (read 2026-09-25)
-- PostNord FI special terms for parcels (valid 2026-05-01)
+- postnord.fi customs information (read 2026-09-25)[^pn-fi-page]
+- PostNord FI special terms for parcels (valid 2026-05-01)[^pn-fi-terms]
 
 ### `nordic_conventions_postnord_dk_export_documents`
 
@@ -94,7 +94,7 @@ Trigger: PostNord, Denmark, parcel product.
 
 Sources:
 
-- postnord.dk export page (Wayback 2026-03-10)
+- postnord.dk export page (Wayback 2026-03-10)[^pn-dk-page]
 
 ### `nordic_conventions_dhl_freight_sweden_customs_mode_missing`
 
@@ -104,9 +104,9 @@ Trigger: DHL Freight Sweden with none of the customs service options set by unif
 
 Sources:
 
-- DHL Freight Sweden product manual v5.23 (valid 2025-04-14)
-- DHL Freight Sweden price list for customs services (valid 2026-05-01)
-- connector spec
+- DHL Freight Sweden product manual v5.23 (valid 2025-04-14)[^dhl-man]
+- DHL Freight Sweden price list for customs services (valid 2026-05-01)[^dhl-prl]
+- DHL Freight Sweden connector spec[^dfs]
 
 ### `nordic_conventions_dhl_freight_sweden_invoice_copy`
 
@@ -116,9 +116,9 @@ Trigger: DHL Freight Sweden, any service.
 
 Sources:
 
-- DHL Freight Sweden product manual v5.23 (valid 2025-04-14)
-- DHL Freight Sweden customs information export (2025-02-03)
-- DHL Freight Sweden price list (valid 2026-05-01)
+- DHL Freight Sweden product manual v5.23 (valid 2025-04-14)[^dhl-man]
+- DHL Freight Sweden customs information export (2025-02-03)[^dhl-cie]
+- DHL Freight Sweden price list (valid 2026-05-01)[^dhl-prl]
 
 ### `nordic_conventions_dhl_freight_sweden_attached_documents`
 
@@ -128,7 +128,7 @@ Trigger: DHL Freight Sweden Parcel Connect (`dhl_freight_sweden_parcel_connect_b
 
 Sources:
 
-- DHL Freight Sweden product manual v5.23 (valid 2025-04-14)
+- DHL Freight Sweden product manual v5.23 (valid 2025-04-14)[^dhl-man]
 
 ### `nordic_conventions_dhl_freight_sweden_voec_marking`
 
@@ -138,8 +138,8 @@ Trigger: DHL Freight Sweden to Norway with `customs.options.voec_number`.
 
 Sources:
 
-- DHL Freight Sweden product manual v5.23 (valid 2025-04-14)
-- connector spec
+- DHL Freight Sweden product manual v5.23 (valid 2025-04-14)[^dhl-man]
+- DHL Freight Sweden connector spec[^dfs]
 
 ### `nordic_conventions_invoice_type_content_mismatch`
 
@@ -149,10 +149,11 @@ Trigger: PostNord parcel product or any DHL Freight Sweden service booked with c
 
 Sources:
 
-- Bring customs documents page
-- DHL Freight Sweden customs information export (2025-02-03)
-- Postpaket Utrikes terms §2 (valid 2025-05-02)
-- connector specs
+- Bring customs documents page[^bring]
+- DHL Freight Sweden customs information export (2025-02-03)[^dhl-cie]
+- Postpaket Utrikes terms §2 (valid 2025-05-02)[^pn-se-postpaket-terms]
+- PostNord connector spec[^pns]
+- DHL Freight Sweden connector spec[^dfs]
 
 ### `nordic_conventions_attestation_conflict`
 
@@ -162,9 +163,9 @@ Trigger: an attested procedure contradicted by the conventions of the lane; in t
 
 Sources:
 
-- PostNord Service Point special terms §4 (valid 2026-01-01)
-- PostNord SE Swedish customs documents page (Wayback 2026-02-08)
-- connector spec
+- PostNord Service Point special terms §4 (valid 2026-01-01)[^pn-se-service-point-terms]
+- PostNord SE Swedish customs documents page (Wayback 2026-02-08)[^pn-se-sv-page]
+- PostNord connector spec[^pns]
 
 ## Attestations
 
@@ -223,3 +224,17 @@ PYTHONDONTWRITEBYTECODE=1 python -m unittest discover -v -f tests
 Create a virtual environment and install the forked SDK and the plugin with `pip install -r requirements-dev.txt -e .`.
 `requirements-dev.txt` installs the SDK editable from a local checkout of the fork's `feat-shipment-advisors` branch; a `git+https` install cannot replace this, because pip recursively fetches the monorepo's private `karrioapi` submodules that `modules/sdk` does not need.
 The connector cross-check tests run when the PostNord and DHL Freight Sweden connectors are importable, as in the karrio fork's `develop` dev shell (`nix develop 'git+file:///home/joaqim/projects/karrio?ref=dev-nix-flake#upstream'`, entered from the karrio checkout), and are skipped otherwise.
+
+[^pn-se-service-point-terms]: PostNord SE Service Point special terms, valid 2026-01-01: <https://www.avropa.se/globalassets/bilagor/1.-aktuella-rao/postformedlingstjanster-2021/paketformedlingstjanster--1-lev-postnord/sarskilda-villkor-service-point-2026.pdf> (`PN_SE_SERVICE_POINT_TERMS_URL`).
+[^pn-se-sv-page]: PostNord SE Swedish customs documents page, Wayback 2026-02-08: <https://www.postnord.se/foretag/import-export-tull/tulldokument-och-frakthandlingar-for-foretag/> (`PN_SE_SV_PAGE`).
+[^pn-se-en-page]: PostNord SE English customs documents page, Wayback 2026-01-16: <https://web.archive.org/web/20260116090151/https://www.postnord.se/en/business/import-export-customs/customs-documents-and-shipping-documents/> (`PN_SE_EN_PAGE`).
+[^pn-se-postpaket-terms]: PostNord SE Postpaket Utrikes terms, valid 2025-05-02: <https://api2.postnord.com/rest/customer/v2/ptm/file/download/5341.28764?disposition=inline> (`PN_SE_POSTPAKET_TERMS_URL`).
+[^pn-fi-page]: postnord.fi customs information, read 2026-09-25: <https://www.postnord.fi/en/sending/online-tools/customs-information/> (`PN_FI_PAGE_URL`).
+[^pn-fi-terms]: PostNord FI special terms for parcels, valid 2026-05-01, Wayback 2026-06-10; no URL is recorded (`PN_FI_TERMS`).
+[^pn-dk-page]: postnord.dk export page, Wayback 2026-03-10: <https://www.postnord.dk/erhverv/eksport/> (`PN_DK_PAGE_URL`).
+[^dhl-man]: DHL Freight Sweden product manual v5.23, valid 2025-04-14: <https://dhlpaket.se/dashboard/wp-content/uploads/sites/2/2025/04/DHL-FREIGHT-SWEDEN-PRODUCT-MANUAL-v5.23.pdf> (`DHL_MAN_URL`).
+[^dhl-cie]: DHL Freight Sweden customs information export, 2025-02-03: <https://www.dhl.com/content/dam/dhl/local/se/dhl-freight/documents/pdf/se-freight-customs-information-export-en.pdf> (`DHL_CIE_URL`).
+[^dhl-prl]: DHL Freight Sweden price list for additional services, valid 2026-05-01: <https://www.dhl.com/content/dam/dhl/local/se/dhl-freight/documents/pdf/se-freight-price-list-additional-services-sv.pdf> (`DHL_PRL_URL`).
+[^bring]: Bring customs documents page: <https://www.bring.se/tjanster/tull/tulldokument> (`BRING_URL`).
+[^pns]: karrio fork `openspec/specs/postnord/customs-declaration/spec.md` on branch `docs-openspec` at commit 60312fe2e (`PNS`).
+[^dfs]: karrio fork `openspec/specs/dhl-freight-sweden/customs/spec.md` on branch `docs-openspec` at commit 60312fe2e (`DFS`).
