@@ -25,7 +25,7 @@ What the carriers ask for goods sent from Sweden, Denmark, or Finland to outside
 | Shipment | Norway | Other non-EU (incl. GB) |
 |---|---|---|
 | PostNord SE parcel | [Invoice sent digitally](#nordic_conventions_postnord_se_no_digital_invoice) (reminder with customs data) | [3× English invoice in pocket on parcel 1](#nordic_conventions_postnord_se_export_paper_invoice) |
-| PostNord SE 91, commercial | [CN23 + digital invoice](#nordic_conventions_postnord_se_postpaket_commercial_invoice) | [CN23 + 3× invoice with parcel](#nordic_conventions_postnord_se_postpaket_commercial_invoice) |
+| PostNord SE 91, commercial | [CN23 + digital invoice](#nordic_conventions_postnord_se_postpaket_commercial_invoice) (supply yourself) | [CN23 + 3× invoice with parcel](#nordic_conventions_postnord_se_postpaket_commercial_invoice) (supply yourself) |
 | PostNord SE 91, non-commercial | [Invoice sent digitally](#nordic_conventions_postnord_se_no_digital_invoice) | — |
 | PostNord SE letter | [Invoice sent digitally; export, REK letters + VOEC](#nordic_conventions_postnord_se_no_digital_invoice) | — |
 | PostNord FI parcel | [E-invoice before shipping](#nordic_conventions_postnord_fi_export_invoice) | [3× signed English invoice](#nordic_conventions_postnord_fi_export_invoice) |
