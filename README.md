@@ -18,15 +18,81 @@ pip install "git+https://github.com/Joaqim/nordic_conventions.git"
 The plugin registers through the `karrio.plugins` entry point group under the id `nordic_conventions` and is reported with the plugin type `advisor`.
 Installing it adds messages to shipment responses; uninstalling it removes them.
 
+## Requirements at a glance
+
+This section states in plain language what the carriers' terms and web pages, as cited by the plugin, ask of a shipper sending goods from Sweden, Denmark, or Finland to a destination outside the EU VAT area.
+Each requirement links to the advisory the plugin returns for it (the advisory code is only needed when reading shipment responses) and footnotes its main source; the advisory lists every source.
+A requirement marked *reminder* is returned at level `info`; every other requirement is returned at level `warning`.
+The plugin does not evaluate goods value, so requirements that start at a value threshold (SEK 2 000, EUR 1 000, DKK 7 500) are not covered, and a cell reading *not covered* means the plugin gives no advice there, not that nothing is required.
+
+### Which destinations count
+
+Shipments to Sweden, Denmark, Finland, or any other EU member state need none of the paperwork below, because they stay inside the EU VAT area.
+The EU VAT area for goods follows Tullverket rather than the political map of the EU.
+Northern Ireland (UK postcodes beginning `BT`) is inside, while the rest of the United Kingdom is outside.
+Åland, the Canary Islands, Ceuta, Melilla, Büsingen, Heligoland, Mount Athos, Livigno, Campione d'Italia, and the French overseas departments are outside, although they belong to member states; Monaco is inside.
+A shipper on Åland is therefore also outside, and receives no advice.
+Norway is outside and is where the carriers differ most: PostNord Sweden and PostNord Finland want the invoice digitally rather than on paper, PostNord Denmark still wants paper invoices, and DHL Freight Sweden wants a booked VOEC number printed on the package.
+Great Britain also has its own figures: two invoices from PostNord Denmark, and a higher DHL Freight Sweden reminder fee.
+
+### PostNord from Sweden
+
+| Service | To Norway | To other destinations outside the EU VAT area |
+|---|---|---|
+| Parcel products, such as `postnord_parcel` | Commercial invoice sent digitally, not on paper with the parcel; *reminder* when the booking carries customs data, because the booking then sends the invoice data ([advisory](#nordic_conventions_postnord_se_no_digital_invoice))[^pn-se-service-point-terms] | Commercial invoice in English, three copies, in a plastic pocket on parcel no. 1; the customs data in the booking prevails over the paper ([advisory](#nordic_conventions_postnord_se_export_paper_invoice))[^pn-se-en-page] |
+| International Parcel (Postpaket Utrikes, 91), commercial | CN23 export declaration, and the commercial invoice sent digitally, not with the parcel; the booking sends neither, so supply both yourself ([advisory](#nordic_conventions_postnord_se_postpaket_commercial_invoice))[^pn-se-sv-page] | CN23 export declaration and a commercial invoice in three copies with the parcel; the booking sends neither, so supply both yourself ([advisory](#nordic_conventions_postnord_se_postpaket_commercial_invoice))[^pn-se-postpaket-terms] |
+| International Parcel (91), not commercial | Commercial invoice sent digitally ([advisory](#nordic_conventions_postnord_se_no_digital_invoice))[^pn-se-sv-page] | Not covered |
+| Letters | Commercial invoice sent digitally; for export letters (`postnord_export_letter`) and registered letters (`postnord_rek`) a commercial invoice and a VOEC number from SEK 0 ([advisory](#nordic_conventions_postnord_se_no_digital_invoice))[^pn-se-sv-page] | Not covered |
+
+The digital routes to Norway are the booking itself where it sends the invoice data, PostNord Skicka Direkt Business, email to foravisering.export@postnord.com, or upload in PostNord MyCustoms.
+The sources disagree on the number of paper copies, between two and three, and the plugin states the stricter three.
+
+### PostNord from Finland
+
+| Service | To Norway | To other destinations outside the EU VAT area |
+|---|---|---|
+| Parcel products | Invoice sent electronically, reaching PostNord before the shipment ([advisory](#nordic_conventions_postnord_fi_export_invoice))[^pn-fi-page] | Signed commercial invoice in English, three copies, with the parcel ([advisory](#nordic_conventions_postnord_fi_export_invoice))[^pn-fi-terms] |
+| International Parcel and letters | Not covered | Not covered |
+
+A copy of the invoice can be emailed to tullaus.fi@postnord.com on every destination.
+The signed triplicate comes from PostNord Finland's special terms for parcels; its web page is laxer, and which of the two governs is unresolved.
+
+### PostNord from Denmark
+
+| Service | To Norway | To other destinations outside the EU VAT area |
+|---|---|---|
+| Parcel products | Two commercial invoices in a plastic pocket visible on the parcel ([advisory](#nordic_conventions_postnord_dk_export_documents))[^pn-dk-page] | In a plastic pocket visible on the parcel: three commercial invoices to Switzerland or Liechtenstein, two to Great Britain, and elsewhere one CN23 and two commercial invoices, the invoice recommended rather than required ([advisory](#nordic_conventions_postnord_dk_export_documents))[^pn-dk-page] |
+| International Parcel and letters | Not covered | Not covered |
+
+On every destination, a lodged export declaration is copied to eksport@postnord.com.
+
+### DHL Freight Sweden from Sweden
+
+| Applies to | To Norway | To other destinations outside the EU VAT area |
+|---|---|---|
+| Every service | Select a customs mode in the booking options: customs handling standard or full service, or your own declaration; each carries a DHL fee, and none is fee-free ([advisory](#nordic_conventions_dhl_freight_sweden_customs_mode_missing))[^dhl-man] | Same as Norway ([advisory](#nordic_conventions_dhl_freight_sweden_customs_mode_missing))[^dhl-man] |
+| Every service | A copy of the invoice emailed to dhlfreight.int.se@dhl.com shortly after booking or uploaded in myDHL Freight, even when the booking carries full customs data; missing documents stop the shipment with a 390 kr reminder fee ([advisory](#nordic_conventions_dhl_freight_sweden_invoice_copy))[^dhl-cie] | Same as Norway, with a 650 kr reminder fee for Great Britain ([advisory](#nordic_conventions_dhl_freight_sweden_invoice_copy))[^dhl-cie] |
+| Parcel Connect (109) | Two copies of the customs documents attached on the outside of the package ([advisory](#nordic_conventions_dhl_freight_sweden_attached_documents))[^dhl-man] | Same as Norway ([advisory](#nordic_conventions_dhl_freight_sweden_attached_documents))[^dhl-man] |
+| A booked VOEC number | The VOEC ID printed on the package or the label ([advisory](#nordic_conventions_dhl_freight_sweden_voec_marking))[^dhl-man] | Does not apply |
+
+Whether Parcel Connect Plus (112) and road-freight products also need the copies on the outside is unconfirmed, and they receive no advice on it.
+
+### Across carriers
+
+On PostNord parcel products and every DHL Freight Sweden service booked with customs data, the invoice type must match what is shipped.
+Goods sold need a commercial invoice, because a proforma invoice is for gifts and samples the recipient does not pay for; the booking declares a proforma invoice whenever `customs.commercial_invoice` is not true ([advisory](#nordic_conventions_invoice_type_content_mismatch))[^bring].
+A commercial invoice declared for a gift or sample is only a *reminder*, since a proforma invoice is the usual document there.
+A consumer that attests a procedure the lane's conventions reject, in this version a paper invoice on a PostNord shipment from Sweden to Norway, is told that the attestation does not hold ([advisory](#nordic_conventions_attestation_conflict))[^pn-se-service-point-terms].
+
 ## When the plugin advises
 
 The plugin advises only at shipment creation, never at rating.
 It advises on `postnord` shipments from Sweden, Denmark, or Finland and on `dhl_freight_sweden` shipments from Sweden, when the shipper is inside and the recipient outside the EU VAT area; for return shipments the returning party is the shipper, because the SDK swaps shipper and recipient before advisors run.
-The EU VAT area follows Tullverket's list of EU customs and fiscal territories for goods movements rather than karrio's `EUCountry`: Northern Ireland is inside for goods, while Åland, the Canary Islands, and the other special territories are outside.
+The EU VAT area follows Tullverket's list of EU customs and fiscal territories for goods movements rather than karrio's `EUCountry`, as summarised in [Which destinations count](#which-destinations-count).
 A shipment is commercial when it carries customs data and either `commercial_invoice` is true or its content is sale-like — a `content_type` that is omitted or none of gift, sample, documents, or return merchandise.
 The full territory table and the determinations above are specified in the [specification](openspec/specs/plugins/nordic-conventions/spec.md).
 
-## Advisories
+## Advisory reference
 
 Every message has level `warning` or `info`, a stable code starting with `nordic_conventions_`, an English message text, and `details` holding the lane and the `sources` behind the claim, each with its evidence tag and the statement it makes.
 Where sources disagree the message states the stricter requirement and lists every disagreeing source.
@@ -36,12 +102,12 @@ The codes are public contract; renaming one is a breaking change.
 The DHL Freight Sweden customs service options are recognised by their unified names only (`dhl_freight_sweden_customs_handling_standard`, `dhl_freight_sweden_customs_handling_full_service`, `dhl_freight_sweden_customs_own_declaration`, `dhl_freight_sweden_customs_joint_declaration`), exactly as the connector parses them.
 The footnotes cite each document once, named after its constant in `karrio/plugins/nordic_conventions/sources.py`; that module and the [specification](openspec/specs/plugins/nordic-conventions/spec.md) add the section, page, and facts-note line numbers behind each claim.
 
-Shipments to Sweden, Denmark, or Finland never receive advisories, because those receivers are inside the EU VAT area.
-The advisories are therefore grouped by carrier and origin, and each one states whether it applies to Norway, to the other destinations outside the EU VAT area, or to both.
+The advisories are grouped by carrier and origin like [Requirements at a glance](#requirements-at-a-glance), and each one states whether it applies to Norway, to the other destinations outside the EU VAT area, or to both.
 Expand an advisory to see its trigger and sources.
 
 ### PostNord from Sweden
 
+<a id="nordic_conventions_postnord_se_no_digital_invoice"></a>
 <details>
 <summary><code>nordic_conventions_postnord_se_no_digital_invoice</code> · info or warning · Norway only</summary>
 
@@ -59,6 +125,7 @@ Sources:
 
 </details>
 
+<a id="nordic_conventions_postnord_se_postpaket_commercial_invoice"></a>
 <details>
 <summary><code>nordic_conventions_postnord_se_postpaket_commercial_invoice</code> · warning · all destinations outside the EU VAT area</summary>
 
@@ -77,6 +144,7 @@ Sources:
 
 </details>
 
+<a id="nordic_conventions_postnord_se_export_paper_invoice"></a>
 <details>
 <summary><code>nordic_conventions_postnord_se_export_paper_invoice</code> · warning · outside the EU VAT area except Norway</summary>
 
@@ -96,6 +164,7 @@ Sources:
 
 ### PostNord from Finland
 
+<a id="nordic_conventions_postnord_fi_export_invoice"></a>
 <details>
 <summary><code>nordic_conventions_postnord_fi_export_invoice</code> · warning · all destinations outside the EU VAT area</summary>
 
@@ -114,6 +183,7 @@ Sources:
 
 ### PostNord from Denmark
 
+<a id="nordic_conventions_postnord_dk_export_documents"></a>
 <details>
 <summary><code>nordic_conventions_postnord_dk_export_documents</code> · warning · all destinations outside the EU VAT area</summary>
 
@@ -131,6 +201,7 @@ Sources:
 
 ### DHL Freight Sweden from Sweden
 
+<a id="nordic_conventions_dhl_freight_sweden_customs_mode_missing"></a>
 <details>
 <summary><code>nordic_conventions_dhl_freight_sweden_customs_mode_missing</code> · warning · all destinations outside the EU VAT area</summary>
 
@@ -148,6 +219,7 @@ Sources:
 
 </details>
 
+<a id="nordic_conventions_dhl_freight_sweden_invoice_copy"></a>
 <details>
 <summary><code>nordic_conventions_dhl_freight_sweden_invoice_copy</code> · warning · all destinations outside the EU VAT area</summary>
 
@@ -165,6 +237,7 @@ Sources:
 
 </details>
 
+<a id="nordic_conventions_dhl_freight_sweden_attached_documents"></a>
 <details>
 <summary><code>nordic_conventions_dhl_freight_sweden_attached_documents</code> · warning · all destinations outside the EU VAT area</summary>
 
@@ -180,6 +253,7 @@ Sources:
 
 </details>
 
+<a id="nordic_conventions_dhl_freight_sweden_voec_marking"></a>
 <details>
 <summary><code>nordic_conventions_dhl_freight_sweden_voec_marking</code> · warning · Norway only</summary>
 
@@ -198,6 +272,7 @@ Sources:
 
 ### Across carriers
 
+<a id="nordic_conventions_invoice_type_content_mismatch"></a>
 <details>
 <summary><code>nordic_conventions_invoice_type_content_mismatch</code> · info or warning · all destinations outside the EU VAT area</summary>
 
@@ -217,6 +292,7 @@ Sources:
 
 </details>
 
+<a id="nordic_conventions_attestation_conflict"></a>
 <details>
 <summary><code>nordic_conventions_attestation_conflict</code> · warning · Norway only</summary>
 
