@@ -7,7 +7,9 @@ repository code or vendored specification, W is public carrier or authority
 documentation, and I is inference. PNS and DFS are the karrio fork's main
 specs ``openspec/specs/postnord/customs-declaration/spec.md`` and
 ``openspec/specs/dhl-freight-sweden/customs/spec.md`` on branch
-``docs-openspec`` at commit 60312fe2e.
+``docs-openspec`` at commit 60312fe2e. The parcel customs invoice that PNS
+specifies entered the connector on branch ``feat-postnord-customs-invoice``
+(tip face88f37), merged into the fork's develop by 52d21fbfb.
 """
 
 import typing
@@ -97,7 +99,10 @@ PN_SE_SV_PAGE_NORWAY_LETTERS = Source(
 )
 PNS_PARCEL_CUSTOMS_INVOICE = Source(
     "S",
-    _ref("PNS:28-31", PNS),
+    _ref(
+        "PNS:28-31",
+        f"{PNS}; implemented on feat-postnord-customs-invoice at face88f37, merged into develop by 52d21fbfb",
+    ),
     "A parcel product booked with customs data containing commodities carries a customs invoice and no CN22 or CN23 declaration.",
 )
 PNS_INTERNATIONAL_PARCEL_CN22 = Source(
