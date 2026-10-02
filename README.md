@@ -32,9 +32,11 @@ What the carriers ask for goods sent from Sweden, Denmark, or Finland to outside
 | PostNord DK parcel | [2× invoice in visible pocket](#nordic_conventions_postnord_dk_export_documents) | [CH, LI 3×, GB 2× invoice; else CN23 + 2× invoice](#nordic_conventions_postnord_dk_export_documents) |
 | PostNord FI or DK 91, letter | — | — |
 | DHL Freight SE, any | [Customs mode](#nordic_conventions_dhl_freight_sweden_customs_mode_missing) + [invoice copy](#nordic_conventions_dhl_freight_sweden_invoice_copy) + [VOEC on label if booked](#nordic_conventions_dhl_freight_sweden_voec_marking) | [Customs mode](#nordic_conventions_dhl_freight_sweden_customs_mode_missing) + [invoice copy](#nordic_conventions_dhl_freight_sweden_invoice_copy) |
-| DHL Parcel Connect (109) | [+ 2 document copies outside package](#nordic_conventions_dhl_freight_sweden_attached_documents) | [+ 2 document copies outside package](#nordic_conventions_dhl_freight_sweden_attached_documents) |
+| DHL Parcel Connect (109) | [+ 2 document copies outside package](#nordic_conventions_dhl_freight_sweden_attached_documents) | [+ 2 document copies outside package](#nordic_conventions_dhl_freight_sweden_attached_documents); [Switzerland not served](#nordic_conventions_dhl_freight_sweden_parcel_connect_not_served); [Great Britain by agreement only](#nordic_conventions_dhl_freight_sweden_parcel_connect_gb_agreement) |
+| DHL Parcel Connect Plus (112) | — | [Switzerland not served](#nordic_conventions_dhl_freight_sweden_parcel_connect_not_served); [Great Britain by agreement only](#nordic_conventions_dhl_freight_sweden_parcel_connect_gb_agreement) |
+| DHL Parcel Return Connect (107) | — | [Switzerland and Great Britain not served](#nordic_conventions_dhl_freight_sweden_parcel_connect_not_served) |
 
-Both carriers: goods sold need a commercial invoice, not a proforma ([Invoice type mismatch](#nordic_conventions_invoice_type_content_mismatch)), and an attested paper invoice on PostNord SE to Norway is flagged ([Attestation conflict](#nordic_conventions_attestation_conflict)).
+Both carriers: goods sold need a commercial invoice, not a proforma ([Invoice type mismatch](#nordic_conventions_invoice_type_content_mismatch)), every line needs a customs value above 0 ([Zero-value line](#nordic_conventions_zero_value_line)), a discounted or free line to Switzerland shows its discount on the invoice ([Discount to Switzerland](#nordic_conventions_ch_discount_on_invoice), reminder), and an attested paper invoice on PostNord SE to Norway is flagged ([Attestation conflict](#nordic_conventions_attestation_conflict)).
 EU destinations, Northern Ireland included, need nothing; Great Britain, Åland, the Canary Islands, and the other special territories are non-EU ([specification](openspec/specs/plugins/nordic-conventions/spec.md)).
 "(reminder)" marks an `info` advisory; — means no advice, not that nothing is required; goods-value thresholds are not checked.
 
@@ -82,6 +84,8 @@ Non-EU means outside the EU VAT area.
 | <a id="nordic_conventions_dhl_freight_sweden_invoice_copy"></a>Invoice copy | `warning` | all non-EU | Any service | DHL product manual[^dhl-man], DHL export customs information[^dhl-cie], DHL price list[^dhl-prl] |
 | <a id="nordic_conventions_dhl_freight_sweden_attached_documents"></a>Documents outside package | `warning` | all non-EU | Parcel Connect (`dhl_freight_sweden_parcel_connect_b2c`, 109) | DHL product manual[^dhl-man] |
 | <a id="nordic_conventions_dhl_freight_sweden_voec_marking"></a>VOEC marking | `warning` | Norway | `customs.options.voec_number` set | DHL product manual[^dhl-man], DHL connector spec[^dfs] |
+| <a id="nordic_conventions_dhl_freight_sweden_parcel_connect_not_served"></a>Parcel Connect not served | `warning` | Switzerland and Great Britain | Parcel Connect (`dhl_freight_sweden_parcel_connect_b2c`, 109), Parcel Connect Plus (`dhl_freight_sweden_parcel_connect_plus`, 112), or Parcel Return Connect (`dhl_freight_sweden_parcel_return_connect_c2b`, 107) to Switzerland; Parcel Return Connect to Great Britain | DHL product manual[^dhl-man] |
+| <a id="nordic_conventions_dhl_freight_sweden_parcel_connect_gb_agreement"></a>Parcel Connect to Great Britain | `warning` | Great Britain | Parcel Connect (`dhl_freight_sweden_parcel_connect_b2c`, 109) or Parcel Connect Plus (`dhl_freight_sweden_parcel_connect_plus`, 112), which serve Great Britain only by separate agreement | DHL product manual[^dhl-man] |
 
 ### Across carriers
 
@@ -89,6 +93,8 @@ Non-EU means outside the EU VAT area.
 |---|---|---|---|---|
 | <a id="nordic_conventions_invoice_type_content_mismatch"></a>Invoice type mismatch | `warning` for proforma with sale-like content, `info` for commercial with gift or sample | all non-EU | PostNord parcel product or any DHL Freight Sweden service, with customs data | Bring customs page[^bring], DHL export customs information[^dhl-cie], Postpaket Utrikes terms §2[^pn-se-postpaket-terms], PostNord connector spec[^pns], DHL connector spec[^dfs] |
 | <a id="nordic_conventions_attestation_conflict"></a>Attestation conflict | `warning` | Norway | An attestation the lane contradicts; in this version a paper invoice on PostNord from Sweden to Norway | Service Point terms §4[^pn-se-service-point-terms], Swedish customs page[^pn-se-sv-page], PostNord connector spec[^pns] |
+| <a id="nordic_conventions_ch_discount_on_invoice"></a>Discount to Switzerland | `info` | Switzerland | A commodity with `metadata.discount_percentage` set or a value of 0 or none | BAZG R-69-03 §5.5.3[^bazg-rabatte] |
+| <a id="nordic_conventions_zero_value_line"></a>Zero-value line | `warning` | all non-EU | A commodity with a value of 0 or none | PostNord Norway parcels page[^pn-se-no-page], Tullverket export documents page[^tv-export-documents], DHL Express customs guidelines[^dhl-express-customs] |
 
 ### Codes
 
@@ -101,8 +107,12 @@ Non-EU means outside the EU VAT area.
 - Invoice copy: `nordic_conventions_dhl_freight_sweden_invoice_copy`
 - Documents outside package: `nordic_conventions_dhl_freight_sweden_attached_documents`
 - VOEC marking: `nordic_conventions_dhl_freight_sweden_voec_marking`
+- Parcel Connect not served: `nordic_conventions_dhl_freight_sweden_parcel_connect_not_served`
+- Parcel Connect to Great Britain: `nordic_conventions_dhl_freight_sweden_parcel_connect_gb_agreement`
 - Invoice type mismatch: `nordic_conventions_invoice_type_content_mismatch`
 - Attestation conflict: `nordic_conventions_attestation_conflict`
+- Discount to Switzerland: `nordic_conventions_ch_discount_on_invoice`
+- Zero-value line: `nordic_conventions_zero_value_line`
 
 ## Attestations
 
@@ -146,6 +156,7 @@ An attestation is the consumer's own commitment to perform the procedure; the pl
 
 No advice at rating time, no per-organisation overrides or connection-level attestation defaults, and no advisories for Norwegian shippers.
 No goods-value thresholds (SEK 2 000, EUR 1 000, DKK 7 500), CN22 or CN23 selection guidance, invoice-content checks, or CN22 or CN23 advice for PostNord letters.
+No advisory on splitting goods sold as one unit into separately packed consignments to Norway to stay under the VOEC value limit, which the [Skatteetaten VOEC guidelines](https://www.skatteetaten.no/globalassets/bedrift-og-organisasjon/voec/voec-guidelines-mars-2024.pdf) (March 2024) prohibit: an advisor sees one shipment request, with no record of the sale or of other consignments, so a split cannot be detected reliably.
 Nothing the connectors already enforce, such as field errors for missing customs data or the mapping of `commercial_invoice` to the invoice type.
 The plugin never reads connection credentials and makes no network calls.
 Known, undecided coverage gaps are recorded inside the requirements they border in the [specification](openspec/specs/plugins/nordic-conventions/spec.md).
@@ -175,3 +186,7 @@ The connector cross-check tests run when the PostNord and DHL Freight Sweden con
 [^bring]: Bring customs documents page: <https://www.bring.se/tjanster/tull/tulldokument> (`BRING_URL`).
 [^pns]: karrio fork `openspec/specs/postnord/customs-declaration/spec.md` on branch `docs-openspec` at commit 60312fe2e (`PNS`).
 [^dfs]: karrio fork `openspec/specs/dhl-freight-sweden/customs/spec.md` on branch `docs-openspec` at commit 60312fe2e (`DFS`).
+[^bazg-rabatte]: BAZG Richtlinie R-69-03, valid 2025-01-01: <https://www.bazg.admin.ch/dam/de/sd-web/mIvoM5CF7ydH/steuerbemessungsgrundlage-de.pdf> (`BAZG_R_69_03_URL`).
+[^pn-se-no-page]: PostNord SE page on sending parcels to Norway, read 2026-10-02: <https://www.postnord.se/privat/skicka/skicka-brev-och-paket-utomlands/skicka-paket-till-norge/> (`PN_SE_NO_PAGE_URL`).
+[^tv-export-documents]: Tullverket supporting documents for export, updated 2026-06-12, read 2026-10-02: <https://www.tullverket.se/sv/foretag/exporteravaror/deklareravarorvidexport/styrkandehandlingarvidexport.4.78aa922815794d801e25e3.html> (`TV_EXPORT_DOCUMENTS_URL`).
+[^dhl-express-customs]: DHL Express global customs customer guidelines: <https://mydhl.express.dhl/content/dam/downloads/global/en/customs-guide/express_global_customs_customer_guidelines.pdf.coredownload.pdf> (`DHL_EXPRESS_CUSTOMS_URL`).

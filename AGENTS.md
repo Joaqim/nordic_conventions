@@ -10,7 +10,7 @@ Any change to the files below must update the README in the same commit, and any
   The row's Advisory cell starts with an `<a id="...">` anchor whose id is the code, followed by the same short name as in the Codes list; short names are unique.
 - `karrio/plugins/nordic_conventions/procedures.py` defines the `Procedure` members, whose option keys are `nordic_conventions_` plus the member value; each has one row in the Attestations table.
 - `karrio/plugins/nordic_conventions/rules/` decides each advisory's level, trigger, and destinations; the Level, Destinations, and Trigger cells state what the rule does, not what it should do.
-  The Level cell states conditional levels briefly, the Destinations cell is one of `Norway`, `non-EU except Norway`, or `all non-EU`, and the Trigger cell leaves out the carrier and origin its group heading names.
+  The Level cell states conditional levels briefly, the Destinations cell is one of `Norway`, `Switzerland`, `Great Britain`, `Switzerland and Great Britain`, `non-EU except Norway`, or `all non-EU`, and the Trigger cell leaves out the carrier and origin its group heading names.
 - The Requirements at a glance matrix has one row per carrier, origin, and service group, with a Norway and an other non-EU column.
   Each cell is a few words stating only what a rule's message states, links to the advisory's anchor, marks an `info` advisory with "(reminder)", and reads — where no rule advises; it carries no footnotes.
   A change to a rule's trigger, level, or message text updates the matching cells.
