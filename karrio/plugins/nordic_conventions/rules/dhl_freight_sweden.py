@@ -12,6 +12,39 @@ from karrio.plugins.nordic_conventions.rules import advisory
 PARCEL_CONNECT_SERVICES: typing.FrozenSet[str] = frozenset(
     {"dhl_freight_sweden_parcel_connect_b2c", "109"}
 )
+PARCEL_CONNECT_FAMILY: typing.FrozenSet[str] = frozenset(
+    {
+        "dhl_freight_sweden_parcel_connect_b2c",
+        "109",
+        "dhl_freight_sweden_parcel_connect_plus",
+        "112",
+        "dhl_freight_sweden_parcel_return_connect_c2b",
+        "107",
+    }
+)
+PARCEL_RETURN_CONNECT: typing.FrozenSet[str] = frozenset(
+    {"dhl_freight_sweden_parcel_return_connect_c2b", "107"}
+)
+PARCEL_CONNECT_BY_AGREEMENT: typing.FrozenSet[str] = PARCEL_CONNECT_FAMILY - PARCEL_RETURN_CONNECT
+SWITZERLAND = "CH"
+GREAT_BRITAIN = "GB"
+NOT_SERVED: typing.Dict[str, typing.Tuple[typing.FrozenSet[str], str]] = {
+    SWITZERLAND: (
+        PARCEL_CONNECT_FAMILY,
+        " ".join(
+            [
+                "DHL Freight Sweden Parcel Connect (109), Parcel Connect Plus (112), and Parcel Return Connect (107)",
+                "do not serve Switzerland.",
+                "Book Switzerland on a product that serves it, such as Home Delivery International B2C (601),",
+                "Euroconnect (202), Euroline (205), or Eurapid (233).",
+            ]
+        ),
+    ),
+    GREAT_BRITAIN: (
+        PARCEL_RETURN_CONNECT,
+        "DHL Freight Sweden Parcel Return Connect (107) does not serve Great Britain.",
+    ),
+}
 
 REMINDER_FEES: typing.Dict[str, str] = {"GB": "650 kr"}
 DEFAULT_REMINDER_FEE = "390 kr"
@@ -131,5 +164,53 @@ def voec_marking(request, context) -> typing.List[models.Message]:
                 sources.DHL_MAN_VOEC_MARKING,
                 sources.DHL_MAN_VOEC_PARCEL_CONNECT,
             ],
+        )
+    ]
+
+
+def parcel_connect_not_served(request, context) -> typing.List[models.Message]:
+    lane = lanes.lane_of(request, context)
+
+    if not _dhl_freight_sweden(lane):
+        return []
+
+    services, text = NOT_SERVED.get(lane.recipient_country, (frozenset(), ""))
+
+    if lane.service not in services:
+        return []
+
+    return [
+        advisory(
+            AdvisoryClassification.dhl_freight_sweden_parcel_connect_not_served,
+            "warning",
+            text,
+            lane,
+            [sources.DHL_MAN_PARCEL_CONNECT_COUNTRIES],
+        )
+    ]
+
+
+def parcel_connect_gb_agreement(request, context) -> typing.List[models.Message]:
+    lane = lanes.lane_of(request, context)
+
+    if not (
+        _dhl_freight_sweden(lane)
+        and lane.recipient_country == GREAT_BRITAIN
+        and lane.service in PARCEL_CONNECT_BY_AGREEMENT
+    ):
+        return []
+
+    return [
+        advisory(
+            AdvisoryClassification.dhl_freight_sweden_parcel_connect_gb_agreement,
+            "warning",
+            " ".join(
+                [
+                    "DHL Freight Sweden serves Great Britain on Parcel Connect (109) and Parcel Connect Plus (112)",
+                    "only by separate agreement with DHL; book Great Britain on them only under such an agreement.",
+                ]
+            ),
+            lane,
+            [sources.DHL_MAN_PARCEL_CONNECT_COUNTRIES],
         )
     ]

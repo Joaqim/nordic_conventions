@@ -4,8 +4,8 @@ from karrio.plugins.nordic_conventions.codes import AdvisoryClassification
 
 
 class TestNordicConventionsCodes(unittest.TestCase):
-    def test_eleven_classifications_follow_the_namespace_rule(self):
-        self.assertEqual(len(AdvisoryClassification), 11)
+    def test_fifteen_classifications_follow_the_namespace_rule(self):
+        self.assertEqual(len(AdvisoryClassification), 15)
         self.assertListEqual(
             [
                 classification

@@ -21,3 +21,7 @@ class AdvisoryClassification(str, enum.Enum):
     dhl_freight_sweden_voec_marking = "nordic_conventions_dhl_freight_sweden_voec_marking"
     invoice_type_content_mismatch = "nordic_conventions_invoice_type_content_mismatch"
     attestation_conflict = "nordic_conventions_attestation_conflict"
+    ch_discount_on_invoice = "nordic_conventions_ch_discount_on_invoice"
+    zero_value_line = "nordic_conventions_zero_value_line"
+    dhl_freight_sweden_parcel_connect_not_served = "nordic_conventions_dhl_freight_sweden_parcel_connect_not_served"
+    dhl_freight_sweden_parcel_connect_gb_agreement = "nordic_conventions_dhl_freight_sweden_parcel_connect_gb_agreement"

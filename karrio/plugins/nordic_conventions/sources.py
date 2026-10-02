@@ -31,6 +31,10 @@ DHL_MAN_URL = "https://dhlpaket.se/dashboard/wp-content/uploads/sites/2/2025/04/
 DHL_CIE_URL = "https://www.dhl.com/content/dam/dhl/local/se/dhl-freight/documents/pdf/se-freight-customs-information-export-en.pdf (2025-02-03)"
 DHL_PRL_URL = "https://www.dhl.com/content/dam/dhl/local/se/dhl-freight/documents/pdf/se-freight-price-list-additional-services-sv.pdf (valid 2026-05-01)"
 BRING_URL = "https://www.bring.se/tjanster/tull/tulldokument"
+BAZG_R_69_03_URL = "https://www.bazg.admin.ch/dam/de/sd-web/mIvoM5CF7ydH/steuerbemessungsgrundlage-de.pdf (valid 2025-01-01)"
+PN_SE_NO_PAGE_URL = "https://www.postnord.se/privat/skicka/skicka-brev-och-paket-utomlands/skicka-paket-till-norge/ (read 2026-10-02)"
+TV_EXPORT_DOCUMENTS_URL = "https://www.tullverket.se/sv/foretag/exporteravaror/deklareravarorvidexport/styrkandehandlingarvidexport.4.78aa922815794d801e25e3.html (updated 2026-06-12, read 2026-10-02)"
+DHL_EXPRESS_CUSTOMS_URL = "https://mydhl.express.dhl/content/dam/downloads/global/en/customs-guide/express_global_customs_customer_guidelines.pdf.coredownload.pdf"
 
 
 @attr.s(auto_attribs=True, frozen=True)
@@ -252,6 +256,34 @@ CONNECTOR_FLAG_MAPPING = Source(
     "S",
     _ref("FN:30-36", "karrio modules/connectors/dhl_freight_sweden/karrio/providers/dhl_freight_sweden/shipment/create.py"),
     "Connectors that read customs.commercial_invoice map it to a commercial versus proforma invoice type, never to producing a document.",
+)
+
+# Customs values
+
+BAZG_RABATTE = Source(
+    "W",
+    _ref("§5.5.3", BAZG_R_69_03_URL),
+    "BAZG Richtlinie R-69-03 §5.5.3 \"Rabatte\": discounts are not part of the taxable consideration, and an item the supplier hands over with a sold item as a discount in kind or add-on (Zugabe) is not taxed additionally on import, provided it is directly connected to the supply causing the import.",
+)
+PN_SE_NO_PAGE_NON_ZERO_VALUE = Source(
+    "W",
+    _ref("Skicka paket till Norge", PN_SE_NO_PAGE_URL),
+    "PostNord SE page on parcels to Norway: \"värdet på en handels- eller proformafaktura får aldrig vara 0 kronor. Allt har ett värde även om innehållet är en gåva eller ett varuprov.\"",
+)
+TV_PROFORMA_NON_ZERO_VALUE = Source(
+    "W",
+    _ref("Styrkande handlingar vid export", TV_EXPORT_DOCUMENTS_URL),
+    "Tullverket, supporting documents for export: a pro forma invoice states \"värde för tulländamål för varje varuslag (får inte vara 0 kronor)\" and \"No charge. Value for customs purposes only.\", and an invoice states \"eventuella rabatter och vilken typ av rabatter\".",
+)
+DHL_EXPRESS_NO_ZERO_VALUES = Source(
+    "W",
+    _ref("Customs customer guidelines", DHL_EXPRESS_CUSTOMS_URL),
+    "DHL Express customs guidelines: \"zero (0) values are not acceptable\" for line values, and invoice values must comply with WTO valuation rules.",
+)
+DHL_MAN_PARCEL_CONNECT_COUNTRIES = Source(
+    "W",
+    _ref("Product manual v5.23", DHL_MAN_URL),
+    "DHL Freight Sweden product manual v5.23: Parcel Connect (109) serves AT, BE, BG, CZ, DE, DK, EE, ES, FI, FR, GB (by separate agreement only), HR, HU, IE, IT, LT, LU, LV, NL, NO, PL, PT, RO, SI, and SK; Parcel Connect Plus (112) the same except FR; Parcel Return Connect (107) the same except GB; Switzerland is served by Euroconnect (202), Euroline (205), Eurapid (233), SPI/PPI, and Home Delivery International (601).",
 )
 
 ALL: typing.Tuple[Source, ...] = tuple(

@@ -6,6 +6,7 @@ import typing
 import karrio.core.models as models
 
 import karrio.plugins.nordic_conventions.lanes as lanes
+import karrio.plugins.nordic_conventions.rules.customs_values as customs_values
 import karrio.plugins.nordic_conventions.rules.dhl_freight_sweden as dhl_freight_sweden
 import karrio.plugins.nordic_conventions.rules.invoice_type as invoice_type
 import karrio.plugins.nordic_conventions.rules.postnord as postnord
@@ -43,6 +44,10 @@ RULES: typing.Tuple[Rule, ...] = (
     dhl_freight_sweden.attached_documents,
     dhl_freight_sweden.voec_marking,
     invoice_type.invoice_type_content_mismatch,
+    dhl_freight_sweden.parcel_connect_not_served,
+    dhl_freight_sweden.parcel_connect_gb_agreement,
+    customs_values.ch_discount_on_invoice,
+    customs_values.zero_value_line,
 )
 
 AnsweringSet = typing.Callable[[lanes.Lane], typing.FrozenSet[Procedure]]
@@ -118,6 +123,10 @@ ANSWERING: typing.Dict[AdvisoryClassification, AnsweringSet] = {
     ),
     AdvisoryClassification.invoice_type_content_mismatch: _always(),
     AdvisoryClassification.attestation_conflict: _always(),
+    AdvisoryClassification.ch_discount_on_invoice: _always(),
+    AdvisoryClassification.zero_value_line: _always(),
+    AdvisoryClassification.dhl_freight_sweden_parcel_connect_not_served: _always(),
+    AdvisoryClassification.dhl_freight_sweden_parcel_connect_gb_agreement: _always(),
 }
 
 
