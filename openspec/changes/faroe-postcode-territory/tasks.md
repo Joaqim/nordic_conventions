@@ -6,5 +6,5 @@
 
 ## 2. Verification
 
-- [ ] 2.1 Run `python -m unittest discover -f tests`, the `AGENTS.md` verification commands, and `openspec validate faroe-postcode-territory --strict`
-- [ ] 2.2 Archive this change
+- [x] 2.1 Run `python -m unittest discover -f tests`, the `AGENTS.md` verification commands, and `openspec validate faroe-postcode-territory --strict`
+- [x] 2.2 Archive this change
