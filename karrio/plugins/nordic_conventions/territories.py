@@ -9,7 +9,9 @@ from the member-state set, or by postal-code range within a member state,
 with Mount Athos excluded by ``GR`` and ``EL`` 63086, the French overseas
 departments by ``FR`` 97000-97999, Wallis and Futuna, French Polynesia, and
 New Caledonia by ``FR`` 98600-98899, and the Faroe Islands and Greenland by
-``DK`` 3800-3999, while Monaco's ``FR`` 980xx codes stay inside. Northern
+``DK`` 3800-3999, while Monaco's ``FR`` 980xx codes stay inside. Under
+``DK``, a postal code that carried an ``FO`` or ``GL`` prefix, or that has the
+three digits of the Faroese format, is also outside. Northern
 Ireland is inside the EU VAT area for goods and outside it for services;
 the plugin advises on goods shipments, so ``GB`` postal codes beginning
 ``BT`` are inside.
@@ -77,6 +79,15 @@ NUMERIC_POSTAL_TERRITORY_PARENTS: typing.Dict[str, str] = {
     "EA": "ES",  # Ceuta and Melilla
 }
 
+NON_EU_VAT_POSTAL_TERRITORY_PREFIXES: typing.Tuple[typing.Tuple[str, str], ...] = (
+    ("DK", "FO"),  # Faroe Islands
+    ("DK", "GL"),  # Greenland
+)
+
+NON_EU_VAT_POSTAL_CODE_LENGTHS: typing.Tuple[typing.Tuple[str, int], ...] = (
+    ("DK", 3),  # Faroe Islands
+)
+
 UK_POSTCODE_AREA_CODES: typing.FrozenSet[str] = frozenset({"JE", "GY", "IM", "BT"})
 
 EU_VAT_POSTAL_PREFIXES: typing.Tuple[typing.Tuple[str, str], ...] = (
@@ -94,17 +105,27 @@ def in_eu_vat_area(
     (see ``postal_prefix_codes``) followed by a hyphen, whitespace, or a
     digit, and loses its spaces; the exclusion ranges apply only when the
     code is then purely numeric, the inclusion prefixes in any case, and a
-    code matching neither leaves the country-level decision standing.
+    code matching neither leaves the country-level decision standing. A
+    removed prefix code listed in ``NON_EU_VAT_POSTAL_TERRITORY_PREFIXES``,
+    or a purely numeric code with a digit count listed in
+    ``NON_EU_VAT_POSTAL_CODE_LENGTHS``, places the address outside.
     """
     country = (country_code or "").upper()
-    postal = _postal_code(country, postal_code)
+    prefix_code, postal = _postal_code(country, postal_code)
     postal_number = int(postal) if postal.isdigit() else None
 
-    inside_member_state = country in EU_VAT_AREA_COUNTRIES and not any(
-        country == range_country
-        and postal_number is not None
-        and low <= postal_number <= high
-        for range_country, low, high in NON_EU_VAT_POSTAL_RANGES
+    inside_member_state = country in EU_VAT_AREA_COUNTRIES and not (
+        any(
+            country == range_country
+            and postal_number is not None
+            and low <= postal_number <= high
+            for range_country, low, high in NON_EU_VAT_POSTAL_RANGES
+        )
+        or (country, prefix_code) in NON_EU_VAT_POSTAL_TERRITORY_PREFIXES
+        or (
+            postal_number is not None
+            and (country, len(postal)) in NON_EU_VAT_POSTAL_CODE_LENGTHS
+        )
     )
     return inside_member_state or any(
         country == prefix_country and postal.startswith(prefix)
@@ -129,12 +150,14 @@ def postal_prefix_codes(country_code: str) -> typing.Tuple[str, ...]:
     )
 
 
-def _postal_code(country: str, postal_code: typing.Optional[str]) -> str:
+def _postal_code(
+    country: str, postal_code: typing.Optional[str]
+) -> typing.Tuple[typing.Optional[str], str]:
+    """The removed prefix code, if any, and the normalised postal code."""
     postal = str(postal_code or "").strip().upper()
     for code in postal_prefix_codes(country):
         separator = r"[\s-]+" if code == "GB" else r"[\s-]+|(?=\d)"
         prefix = re.match(rf"{re.escape(code)}(?:{separator})", postal)
         if prefix:
-            postal = postal[prefix.end():]
-            break
-    return postal.replace(" ", "")
+            return code, postal[prefix.end():].replace(" ", "")
+    return None, postal.replace(" ", "")

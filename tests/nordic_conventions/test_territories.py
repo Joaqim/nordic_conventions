@@ -122,6 +122,38 @@ class TestNordicConventionsTerritories(unittest.TestCase):
             [True, False, False, False, True],
         )
 
+    def test_faroe_islands_and_greenland_by_territory_prefix_or_faroese_format_are_outside(self):
+        cases = (
+            ("DK", "FO-100", False),
+            ("DK", "fo 100", False),
+            ("DK", "FO100", False),
+            ("DK", "FO 3800", False),
+            ("DK", "GL 3900", False),
+            ("DK", "GL-1000", False),
+            ("DK", "gl2100", False),
+            ("DK", "100", False),
+            ("DK", "DK-100", False),
+            ("DK", "dk 999", False),
+            ("DK", "1 00", False),
+            ("DK", "1000", True),
+            ("DK", "DK-2100", True),
+            ("DK", "0100", True),
+            ("DK", "10", True),
+            ("DK", "10000", True),
+            ("FO", "100", False),
+            ("GL", "3900", False),
+            ("SE", "FO-100", True),
+            ("SE", "100", True),
+            ("FI", "100", True),
+        )
+        self.assertListEqual(
+            [
+                (country_code, postal_code, territories.in_eu_vat_area(country_code, postal_code))
+                for country_code, postal_code, _ in cases
+            ],
+            list(cases),
+        )
+
     def test_matches_connector_tables(self):
         for carrier_name in ("postnord", "dhl_freight_sweden"):
             with self.subTest(carrier_name=carrier_name):
