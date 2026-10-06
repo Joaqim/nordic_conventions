@@ -6,9 +6,10 @@ Sweden connectors: member states are inside, with Greece under its ISO code
 special fiscal territories are outside either by their own country code
 (``AX``, ``IC``, ``GP``, ``GF``, ``MQ``, ``RE``, ``YT``), which is absent
 from the member-state set, or by postal-code range within a member state,
-with Mount Athos excluded by ``GR`` 63086, the French overseas departments
-by ``FR`` 97000-97999, and the Faroe Islands and Greenland by ``DK``
-3800-3999. Northern Ireland is inside the
+with Mount Athos excluded by ``GR`` and ``EL`` 63086, the French overseas
+departments by ``FR`` 97000-97999, Wallis and Futuna, French Polynesia, and
+New Caledonia by ``FR`` 98600-98899, and the Faroe Islands and Greenland by
+``DK`` 3800-3999; Monaco's 98000-98099 stays inside. Northern Ireland is inside the
 EU VAT area for goods and outside it for services; the plugin advises on
 goods shipments, so ``GB`` postal codes beginning ``BT`` are inside.
 """
@@ -63,6 +64,8 @@ NON_EU_VAT_POSTAL_RANGES: typing.Tuple[typing.Tuple[str, int, int], ...] = (
     ("IT", 22061, 22061),  # Campione d'Italia
     ("FR", 97000, 97999),  # French overseas departments
     ("DK", 3800, 3999),  # Faroe Islands and Greenland
+    ("FR", 98600, 98899),  # Wallis and Futuna, French Polynesia, New Caledonia
+    ("EL", 63086, 63086),  # Mount Athos
 )
 
 EU_VAT_POSTAL_PREFIXES: typing.Tuple[typing.Tuple[str, str], ...] = (

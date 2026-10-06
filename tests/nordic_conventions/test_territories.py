@@ -79,7 +79,24 @@ class TestNordicConventionsTerritories(unittest.TestCase):
         self.assertFalse(territories.in_eu_vat_area("GB", "EC1A 1BB"))
 
     def test_mount_athos_by_postal_code_is_outside(self):
-        self.assertFalse(territories.in_eu_vat_area("GR", "630 86"))
+        self.assertListEqual(
+            [
+                territories.in_eu_vat_area("GR", "630 86"),
+                territories.in_eu_vat_area("EL", "630 86"),
+                territories.in_eu_vat_area("EL", "10431"),
+            ],
+            [False, False, True],
+        )
+
+    def test_french_pacific_collectivities_by_postal_code_are_outside(self):
+        self.assertListEqual(
+            [
+                territories.in_eu_vat_area("FR", postal_code)
+                for postal_code in ("98000", "98599", "98600", "98713", "98800", "98899", "98900")
+            ],
+            [True, True, False, False, False, False, True],
+        )
+
 
     def test_french_overseas_departments_by_postal_code_are_outside(self):
         self.assertListEqual(
