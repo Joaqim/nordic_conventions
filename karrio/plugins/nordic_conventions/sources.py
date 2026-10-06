@@ -29,7 +29,7 @@ PN_SE_SERVICE_POINT_TERMS_URL = "https://www.avropa.se/globalassets/bilagor/1.-a
 PN_FI_PAGE_URL = "https://www.postnord.fi/en/sending/online-tools/customs-information/ (read 2026-09-25)"
 PN_FI_TERMS = "PostNord FI special terms for parcels, valid 2026-05-01 (Wayback 2026-06-10)"
 PN_DK_PAGE_URL = "https://www.postnord.dk/erhverv/eksport/ (Wayback 2026-03-10)"
-DHL_MAN_URL = "https://dhlpaket.se/dashboard/wp-content/uploads/sites/2/2025/04/DHL-FREIGHT-SWEDEN-PRODUCT-MANUAL-v5.23.pdf (valid 2025-04-14)"
+DHL_MAN_URL = "https://dhlpaket.se/dashboard/specifications/products/ (product manual v5.26, updated 2026-10-01, valid from 2026-11-01, sha256 050660c37ba93d1ae9514c50dfa42c2010bc87763ccaff51a740b2526af11b73)"
 DHL_CIE_URL = "https://www.dhl.com/content/dam/dhl/local/se/dhl-freight/documents/pdf/se-freight-customs-information-export-en.pdf (2025-02-03)"
 DHL_PRL_URL = "https://www.dhl.com/content/dam/dhl/local/se/dhl-freight/documents/pdf/se-freight-price-list-additional-services-sv.pdf (valid 2026-05-01)"
 BRING_URL = "https://www.bring.se/tjanster/tull/tulldokument"
@@ -181,7 +181,7 @@ DFS_CUSTOMS_SERVICES_OPT_IN = Source(
 )
 DHL_MAN_CUSTOMS_SELECTION = Source(
     "W",
-    _ref("FN:196", f"{DHL_MAN_URL} §7.6.1, §6.7"),
+    _ref("FN:196", f"{DHL_MAN_URL} §7.6.1 p.163, §6.7 p.96"),
     "Customs handling (Standard or Full service) or own declaration must be selected for CH, GB, NO, Åland (FI 22) and other non-EU destinations.",
 )
 DHL_PRL_NO_FEE_FREE_MODE = Source(
@@ -196,7 +196,7 @@ DHL_OWN_DECLARATION_FEE_INFERENCE = Source(
 )
 DHL_MAN_INVOICE_COPY = Source(
     "W",
-    _ref("FN:213", f"{DHL_MAN_URL} §7.6.2"),
+    _ref("FN:213", f"{DHL_MAN_URL} §7.6.2 p.163"),
     "\"A copy of the invoice must still be sent\" even with complete EDI data under standard customs handling.",
 )
 DHL_CIE_INVOICE_ROUTES = Source(
@@ -216,7 +216,7 @@ DHL_API_NO_UPLOAD = Source(
 )
 DHL_MAN_OUTSIDE_COPIES = Source(
     "W",
-    _ref("FN:215", f"{DHL_MAN_URL} p.66"),
+    _ref("FN:215", f"{DHL_MAN_URL} §5.14 p.62"),
     "For Parcel Connect (109): \"Two copies of customs documents must also be attached on the outside of the package\".",
 )
 DHL_OUTSIDE_COPIES_UNCONFIRMED = Source(
@@ -231,13 +231,13 @@ DFS_VOEC_SERVICE = Source(
 )
 DHL_MAN_VOEC_MARKING = Source(
     "W",
-    _ref("FN:217", f"{DHL_MAN_URL} pp.97, 99"),
+    _ref("FN:217", f"{DHL_MAN_URL} §6.5 p.92, §6.6 p.94, §9.4.2 p.168"),
     "The Norway VOEC ID must be printed on the package or label.",
 )
 DHL_MAN_VOEC_PARCEL_CONNECT = Source(
     "W",
-    _ref("FN:206", DHL_MAN_URL),
-    "The voecSupplyVAT service is VOEC with Parcel Connect (109) to Norway.",
+    _ref("FN:206", f"{DHL_MAN_URL} §6.5 p.92, §6.6 p.94"),
+    "The voecSupplyVAT service is VOEC with Parcel Connect (109) to Norway, sent in the API as additionalServices.voecSupplyVAT.vatId.",
 )
 
 # Invoice type
@@ -287,8 +287,8 @@ DHL_EXPRESS_NO_ZERO_VALUES = Source(
 )
 DHL_MAN_PARCEL_CONNECT_COUNTRIES = Source(
     "W",
-    _ref("Product manual v5.23", DHL_MAN_URL),
-    "DHL Freight Sweden product manual v5.23: Parcel Connect (109) serves AT, BE, BG, CZ, DE, DK, EE, ES, FI, FR, GB (by separate agreement only), HR, HU, IE, IT, LT, LU, LV, NL, NO, PL, PT, RO, SI, and SK; Parcel Connect Plus (112) the same except FR; Parcel Return Connect (107) the same except GB; Switzerland is served by Euroconnect (202), Euroline (205), Eurapid (233), SPI/PPI, and Home Delivery International (601).",
+    _ref("Product manual v5.26", f"{DHL_MAN_URL} §5.3 p.18, §5.14 p.63, §5.15 p.66"),
+    "DHL Freight Sweden product manual v5.26: Parcel Connect (109) serves AT, BE, BG, CZ, DE, DK, EE, ES, FI, FR, GB (by separate agreement only), HR, HU, IE, IT, LT, LU, LV, NL, NO, PL, PT, RO, SI, and SK; Parcel Connect Plus (112) the same, FR only through the print and transportInstruction APIs; Parcel Return Connect (107) the same except GB; 109 and 112 exclude FR 97100-99999; Switzerland is served by Road Freight Standard (202), Road Freight Direct (205), Road Freight Priority (233), SPI, and Home Delivery International (601).",
 )
 
 ALL: typing.Tuple[Source, ...] = tuple(
