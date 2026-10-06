@@ -4,3 +4,4 @@
 # private karrioapi submodules (ee/insiders, ee/platform) and fails, although
 # modules/sdk needs neither. Install from a local checkout instead.
 -e ../karrio/.worktrees/feat-shipment-advisors/modules/sdk
+pytest
