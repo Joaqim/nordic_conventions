@@ -83,6 +83,7 @@ Monaco's French-style postal codes 98000-98099 keep their inside verdict through
 A postal code SHALL be upper-cased and trimmed, SHALL lose a leading prefix code together with the hyphen and whitespace after it, and SHALL then be compared after removing spaces.
 A prefix code is the address's own country code, or a territory code with numeric postcodes whose parent is that country (`AX` under `FI`, `FO` and `GL` under `DK`, `IC` and `EA` under `ES`), followed by a hyphen, whitespace, or a digit; `GB` is a prefix code only when a hyphen or whitespace follows it, and `JE`, `GY`, `IM`, and `BT` are never prefix codes.
 The DHL Freight Sweden connector applies the same normalisation.
+Under `DK`, an address SHALL be outside when the prefix code removed from its postal code is `FO` or `GL`, whatever number follows, or when its normalised postal code is exactly three digits, the Faroese format, because the Faroe Islands and Greenland are outside the EU VAT area (FN:63, W); a four-digit `DK` postal code outside 3800-3999 stays inside.
 A postal code that is not purely numeric after this normalisation SHALL leave the country-level decision unchanged, except that the Northern Ireland prefix comparison SHALL apply to a normalised postal code beginning `BT` whether or not it is purely numeric.
 
 #### Scenario: Åland by postal code is outside
@@ -129,6 +130,21 @@ A postal code that is not purely numeric after this normalisation SHALL leave th
 
 - **WHEN** a PostNord shipment is created from Sweden to `DK` with postal code `DK 3800` or `DK-3900`
 - **THEN** the recipient is treated as outside the EU VAT area and the Swedish PostNord advisories for destinations outside the EU VAT area apply
+
+#### Scenario: Faroe Islands and Greenland by territory-prefixed Danish postal code are outside
+
+- **WHEN** a PostNord shipment is created from Sweden to `DK` with postal code `FO-100`, `fo 100`, `FO100`, or `GL 3900`
+- **THEN** the recipient is treated as outside the EU VAT area
+
+#### Scenario: Faroese three-digit postal code under Denmark is outside
+
+- **WHEN** a DHL Freight Sweden shipment is created from Sweden to `DK` with postal code 100 or `DK-100`
+- **THEN** the recipient is treated as outside the EU VAT area
+
+#### Scenario: Danish four-digit postal code outside the Faroe and Greenland range is inside
+
+- **WHEN** a PostNord shipment is created from Sweden to `DK` with postal code 1000 or `DK-2100`
+- **THEN** the recipient is treated as inside the EU VAT area
 
 #### Scenario: Mount Athos by postal code is outside
 
