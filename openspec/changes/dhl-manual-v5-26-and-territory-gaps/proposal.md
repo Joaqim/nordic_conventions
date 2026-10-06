@@ -28,7 +28,7 @@ None.
 
 ### Modified Capabilities
 
-- `plugins/nordic-conventions`: the EU VAT area requirement gains two postal ranges and country-prefix normalisation; the five DHL Freight Sweden manual-backed requirements cite v5.26.
+- `plugins/nordic-conventions`: the EU VAT area requirement gains two postal ranges and country-prefix normalisation; the six DHL Freight Sweden manual-backed requirements cite v5.26.
 
 ## Impact
 
