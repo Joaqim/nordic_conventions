@@ -36,6 +36,36 @@ class TestNordicConventionsTerritories(unittest.TestCase):
             [True, False],
         )
 
+    def test_own_country_prefix_is_removed_before_range_checks(self):
+        self.assertListEqual(
+            [
+                territories.in_eu_vat_area(country_code, postal_code)
+                for country_code, postal_code in (
+                    ("FI", "FI-22100"),
+                    ("FI", "fi 22100"),
+                    ("FI", "FI22100"),
+                    ("FI", " FI - 22100 "),
+                    ("DK", "DK-3900"),
+                    ("ES", "ES-35001"),
+                    ("FI", "FI-00100"),
+                )
+            ],
+            [False, False, False, False, False, False, True],
+        )
+
+    def test_letters_that_begin_a_postal_code_are_kept(self):
+        self.assertTrue(territories.in_eu_vat_area("MT", "MTF 1234"))
+
+    def test_northern_ireland_with_country_prefix_is_inside(self):
+        self.assertListEqual(
+            [
+                territories.in_eu_vat_area("GB", "GB-BT1 1AA"),
+                territories.in_eu_vat_area("GB", "gb bt1 1aa"),
+                territories.in_eu_vat_area("GB", "GB-EC1A 1BB"),
+            ],
+            [True, True, False],
+        )
+
     def test_monaco_is_inside(self):
         self.assertTrue(territories.in_eu_vat_area("MC", "98000"))
 

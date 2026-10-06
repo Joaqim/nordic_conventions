@@ -13,6 +13,7 @@ EU VAT area for goods and outside it for services; the plugin advises on
 goods shipments, so ``GB`` postal codes beginning ``BT`` are inside.
 """
 
+import re
 import typing
 
 EU_VAT_AREA_COUNTRIES: typing.FrozenSet[str] = frozenset(
@@ -75,13 +76,15 @@ def in_eu_vat_area(
 ) -> bool:
     """Whether an address lies inside the EU VAT area for goods.
 
-    A postal code is compared after removing spaces; the exclusion ranges
-    apply only when the code is purely numeric, the inclusion prefixes in
-    any case, and a code matching neither leaves the country-level decision
-    standing.
+    A postal code is compared after upper-casing it, removing a leading copy
+    of the address's own country code followed by a hyphen, whitespace, or a
+    digit (``FI-22100``, ``fi 22100``, ``FI22100``), and removing spaces;
+    the exclusion ranges apply only when the code is then purely numeric,
+    the inclusion prefixes in any case, and a code matching neither leaves
+    the country-level decision standing.
     """
     country = (country_code or "").upper()
-    postal = str(postal_code or "").replace(" ", "")
+    postal = _postal_code(country, postal_code)
     postal_number = int(postal) if postal.isdigit() else None
 
     inside_member_state = country in EU_VAT_AREA_COUNTRIES and not any(
@@ -91,6 +94,14 @@ def in_eu_vat_area(
         for range_country, low, high in NON_EU_VAT_POSTAL_RANGES
     )
     return inside_member_state or any(
-        country == prefix_country and postal.upper().startswith(prefix)
+        country == prefix_country and postal.startswith(prefix)
         for prefix_country, prefix in EU_VAT_POSTAL_PREFIXES
     )
+
+
+def _postal_code(country: str, postal_code: typing.Optional[str]) -> str:
+    postal = str(postal_code or "").strip().upper()
+    own_prefix = (
+        re.match(rf"{re.escape(country)}(?:[\s-]+|(?=\d))", postal) if country else None
+    )
+    return (postal[own_prefix.end():] if own_prefix else postal).replace(" ", "")
