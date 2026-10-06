@@ -36,7 +36,7 @@ NOT_SERVED: typing.Dict[str, typing.Tuple[typing.FrozenSet[str], str]] = {
                 "DHL Freight Sweden Parcel Connect (109), Parcel Connect Plus (112), and Parcel Return Connect (107)",
                 "do not serve Switzerland.",
                 "Book Switzerland on a product that serves it, such as Home Delivery International B2C (601),",
-                "Euroconnect (202), Euroline (205), or Eurapid (233).",
+                "Road Freight Standard (202), Road Freight Direct (205), or Road Freight Priority (233).",
             ]
         ),
     ),
