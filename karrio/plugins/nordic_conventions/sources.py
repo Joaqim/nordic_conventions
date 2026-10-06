@@ -37,6 +37,7 @@ BAZG_R_69_03_URL = "https://www.bazg.admin.ch/dam/de/sd-web/mIvoM5CF7ydH/steuerb
 PN_SE_NO_PAGE_URL = "https://www.postnord.se/privat/skicka/skicka-brev-och-paket-utomlands/skicka-paket-till-norge/ (read 2026-10-02)"
 TV_EXPORT_DOCUMENTS_URL = "https://www.tullverket.se/sv/foretag/exporteravaror/deklareravarorvidexport/styrkandehandlingarvidexport.4.78aa922815794d801e25e3.html (updated 2026-06-12, read 2026-10-02)"
 DHL_EXPRESS_CUSTOMS_URL = "https://mydhl.express.dhl/content/dam/downloads/global/en/customs-guide/express_global_customs_customer_guidelines.pdf.coredownload.pdf"
+DHL_CONNECTOR_REJECTION_112_GB_URL = "https://github.com/PrimePack-AB/karrio-dhl-freight-sweden/blob/28c1ccb/tests/dhl_freight_sweden/fixtures/sandbox/rejection-22005-112-se-gb.json (captured 2026-10-06)"
 
 
 @attr.s(auto_attribs=True, frozen=True)
@@ -289,6 +290,11 @@ DHL_MAN_PARCEL_CONNECT_COUNTRIES = Source(
     "W",
     _ref("Product manual v5.26", f"{DHL_MAN_URL} §5.3 p.18, §5.14 p.63, §5.15 p.66"),
     "DHL Freight Sweden product manual v5.26: Parcel Connect (109) serves AT, BE, BG, CZ, DE, DK, EE, ES, FI, FR, GB (by separate agreement only), HR, HU, IE, IT, LT, LU, LV, NL, NO, PL, PT, RO, SI, and SK; Parcel Connect Plus (112) the same, FR only through the print and transportInstruction APIs; Parcel Return Connect (107) the same except GB; 109 and 112 exclude FR 97100-99999; Switzerland is served by Road Freight Standard (202), Road Freight Direct (205), Road Freight Priority (233), SPI, and Home Delivery International (601).",
+)
+DHL_CONNECTOR_SANDBOX_112_GB_REJECTED = Source(
+    "S",
+    _ref("Sandbox rejection 22005", DHL_CONNECTOR_REJECTION_112_GB_URL),
+    "DHL Freight Sweden connector sandbox evidence: a Parcel Connect Plus (112) booking from SE to GB without the separate agreement, for which product matches did not offer 112, was rejected with 22005 \"No valid product was found for given productcode and countries\" and 22026 \"Consignee CountryCode is not valid for this product\".",
 )
 
 ALL: typing.Tuple[Source, ...] = tuple(

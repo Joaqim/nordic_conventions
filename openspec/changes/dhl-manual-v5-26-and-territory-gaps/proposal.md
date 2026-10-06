@@ -32,5 +32,5 @@ None.
 
 ## Impact
 
-`territories.py`, `sources.py`, `rules/dhl_freight_sweden.py`, tests, `README.md`, `AGENTS.md`, and the main specification.
+`territories.py`, `sources.py`, `rules/dhl_freight_sweden.py`, tests, `README.md`, and the main specification.
 No advisory code, level, trigger, or attestation changes; verdicts change only for `FR` 97000-97999, `DK` 3800-3999, and country-prefixed postal codes.

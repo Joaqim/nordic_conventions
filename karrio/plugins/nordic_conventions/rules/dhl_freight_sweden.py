@@ -211,6 +211,6 @@ def parcel_connect_gb_agreement(request, context) -> typing.List[models.Message]
                 ]
             ),
             lane,
-            [sources.DHL_MAN_PARCEL_CONNECT_COUNTRIES],
+            [sources.DHL_MAN_PARCEL_CONNECT_COUNTRIES, sources.DHL_CONNECTOR_SANDBOX_112_GB_REJECTED],
         )
     ]

@@ -22,7 +22,7 @@ FN line references stay where a source has one, because they record where the fi
 No rule's basis changed materially.
 The Parcel Connect source statement changes in substance: 112 now lists FR (print and transportInstruction APIs required, 97100-99999 excluded; release notes p7) and no longer lists Åland among its excluded regions, and product 232 is gone; none of these feeds a rule trigger.
 
-The connector sandbox evidence is the committed fixture `tests/dhl_freight_sweden/fixtures/sandbox/rejection-22005-112-se-gb.json` of the DHL Freight Sweden connector repository at 28c1ccb, cited as the document constant `DHL_CONNECTOR_REJECTION_112_GB` and tagged S, because it is evidence committed to a repository rather than published carrier documentation.
+The connector sandbox evidence is the committed fixture `tests/dhl_freight_sweden/fixtures/sandbox/rejection-22005-112-se-gb.json` of the DHL Freight Sweden connector repository at 28c1ccb, cited by its GitHub URL at that commit as the document constant `DHL_CONNECTOR_REJECTION_112_GB_URL` and tagged S, because it is evidence committed to a repository rather than published carrier documentation.
 
 ## Territory ranges
 

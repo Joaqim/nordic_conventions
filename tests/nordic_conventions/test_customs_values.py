@@ -181,7 +181,7 @@ class TestNordicConventionsZeroValueLine(unittest.TestCase):
 
 
 class TestNordicConventionsParcelConnectDestinations(unittest.TestCase):
-    def _expected(self, code, text, lane):
+    def _expected(self, code, text, lane, cited=(sources.DHL_MAN_PARCEL_CONNECT_COUNTRIES,)):
         return [
             dict(
                 code=code,
@@ -190,7 +190,7 @@ class TestNordicConventionsParcelConnectDestinations(unittest.TestCase):
                 details=dict(
                     plugin="nordic_conventions",
                     lane=lane,
-                    sources=[sources.DHL_MAN_PARCEL_CONNECT_COUNTRIES.to_dict()],
+                    sources=[source.to_dict() for source in cited],
                 ),
             )
         ]
@@ -233,7 +233,10 @@ class TestNordicConventionsParcelConnectDestinations(unittest.TestCase):
                 self.assertListEqual(
                     _advise(dhl_freight_sweden.parcel_connect_gb_agreement, "dhl_freight_sweden", "GB", service, PAID),
                     self._expected(
-                        "nordic_conventions_dhl_freight_sweden_parcel_connect_gb_agreement", GB_AGREEMENT_TEXT, "SE-GB"
+                        "nordic_conventions_dhl_freight_sweden_parcel_connect_gb_agreement",
+                        GB_AGREEMENT_TEXT,
+                        "SE-GB",
+                        (sources.DHL_MAN_PARCEL_CONNECT_COUNTRIES, sources.DHL_CONNECTOR_SANDBOX_112_GB_REJECTED),
                     ),
                 )
 

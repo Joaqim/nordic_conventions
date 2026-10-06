@@ -85,7 +85,7 @@ Non-EU means outside the EU VAT area.
 | <a id="nordic_conventions_dhl_freight_sweden_attached_documents"></a>Documents outside package | `warning` | all non-EU | Parcel Connect (`dhl_freight_sweden_parcel_connect_b2c`, 109) | DHL product manual[^dhl-man] |
 | <a id="nordic_conventions_dhl_freight_sweden_voec_marking"></a>VOEC marking | `warning` | Norway | `customs.options.voec_number` set | DHL product manual[^dhl-man], DHL connector spec[^dfs] |
 | <a id="nordic_conventions_dhl_freight_sweden_parcel_connect_not_served"></a>Parcel Connect not served | `warning` | Switzerland and Great Britain | Parcel Connect (`dhl_freight_sweden_parcel_connect_b2c`, 109), Parcel Connect Plus (`dhl_freight_sweden_parcel_connect_plus`, 112), or Parcel Return Connect (`dhl_freight_sweden_parcel_return_connect_c2b`, 107) to Switzerland; Parcel Return Connect to Great Britain | DHL product manual[^dhl-man] |
-| <a id="nordic_conventions_dhl_freight_sweden_parcel_connect_gb_agreement"></a>Parcel Connect to Great Britain | `warning` | Great Britain | Parcel Connect (`dhl_freight_sweden_parcel_connect_b2c`, 109) or Parcel Connect Plus (`dhl_freight_sweden_parcel_connect_plus`, 112), which serve Great Britain only by separate agreement | DHL product manual[^dhl-man] |
+| <a id="nordic_conventions_dhl_freight_sweden_parcel_connect_gb_agreement"></a>Parcel Connect to Great Britain | `warning` | Great Britain | Parcel Connect (`dhl_freight_sweden_parcel_connect_b2c`, 109) or Parcel Connect Plus (`dhl_freight_sweden_parcel_connect_plus`, 112), which serve Great Britain only by separate agreement | DHL product manual[^dhl-man], DHL connector sandbox rejection[^dhl-connector-gb-rejection] |
 
 ### Across carriers
 
@@ -181,6 +181,7 @@ The connector cross-check tests run when the PostNord and DHL Freight Sweden con
 [^pn-fi-terms]: PostNord FI special terms for parcels, valid 2026-05-01, Wayback 2026-06-10; no URL is recorded (`PN_FI_TERMS`).
 [^pn-dk-page]: postnord.dk export page, Wayback 2026-03-10: <https://www.postnord.dk/erhverv/eksport/> (`PN_DK_PAGE_URL`).
 [^dhl-man]: DHL Freight Sweden product manual v5.26, updated 2026-10-01, valid from 2026-11-01, sha256 050660c37ba93d1ae9514c50dfa42c2010bc87763ccaff51a740b2526af11b73, listed at <https://dhlpaket.se/dashboard/specifications/products/> (`DHL_MAN_URL`).
+[^dhl-connector-gb-rejection]: DHL Freight Sweden connector sandbox rejection of Parcel Connect Plus (112) from SE to GB, captured 2026-10-06: <https://github.com/PrimePack-AB/karrio-dhl-freight-sweden/blob/28c1ccb/tests/dhl_freight_sweden/fixtures/sandbox/rejection-22005-112-se-gb.json> (`DHL_CONNECTOR_REJECTION_112_GB_URL`).
 [^dhl-cie]: DHL Freight Sweden customs information export, 2025-02-03: <https://www.dhl.com/content/dam/dhl/local/se/dhl-freight/documents/pdf/se-freight-customs-information-export-en.pdf> (`DHL_CIE_URL`).
 [^dhl-prl]: DHL Freight Sweden price list for additional services, valid 2026-05-01: <https://www.dhl.com/content/dam/dhl/local/se/dhl-freight/documents/pdf/se-freight-price-list-additional-services-sv.pdf> (`DHL_PRL_URL`).
 [^bring]: Bring customs documents page: <https://www.bring.se/tjanster/tull/tulldokument> (`BRING_URL`).

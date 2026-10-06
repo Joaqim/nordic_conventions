@@ -9,7 +9,7 @@
 
 - [ ] 2.1 Cite manual v5.26 in `sources.py`, move every manual section and page reference to v5.26, restate the Parcel Connect country facts, and update the README footnote in the same commit
 - [ ] 2.2 Name the Switzerland alternatives by their v5.26 product names in the `parcel_connect_not_served` message, test-first
-- [ ] 2.3 Add the connector's 112 SE to GB rejection evidence as a source of `parcel_connect_gb_agreement`, test-first, with its README Sources cell, footnote, and `AGENTS.md` constant list
+- [ ] 2.3 Add the connector's 112 SE to GB rejection evidence as a source of `parcel_connect_gb_agreement`, test-first, with its README Sources cell and footnote
 
 ## 3. Verification
 
