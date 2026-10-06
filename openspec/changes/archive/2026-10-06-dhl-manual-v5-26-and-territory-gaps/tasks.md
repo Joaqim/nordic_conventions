@@ -16,4 +16,4 @@
 ## 3. Verification
 
 - [x] 3.1 Run `python -m unittest discover -f tests`, the `AGENTS.md` verification commands, and `openspec validate dhl-manual-v5-26-and-territory-gaps --strict`
-- [ ] 3.2 Archive this change after the connector branch lands, so the parity cross-check sees identical tables
+- [x] 3.2 Archive this change; the operator chose to archive before the connector branch lands, so the parity cross-check fails until it does

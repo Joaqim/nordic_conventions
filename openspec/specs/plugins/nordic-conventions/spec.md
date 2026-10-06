@@ -75,16 +75,35 @@ Norwegian shippers are out of scope because PostNord Norway export rules were no
 ### Requirement: The EU VAT area follows Tullverket for goods
 
 The plugin SHALL decide EU VAT area membership from its own territory table, independent of karrio's `EUCountry`, which lists Greece as `EL` and lacks `AX` and `XI` (FN:235, FN:276, S).
-The table SHALL match Tullverket's list of EU customs and fiscal territories as it applies to goods movements (FN:58-65, W): the EU member states with Greece as `GR` are inside; Monaco is inside (FN:64, W); Northern Ireland is inside, identified as `GB` with a postal code beginning `BT` (FN:64, W); and Åland (`AX`, or `FI` 22000-22999), the Canary Islands (`IC`, or `ES` 35000-35999 and 38000-38999), Ceuta (`ES` 51000-51999), Melilla (`ES` 52000-52999), Büsingen (`DE` 78266), Heligoland (`DE` 27498), Livigno (`IT` 23041), Campione d'Italia (`IT` 22061), the French overseas departments (`GP`, `GF`, `MQ`, `RE`, `YT`), and Mount Athos (`GR` 63086) are outside.
+The table SHALL match Tullverket's list of EU customs and fiscal territories as it applies to goods movements (FN:58-65, W): the EU member states with Greece as `GR` are inside; Monaco is inside (FN:64, W); Northern Ireland is inside, identified as `GB` with a postal code beginning `BT` (FN:64, W); and Åland (`AX`, or `FI` 22000-22999), the Canary Islands (`IC`, or `ES` 35000-35999 and 38000-38999), Ceuta (`ES` 51000-51999), Melilla (`ES` 52000-52999), Büsingen (`DE` 78266), Heligoland (`DE` 27498), Livigno (`IT` 23041), Campione d'Italia (`IT` 22061), the French overseas departments (`GP`, `GF`, `MQ`, `RE`, `YT`, or `FR` 97000-97999), Wallis and Futuna, French Polynesia, and New Caledonia addressed under `FR` (`FR` 98600-98899), the Faroe Islands and Greenland addressed under `DK` (`DK` 3800-3999), and Mount Athos (`GR` or `EL` 63086) are outside.
+The `DK` range is the one DHL Freight Sweden's product manual v5.26 gives for "Greenland & The Faroe Islands" (W, MAN v5.26 §5.3 p.18, §5.14 p.63, §5.15 p.66); the two `FR` ranges are the operator's, inside the manual's delivery exclusion 97100-99999, which also covers Monaco's 98000 and is therefore not adopted.
 Great Britain other than Northern Ireland is outside (FN:65, W).
 Northern Ireland's inside verdict is the goods-movement verdict: Northern Ireland is inside the EU VAT area for goods and outside it for services, and the plugin decides customs-document advice for goods shipments, so the territory table carries no services verdict.
-Monaco's French-style postal codes 98000-98999 keep their inside verdict through the `FR` country code, so only the `MC` country code changes verdict.
-Postal codes SHALL be compared after removing spaces, and a postal code that is not purely numeric SHALL leave the country-level decision unchanged, except that the Northern Ireland prefix comparison SHALL apply to a postal code beginning `BT` whether or not the postal code is purely numeric.
+Monaco's French-style postal codes 98000-98099 keep their inside verdict through the `FR` country code, so only the `MC` country code changes verdict.
+A postal code SHALL be upper-cased and trimmed, SHALL lose a leading prefix code together with the hyphen and whitespace after it, and SHALL then be compared after removing spaces.
+A prefix code is the address's own country code, or a territory code with numeric postcodes whose parent is that country (`AX` under `FI`, `FO` and `GL` under `DK`, `IC` and `EA` under `ES`), followed by a hyphen, whitespace, or a digit; `GB` is a prefix code only when a hyphen or whitespace follows it, and `JE`, `GY`, `IM`, and `BT` are never prefix codes.
+The DHL Freight Sweden connector applies the same normalisation.
+A postal code that is not purely numeric after this normalisation SHALL leave the country-level decision unchanged, except that the Northern Ireland prefix comparison SHALL apply to a normalised postal code beginning `BT` whether or not it is purely numeric.
 
 #### Scenario: Åland by postal code is outside
 
 - **WHEN** a PostNord shipment is created from Sweden to `FI` with postal code 22100
 - **THEN** the recipient is treated as outside the EU VAT area and the Swedish PostNord advisories for destinations outside the EU VAT area apply
+
+#### Scenario: Åland by country-prefixed postal code is outside
+
+- **WHEN** a DHL Freight Sweden shipment is created from Sweden to `FI` with postal code `FI-22100`, `fi 22100`, `FI22100`, or `FI 22 100`
+- **THEN** the recipient is treated as outside the EU VAT area
+
+#### Scenario: Åland by territory-prefixed postal code is outside
+
+- **WHEN** a PostNord shipment is created from Sweden to `FI` with postal code `AX-22100`
+- **THEN** the recipient is treated as outside the EU VAT area, because `AX` is a territory code whose parent is `FI`
+
+#### Scenario: Letters that begin a postal code are kept
+
+- **WHEN** a PostNord shipment is created from Sweden to `MT` with postal code `MTF 1234`
+- **THEN** the recipient is treated as inside the EU VAT area
 
 #### Scenario: Greece is inside
 
@@ -96,9 +115,24 @@ Postal codes SHALL be compared after removing spaces, and a postal code that is 
 - **WHEN** a DHL Freight Sweden shipment is created from Sweden to `ES` with postal code 35 001
 - **THEN** the recipient is treated as outside the EU VAT area
 
+#### Scenario: French overseas department by postal code is outside
+
+- **WHEN** a DHL Freight Sweden shipment is created from Sweden to `FR` with postal code 97400
+- **THEN** the recipient is treated as outside the EU VAT area
+
+#### Scenario: French Pacific collectivity by postal code is outside
+
+- **WHEN** a DHL Freight Sweden shipment is created from Sweden to `FR` with postal code 98713
+- **THEN** the recipient is treated as outside the EU VAT area
+
+#### Scenario: Faroe Islands and Greenland by Danish postal code are outside
+
+- **WHEN** a PostNord shipment is created from Sweden to `DK` with postal code `DK 3800` or `DK-3900`
+- **THEN** the recipient is treated as outside the EU VAT area and the Swedish PostNord advisories for destinations outside the EU VAT area apply
+
 #### Scenario: Mount Athos by postal code is outside
 
-- **WHEN** a PostNord shipment is created from Sweden to `GR` with postal code 630 86
+- **WHEN** a PostNord shipment is created from Sweden to `GR` or `EL` with postal code 630 86
 - **THEN** the recipient is treated as outside the EU VAT area and the Swedish PostNord advisories for destinations outside the EU VAT area apply
 
 #### Scenario: Monaco by country code is inside
@@ -113,8 +147,13 @@ Postal codes SHALL be compared after removing spaces, and a postal code that is 
 
 #### Scenario: Northern Ireland is inside for goods
 
-- **WHEN** a PostNord shipment is created from Sweden to `GB` with postal code BT1 1AA
+- **WHEN** a PostNord shipment is created from Sweden to `GB` with postal code BT1 1AA or `GB-BT1 1AA`
 - **THEN** the plugin returns no message
+
+#### Scenario: Channel Islands and Isle of Man postcodes are not prefixes
+
+- **WHEN** a PostNord shipment is created from Sweden to `GB` with postal code JE2 3AB, GY1 1AA, or IM1 1AA
+- **THEN** the recipient is treated as outside the EU VAT area
 
 #### Scenario: Great Britain outside Northern Ireland is outside
 
@@ -308,7 +347,7 @@ Recorded gap, not addressed: this advisory is limited to PostNord parcel product
 ### Requirement: DHL Freight Sweden needs a customs handling mode
 
 For a DHL Freight Sweden shipment from Sweden to a destination outside the EU VAT area on which none of the connector's customs service options (standard handling, full-service handling, customer's own declaration, joint declaration) is set, the plugin SHALL return code `nordic_conventions_dhl_freight_sweden_customs_mode_missing` at level `warning`, stating that DHL requires customs handling (standard or full service) or an own declaration to be selected for such destinations and naming the connector options that select them.
-The connector selects no customs service implicitly because each carries a fee (DFS lines 75-83, S); DHL's product manual requires the selection for Switzerland, Great Britain, Norway, Åland, and other non-EU destinations (FN:196, W, MAN §7.6.1 and §6.7), and no fee-free mode exists for non-EU destinations (FN:208, W and I), which the details SHALL state.
+The connector selects no customs service implicitly because each carries a fee (DFS lines 75-83, S); DHL's product manual requires the selection for Switzerland, Great Britain, Norway, Åland, and other non-EU destinations (FN:196, W, MAN v5.26 §7.6.1 p.163 and §6.7 p.96), and no fee-free mode exists for non-EU destinations (FN:208, W and I), which the details SHALL state.
 
 #### Scenario: No customs option to Norway
 
@@ -323,7 +362,7 @@ The connector selects no customs service implicitly because each carries a fee (
 ### Requirement: DHL Freight Sweden invoice copy is sent separately
 
 For a DHL Freight Sweden shipment from Sweden to a destination outside the EU VAT area, the plugin SHALL return code `nordic_conventions_dhl_freight_sweden_invoice_copy` at level `warning`, stating that a copy of the invoice must be emailed to dhlfreight.int.se@dhl.com shortly after booking or uploaded in myDHL Freight, one document per shipment with a clear reference, even when complete customs data is sent with the booking, and that missing documents stop the shipment with a reminder fee of 390 kr, or 650 kr for Great Britain.
-Sources: FN:213 (W, MAN §7.6.2, "A copy of the invoice must still be sent"), FN:214 (W, CIE p.9, email and upload routes), FN:216 (W, CIE p.12 and PRL, reminder fees), FN:179 (S, the DHL API has no attachment or upload endpoint).
+Sources: FN:213 (W, MAN v5.26 §7.6.2 p.163, "A copy of the invoice must still be sent"), FN:214 (W, CIE p.9, email and upload routes), FN:216 (W, CIE p.12 and PRL, reminder fees), FN:179 (S, the DHL API has no attachment or upload endpoint).
 
 #### Scenario: Invoice copy advisory to Great Britain states the higher fee
 
@@ -334,7 +373,7 @@ Sources: FN:213 (W, MAN §7.6.2, "A copy of the invoice must still be sent"), FN
 
 For a DHL Freight Sweden Parcel Connect shipment (service `dhl_freight_sweden_parcel_connect_b2c`, DHL product 109) from Sweden to a destination outside the EU VAT area, the plugin SHALL return code `nordic_conventions_dhl_freight_sweden_attached_documents` at level `warning`, stating that two copies of the customs documents must be attached on the outside of the package.
 The details SHALL state that the requirement is unconfirmed for Parcel Connect Plus (112) and road-freight products, which receive no such advisory.
-Sources: FN:215 (W, MAN p.66, "Two copies of customs documents must also be attached on the outside of the package"), FN:268 (open question for 112 and road freight).
+Sources: FN:215 (W, MAN v5.26 §5.14 p.62, "Two copies of customs documents must also be attached on the outside of the package"), FN:268 (open question for 112 and road freight; MAN v5.26 §5.3 p.18 asks for 112 only that documents are sent by e-mail).
 
 #### Scenario: Parcel Connect to Norway
 
@@ -349,7 +388,7 @@ Sources: FN:215 (W, MAN p.66, "Two copies of customs documents must also be atta
 ### Requirement: DHL Freight Sweden VOEC ID is marked on the package
 
 For a DHL Freight Sweden shipment from Sweden to Norway whose customs data carries `options.voec_number`, which the connector sends as DHL's VOEC supply VAT service (DFS lines 66-73, S), the plugin SHALL return code `nordic_conventions_dhl_freight_sweden_voec_marking` at level `warning`, stating that the VOEC ID must be printed on the package or the label.
-Sources: FN:217 (W, MAN pp.97 and 99), FN:206 (W, VOEC with Parcel Connect to Norway).
+Sources: FN:217 (W, MAN v5.26 §6.5 p.92, §6.6 p.94, and §9.4.2 p.168), FN:206 (W, VOEC with Parcel Connect to Norway, sent in the API as `additionalServices.voecSupplyVAT.vatId` per MAN v5.26 §6.5 p.92 and §6.6 p.94).
 
 #### Scenario: VOEC number to Norway
 
@@ -555,9 +594,9 @@ The message SHALL state that a commercial or pro forma invoice may never carry a
 ### Requirement: DHL Freight Sweden Parcel Connect is not booked where it does not serve
 
 For a DHL Freight Sweden shipment from Sweden booked, by unified name or carrier code, as Parcel Connect (`dhl_freight_sweden_parcel_connect_b2c`, `109`), Parcel Connect Plus (`dhl_freight_sweden_parcel_connect_plus`, `112`), or Parcel Return Connect (`dhl_freight_sweden_parcel_return_connect_c2b`, `107`) to Switzerland, or as Parcel Return Connect to Great Britain, the plugin SHALL return code `nordic_conventions_dhl_freight_sweden_parcel_connect_not_served` at level `warning`.
-For Switzerland the message SHALL state that these products do not serve Switzerland and name products that serve it: Home Delivery International B2C (601), Euroconnect (202), Euroline (205), and Eurapid (233).
+For Switzerland the message SHALL state that these products do not serve Switzerland and name products that serve it: Home Delivery International B2C (601), Road Freight Standard (202), Road Freight Direct (205), and Road Freight Priority (233).
 For Great Britain the message SHALL state that Parcel Return Connect (107) does not serve Great Britain.
-`details` SHALL cite the DHL Freight Sweden product manual v5.23 (W).
+`details` SHALL cite the DHL Freight Sweden product manual v5.26 (W, §5.3 p.18, §5.14 p.63, §5.15 p.66).
 
 #### Scenario: Parcel Connect to Switzerland
 
@@ -583,7 +622,7 @@ For Great Britain the message SHALL state that Parcel Return Connect (107) does 
 
 For a DHL Freight Sweden shipment from Sweden to Great Britain booked, by unified name or carrier code, as Parcel Connect (`dhl_freight_sweden_parcel_connect_b2c`, `109`) or Parcel Connect Plus (`dhl_freight_sweden_parcel_connect_plus`, `112`), the plugin SHALL return code `nordic_conventions_dhl_freight_sweden_parcel_connect_gb_agreement` at level `warning`.
 The message SHALL state that these products serve Great Britain only by separate agreement with DHL.
-`details` SHALL cite the DHL Freight Sweden product manual v5.23 (W).
+`details` SHALL cite the DHL Freight Sweden product manual v5.26 (W, §5.3 p.18, §5.14 p.63) and the DHL Freight Sweden connector's committed sandbox evidence that a 112 booking from Sweden to Great Britain without the agreement was rejected with 22005 and 22026 (S, `tests/dhl_freight_sweden/fixtures/sandbox/rejection-22005-112-se-gb.json` at 28c1ccb).
 
 #### Scenario: Parcel Connect to Great Britain
 
