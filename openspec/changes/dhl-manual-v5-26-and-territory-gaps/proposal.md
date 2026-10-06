@@ -7,15 +7,16 @@ v5.26 changes facts the plugin restates: Parcel Connect Plus (112) now serves Fr
 The connector's sandbox also rejected a 112 booking from Sweden to Great Britain made without the separate agreement (22005 and 22026), which corroborates the agreement advisory.
 
 The territory table misses two groups of special territories that are addressed under a member state's country code: French overseas departments under `FR` (postal codes 97000-97999) and the Faroe Islands and Greenland under `DK` (3800-3999), which Tullverket lists outside the EU VAT area.
-A postal code written with its country prefix, such as `FI-22100`, `DK-3900`, or `fi 22100`, is not purely numeric, so the table currently falls back to the member state's inside verdict for it.
+The French Pacific collectivities (Wallis and Futuna, French Polynesia, New Caledonia) addressed under `FR` and Mount Athos addressed under `EL` are also inside today.
+A postal code written with a country or territory prefix, such as `FI-22100`, `AX-22100`, `DK 3800`, or `fi 22100`, is not purely numeric, so the table currently falls back to the member state's inside verdict for it.
 
 ## What Changes
 
 - Cites manual v5.26 by its listing page, version, dates, and sha256, and moves every manual section and page reference to v5.26.
 - Restates the Parcel Connect country facts from v5.26 and names the Switzerland alternatives by their v5.26 product names in the `nordic_conventions_dhl_freight_sweden_parcel_connect_not_served` message.
 - Adds the connector's committed 112 SE to GB rejection evidence as a source of `nordic_conventions_dhl_freight_sweden_parcel_connect_gb_agreement`.
-- Adds `("FR", 97000, 97999)` and `("DK", 3800, 3999)` to `NON_EU_VAT_POSTAL_RANGES`.
-- Removes a leading copy of the address's own country code, followed by a hyphen, spaces, or a digit, from the postal code before the range and prefix comparisons; Northern Ireland stays inside.
+- Appends `("FR", 97000, 97999)`, `("DK", 3800, 3999)`, `("FR", 98600, 98899)`, and `("EL", 63086, 63086)` to `NON_EU_VAT_POSTAL_RANGES`, in that order; Monaco stays inside.
+- Normalises postal codes by one rule shared with the DHL Freight Sweden connector: upper-case and trim, remove a leading code that is the address's own country code or a territory code with numeric postcodes whose parent it is (`AX`, `FO`, `GL`, `IC`, `EA`) when a hyphen, whitespace, or a digit follows it (`GB` only when a hyphen or whitespace follows), never remove `JE`, `GY`, `IM`, or `BT`, then remove spaces; Northern Ireland stays inside.
 - Records candidate territory advisories and a way to run the connector parity test in the design, for operator decision.
 
 Out of scope: new advisories, codes, or attestations; any change to the connectors, which a parallel change in the DHL Freight Sweden connector mirrors.
@@ -28,9 +29,9 @@ None.
 
 ### Modified Capabilities
 
-- `plugins/nordic-conventions`: the EU VAT area requirement gains two postal ranges and country-prefix normalisation; the six DHL Freight Sweden manual-backed requirements cite v5.26.
+- `plugins/nordic-conventions`: the EU VAT area requirement gains four postal ranges and prefix normalisation; the six DHL Freight Sweden manual-backed requirements cite v5.26.
 
 ## Impact
 
 `territories.py`, `sources.py`, `rules/dhl_freight_sweden.py`, tests, `README.md`, and the main specification.
-No advisory code, level, trigger, or attestation changes; verdicts change only for `FR` 97000-97999, `DK` 3800-3999, and country-prefixed postal codes.
+No advisory code, level, trigger, or attestation changes; verdicts change only for `FR` 97000-97999 and 98600-98899, `DK` 3800-3999, `EL` 63086, and prefixed postal codes.

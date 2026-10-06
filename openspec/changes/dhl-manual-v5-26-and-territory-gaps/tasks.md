@@ -4,6 +4,8 @@
 
 - [x] 1.1 Add `("FR", 97000, 97999)` and `("DK", 3800, 3999)` to `NON_EU_VAT_POSTAL_RANGES`, test-first
 - [x] 1.2 Remove a leading copy of the address's own country code from the postal code in `in_eu_vat_area`, test-first
+- [x] 1.3 Append `("FR", 98600, 98899)` and `("EL", 63086, 63086)` to `NON_EU_VAT_POSTAL_RANGES`, test-first
+- [x] 1.4 Apply the shared normalisation rule: also remove territory codes with numeric postcodes under their parent, `GB` only before a hyphen or whitespace, never `JE`, `GY`, `IM`, or `BT`, test-first
 
 ## 2. DHL product manual v5.26
 
@@ -14,4 +16,4 @@
 ## 3. Verification
 
 - [x] 3.1 Run `python -m unittest discover -f tests`, the `AGENTS.md` verification commands, and `openspec validate dhl-manual-v5-26-and-territory-gaps --strict`
-- [ ] 3.2 Archive this change after the parallel connector change lands, so the parity cross-check sees identical tables
+- [ ] 3.2 Archive this change after the connector branch lands, so the parity cross-check sees identical tables

@@ -22,25 +22,31 @@ FN line references stay where a source has one, because they record where the fi
 No rule's basis changed materially.
 The Parcel Connect source statement changes in substance: 112 now lists FR (print and transportInstruction APIs required, 97100-99999 excluded; release notes p7) and no longer lists Åland among its excluded regions, and product 232 is gone; none of these feeds a rule trigger.
 
-The connector sandbox evidence is the committed fixture `tests/dhl_freight_sweden/fixtures/sandbox/rejection-22005-112-se-gb.json` of the DHL Freight Sweden connector repository at 28c1ccb, cited by its GitHub URL at that commit as the document constant `DHL_CONNECTOR_REJECTION_112_GB_URL` and tagged S, because it is evidence committed to a repository rather than published carrier documentation.
+The connector sandbox evidence is the committed fixture `tests/dhl_freight_sweden/fixtures/sandbox/rejection-22005-112-se-gb.json` of the DHL Freight Sweden connector repository at 28c1ccb, cited by its GitHub URL at that commit as the document constant `DHL_CONNECTOR_REJECTION_112_GB_URL` and tagged S, as the operator confirmed, because it is evidence committed to a repository rather than published carrier documentation.
 
 ## Territory ranges
 
-Tullverket's list, as recorded at FN:58-65, already states the status: the French overseas departments are inside the customs union and outside the VAT area (FN:62), and the Faroe Islands and Greenland are outside both (FN:63).
-The table expressed them only by their own country codes, so an address under `FR` or `DK` stayed inside.
-Tullverket names territories, not postal codes, so the ranges come from elsewhere.
-`("DK", 3800, 3999)` is the range DHL's v5.26 exclusion tables give for "Greenland & The Faroe Islands" (§5.3 p18, §5.14 p63, §5.15 p66).
-`("FR", 97000, 97999)` is the operator's range for the overseas departments under `FR`; DHL's exclusion tables give "97100-99999", a delivery exclusion that also covers Monaco's 98000, which Tullverket treats as EU, so the manual range is not adopted.
-DHL §7.4 (p162) names only Åland and the Canary Islands as examples of areas outside the tax area, so it confirms the concept but not these two ranges.
-The ranges are appended after the existing ones so the tuple stays byte-identical with the connector's when the parallel connector change appends them in the same order: `("FR", 97000, 97999)`, then `("DK", 3800, 3999)`.
+Tullverket's list, as recorded at FN:58-65, already states the status: the French overseas departments and Mount Athos are inside the customs union and outside the VAT area (FN:62), and the Faroe Islands and Greenland are outside both (FN:63).
+The table expressed the departments, the Faroe Islands, and Greenland only by their own country codes and Mount Athos only under `GR`, so addresses under `FR`, `DK`, or `EL` stayed inside.
+Tullverket names territories, not postal codes, so the ranges come from elsewhere, and the order of the appended ranges is the operator's, shared with the connector so the tuples stay identical:
 
-## Country-prefixed postal codes
+| Range | Territory | Range source |
+|---|---|---|
+| `("FR", 97000, 97999)` | French overseas departments | Operator decision; DHL's exclusion tables give the wider delivery exclusion 97100-99999 (MAN v5.26 §5.3 p.18, §5.14 p.63). |
+| `("DK", 3800, 3999)` | Faroe Islands and Greenland | MAN v5.26 §5.3 p.18, §5.14 p.63, §5.15 p.66, "Greenland & The Faroe Islands (3800-3999)". |
+| `("FR", 98600, 98899)` | Wallis and Futuna, French Polynesia, New Caledonia | Operator decision; not on Tullverket's list as recorded, and inside DHL's 97100-99999 delivery exclusion. Monaco's 980xx stays inside. |
+| `("EL", 63086, 63086)` | Mount Athos under Greece's VAT prefix | Same as `("GR", 63086, 63086)` (FN:62), because the table accepts `EL` as Greece. |
 
-Addresses sometimes carry the country in the postal code, as in `FI-22100`, `DK-3900`, or `fi 22100`, and such a code is not purely numeric, so the range comparison skipped it.
-`in_eu_vat_area` now upper-cases and trims the postal code and removes a leading copy of the address's own country code when a hyphen, whitespace, or a digit follows it, before removing spaces.
-Only the address's own country code is removed: `AX-22100` under `FI` keeps falling back to `FI`'s inside verdict, as the existing test states, and legacy distinguishing signs such as `N-` or `D-` are left alone.
-Requiring a separator or a digit keeps alphanumeric postal codes that start with the country's letters intact, such as Maltese `MTF 1234` under `MT`.
-The prefix comparison uses the normalised code, so `GB-BT1 1AA` is inside like `BT1 1AA`, and Northern Ireland stays inside per Tullverket.
+DHL §7.4 (p.162) names only Åland and the Canary Islands as examples of areas outside the tax area, so it confirms the concept but none of these ranges.
+
+## Prefixed postal codes
+
+Addresses sometimes carry a country or territory code in the postal code, as in `FI-22100`, `AX-22100`, `DK 3800`, or `fi 22100`, and such a code is not purely numeric, so the range comparison skipped it.
+The operator set one rule for this plugin and the DHL Freight Sweden connector: upper-case and trim; remove a leading code that is the address's own country code, or a territory code with numeric postcodes whose parent is that country (`NUMERIC_POSTAL_TERRITORY_PARENTS`: `AX` to `FI`, `FO` and `GL` to `DK`, `IC` and `EA` to `ES`), when a hyphen, whitespace, or a digit follows it; then remove spaces.
+`GB` is removed only before a hyphen or whitespace, and `JE`, `GY`, `IM`, and `BT` are never removed, because they begin United Kingdom postcodes; so `GB-BT1 1AA` and `BT1 1AA` are inside and Northern Ireland stays inside per Tullverket.
+Requiring a separator or a digit keeps alphanumeric postal codes that start with the country's letters intact, such as Maltese `MTF 1234` under `MT`, and a territory code is removed only under its parent, so `AX-22100` under `SE` is left alone.
+`postal_prefix_codes(country_code)` returns the removable codes, so the connector's equivalent can be compared directly.
+A Faroese three-digit code under `DK`, such as `FO-100`, normalises to `100`, which is outside `DK` 3800-3999 and therefore stays inside; the table has no rule for it.
 
 ## Connector parity and running the parity test
 
@@ -64,7 +70,6 @@ Recorded for the operator to decide; none is implemented here.
 
 ## Open Questions
 
-- Whether `FR` 98600-98899 (Wallis and Futuna, French Polynesia, New Caledonia) should also be outside when addressed under `FR`; Tullverket's list as recorded does not name them, and DHL's 97100-99999 covers them.
-- Whether country-prefix normalisation should also remove another country's code, such as `AX-22100` under `FI`, which today stays inside.
-- Whether the S tag fits sandbox evidence, or whether it needs its own tag.
-- `NON_EU_VAT_POSTAL_RANGES` keys Mount Athos on `GR`, so `EL` 63086 stays inside; this is pre-existing and unchanged here.
+- Whether a `FO` or `GL` prefix under `DK` should make the address outside even when the remaining code is a Faroese three-digit code outside 3800-3999.
+
+Decided by the operator: `FR` 98600-98899 and `EL` 63086 are outside; territory prefixes with numeric postcodes are removed under their parent; the sandbox evidence keeps the S tag; this change is archived after the connector branch lands.

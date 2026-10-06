@@ -9,9 +9,10 @@ from the member-state set, or by postal-code range within a member state,
 with Mount Athos excluded by ``GR`` and ``EL`` 63086, the French overseas
 departments by ``FR`` 97000-97999, Wallis and Futuna, French Polynesia, and
 New Caledonia by ``FR`` 98600-98899, and the Faroe Islands and Greenland by
-``DK`` 3800-3999; Monaco's 98000-98099 stays inside. Northern Ireland is inside the
-EU VAT area for goods and outside it for services; the plugin advises on
-goods shipments, so ``GB`` postal codes beginning ``BT`` are inside.
+``DK`` 3800-3999, while Monaco's ``FR`` 980xx codes stay inside. Northern
+Ireland is inside the EU VAT area for goods and outside it for services;
+the plugin advises on goods shipments, so ``GB`` postal codes beginning
+``BT`` are inside.
 """
 
 import re
