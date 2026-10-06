@@ -3,14 +3,14 @@ requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "karrio_nordic_conventions"
+name = "karrio_advisor_nordic_conventions"
 version = "2026.10.6"
 description = "Karrio - Nordic trade document conventions advisors"
 readme = "README.md"
-requires-python = ">=3.7"
+requires-python = ">=3.11"
 license = "LGPL-3.0"
 authors = [
-    {name = "karrio", email = "hello@karrio.io"}
+    {name = "PrimePack AB"}
 ]
 classifiers = [
     "Intended Audience :: Developers",
@@ -22,7 +22,7 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/Joaqim/nordic_conventions"
+Homepage = "https://github.com/PrimePack-AB/karrio-advisor-nordic-conventions"
 
 [project.entry-points."karrio.plugins"]
 advisor_nordic_conventions = "karrio.plugins.advisor_nordic_conventions:METADATA"
@@ -35,5 +35,6 @@ include-package-data = true
 "" = "."
 
 [tool.setuptools.packages.find]
+include = ["karrio*"]
 exclude = ["tests.*", "tests"]
 namespaces = true
