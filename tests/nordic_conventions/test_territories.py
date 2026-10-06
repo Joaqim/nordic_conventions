@@ -51,6 +51,24 @@ class TestNordicConventionsTerritories(unittest.TestCase):
     def test_mount_athos_by_postal_code_is_outside(self):
         self.assertFalse(territories.in_eu_vat_area("GR", "630 86"))
 
+    def test_french_overseas_departments_by_postal_code_are_outside(self):
+        self.assertListEqual(
+            [
+                territories.in_eu_vat_area("FR", postal_code)
+                for postal_code in ("96999", "97000", "97100", "97400", "97600", "97999", "98000")
+            ],
+            [True, False, False, False, False, False, True],
+        )
+
+    def test_faroe_islands_and_greenland_by_danish_postal_code_are_outside(self):
+        self.assertListEqual(
+            [
+                territories.in_eu_vat_area("DK", postal_code)
+                for postal_code in ("3799", "3800", "3900", "3999", "4000")
+            ],
+            [True, False, False, False, True],
+        )
+
     def test_matches_connector_tables(self):
         for carrier_name in ("postnord", "dhl_freight_sweden"):
             with self.subTest(carrier_name=carrier_name):
