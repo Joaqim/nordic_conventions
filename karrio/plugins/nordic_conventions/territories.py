@@ -68,6 +68,16 @@ NON_EU_VAT_POSTAL_RANGES: typing.Tuple[typing.Tuple[str, int, int], ...] = (
     ("EL", 63086, 63086),  # Mount Athos
 )
 
+NUMERIC_POSTAL_TERRITORY_PARENTS: typing.Dict[str, str] = {
+    "AX": "FI",  # Åland
+    "FO": "DK",  # Faroe Islands
+    "GL": "DK",  # Greenland
+    "IC": "ES",  # Canary Islands
+    "EA": "ES",  # Ceuta and Melilla
+}
+
+UK_POSTCODE_AREA_CODES: typing.FrozenSet[str] = frozenset({"JE", "GY", "IM", "BT"})
+
 EU_VAT_POSTAL_PREFIXES: typing.Tuple[typing.Tuple[str, str], ...] = (
     ("GB", "BT"),  # Northern Ireland
 )
@@ -79,12 +89,11 @@ def in_eu_vat_area(
 ) -> bool:
     """Whether an address lies inside the EU VAT area for goods.
 
-    A postal code is compared after upper-casing it, removing a leading copy
-    of the address's own country code followed by a hyphen, whitespace, or a
-    digit (``FI-22100``, ``fi 22100``, ``FI22100``), and removing spaces;
-    the exclusion ranges apply only when the code is then purely numeric,
-    the inclusion prefixes in any case, and a code matching neither leaves
-    the country-level decision standing.
+    A postal code is upper-cased and trimmed, loses a leading prefix code
+    (see ``postal_prefix_codes``) followed by a hyphen, whitespace, or a
+    digit, and loses its spaces; the exclusion ranges apply only when the
+    code is then purely numeric, the inclusion prefixes in any case, and a
+    code matching neither leaves the country-level decision standing.
     """
     country = (country_code or "").upper()
     postal = _postal_code(country, postal_code)
@@ -102,9 +111,29 @@ def in_eu_vat_area(
     )
 
 
+def postal_prefix_codes(country_code: str) -> typing.Tuple[str, ...]:
+    """Codes that may lead a postal code of ``country_code`` and are removed.
+
+    These are the country's own code and the codes of its territories with
+    numeric postal codes. ``JE``, ``GY``, ``IM``, and ``BT`` are never
+    removed, because they begin United Kingdom postcodes.
+    """
+    territories = (
+        territory
+        for territory, parent in NUMERIC_POSTAL_TERRITORY_PARENTS.items()
+        if parent == country_code
+    )
+    return tuple(
+        code for code in (country_code, *territories) if code and code not in UK_POSTCODE_AREA_CODES
+    )
+
+
 def _postal_code(country: str, postal_code: typing.Optional[str]) -> str:
     postal = str(postal_code or "").strip().upper()
-    own_prefix = (
-        re.match(rf"{re.escape(country)}(?:[\s-]+|(?=\d))", postal) if country else None
-    )
-    return (postal[own_prefix.end():] if own_prefix else postal).replace(" ", "")
+    for code in postal_prefix_codes(country):
+        separator = r"[\s-]+" if code == "GB" else r"[\s-]+|(?=\d)"
+        prefix = re.match(rf"{re.escape(code)}(?:{separator})", postal)
+        if prefix:
+            postal = postal[prefix.end():]
+            break
+    return postal.replace(" ", "")
