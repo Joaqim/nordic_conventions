@@ -1,7 +1,7 @@
 import importlib
 import unittest
 
-import karrio.plugins.nordic_conventions.lanes as lanes
+import karrio.plugins.advisor_nordic_conventions.lanes as lanes
 from . import fixture
 
 

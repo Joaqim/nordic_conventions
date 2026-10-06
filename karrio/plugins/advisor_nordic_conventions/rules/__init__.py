@@ -4,10 +4,10 @@ import typing
 
 import karrio.core.models as models
 
-import karrio.plugins.nordic_conventions.lanes as lanes
-import karrio.plugins.nordic_conventions.sources as sources
+import karrio.plugins.advisor_nordic_conventions.lanes as lanes
+import karrio.plugins.advisor_nordic_conventions.sources as sources
 
-PLUGIN_ID = "nordic_conventions"
+PLUGIN_ID = "advisor_nordic_conventions"
 
 
 def advisory(

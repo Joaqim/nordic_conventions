@@ -5,13 +5,13 @@ import typing
 
 import karrio.core.models as models
 
-import karrio.plugins.nordic_conventions.lanes as lanes
-import karrio.plugins.nordic_conventions.rules.customs_values as customs_values
-import karrio.plugins.nordic_conventions.rules.dhl_freight_sweden as dhl_freight_sweden
-import karrio.plugins.nordic_conventions.rules.invoice_type as invoice_type
-import karrio.plugins.nordic_conventions.rules.postnord as postnord
-from karrio.plugins.nordic_conventions.codes import AdvisoryClassification
-from karrio.plugins.nordic_conventions.rules import PLUGIN_ID
+import karrio.plugins.advisor_nordic_conventions.lanes as lanes
+import karrio.plugins.advisor_nordic_conventions.rules.customs_values as customs_values
+import karrio.plugins.advisor_nordic_conventions.rules.dhl_freight_sweden as dhl_freight_sweden
+import karrio.plugins.advisor_nordic_conventions.rules.invoice_type as invoice_type
+import karrio.plugins.advisor_nordic_conventions.rules.postnord as postnord
+from karrio.plugins.advisor_nordic_conventions.codes import AdvisoryClassification
+from karrio.plugins.advisor_nordic_conventions.rules import PLUGIN_ID
 
 OPTION_PREFIX = f"{PLUGIN_ID}_"
 

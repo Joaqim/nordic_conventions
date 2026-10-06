@@ -5,15 +5,15 @@ import typing
 import attr
 import karrio.core.models as models
 
-import karrio.plugins.nordic_conventions.lanes as lanes
-import karrio.plugins.nordic_conventions.sources as sources
-from karrio.plugins.nordic_conventions.codes import AdvisoryClassification
-from karrio.plugins.nordic_conventions.procedures import (
+import karrio.plugins.advisor_nordic_conventions.lanes as lanes
+import karrio.plugins.advisor_nordic_conventions.sources as sources
+from karrio.plugins.advisor_nordic_conventions.codes import AdvisoryClassification
+from karrio.plugins.advisor_nordic_conventions.procedures import (
     Procedure,
     answering_procedures,
     option_key,
 )
-from karrio.plugins.nordic_conventions.rules import advisory
+from karrio.plugins.advisor_nordic_conventions.rules import advisory
 
 
 def parse(request: typing.Any) -> typing.FrozenSet[Procedure]:

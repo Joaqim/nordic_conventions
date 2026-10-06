@@ -1,15 +1,15 @@
 import unittest
 
-import karrio.plugins.nordic_conventions.attestations as attestations
-import karrio.plugins.nordic_conventions.lanes as lanes
-import karrio.plugins.nordic_conventions.rules.postnord as postnord
-import karrio.plugins.nordic_conventions.sources as sources
-from karrio.plugins.nordic_conventions.procedures import Procedure
+import karrio.plugins.advisor_nordic_conventions.attestations as attestations
+import karrio.plugins.advisor_nordic_conventions.lanes as lanes
+import karrio.plugins.advisor_nordic_conventions.rules.postnord as postnord
+import karrio.plugins.advisor_nordic_conventions.sources as sources
+from karrio.plugins.advisor_nordic_conventions.procedures import Procedure
 from . import fixture
 
-PAPER = "nordic_conventions_commercial_invoice_paper_copy"
-CUSTOMS_DECLARATION = "nordic_conventions_customs_declaration_paper_copy"
-ELECTRONIC = "nordic_conventions_commercial_invoice_electronic"
+PAPER = "advisor_nordic_conventions_commercial_invoice_paper_copy"
+CUSTOMS_DECLARATION = "advisor_nordic_conventions_customs_declaration_paper_copy"
+ELECTRONIC = "advisor_nordic_conventions_commercial_invoice_electronic"
 
 PAPER_PROCEDURE = Procedure.commercial_invoice_paper_copy
 ELECTRONIC_PROCEDURE = Procedure.commercial_invoice_electronic
@@ -51,7 +51,7 @@ class TestNordicConventionsAttestationParsing(unittest.TestCase):
 
     def test_unknown_namespaced_option_is_no_claim(self):
         self.assertSetEqual(
-            _parse({"nordic_conventions_unknown_procedure": True}), frozenset()
+            _parse({"advisor_nordic_conventions_unknown_procedure": True}), frozenset()
         )
 
     def test_no_options_attest_nothing(self):
@@ -174,13 +174,13 @@ class TestNordicConventionsAttestationResolver(unittest.TestCase):
                     attestations.attestation_conflicts, request, fixture.context("postnord")
                 )
             ],
-            ["nordic_conventions_attestation_conflict"],
+            ["advisor_nordic_conventions_attestation_conflict"],
         )
 
     def test_unknown_namespaced_option_changes_no_advisory(self):
         wrapped = attestations.with_attestations(postnord.se_export_paper_invoice)
         unknown = fixture.shipment(
-            "SE", "CH", "postnord_mypack_home", options={"nordic_conventions_unknown": True}
+            "SE", "CH", "postnord_mypack_home", options={"advisor_nordic_conventions_unknown": True}
         )
         bare = fixture.shipment("SE", "CH", "postnord_mypack_home")
 
@@ -208,17 +208,17 @@ class TestNordicConventionsAttestationConflicts(unittest.TestCase):
             ),
             [
                 dict(
-                    code="nordic_conventions_attestation_conflict",
+                    code="advisor_nordic_conventions_attestation_conflict",
                     level="warning",
                     message=(
-                        "The attested procedure nordic_conventions_commercial_invoice_paper_copy "
+                        "The attested procedure advisor_nordic_conventions_commercial_invoice_paper_copy "
                         "does not hold on this lane: PostNord requires the commercial invoice "
                         "from Sweden to Norway digitally, not on paper with the parcel."
                     ),
                     details=dict(
-                        plugin="nordic_conventions",
+                        plugin="advisor_nordic_conventions",
                         lane="SE-NO",
-                        procedure="nordic_conventions_commercial_invoice_paper_copy",
+                        procedure="advisor_nordic_conventions_commercial_invoice_paper_copy",
                         sources=CONFLICT_SOURCES,
                     ),
                 )

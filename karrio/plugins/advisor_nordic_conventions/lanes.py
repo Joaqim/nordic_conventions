@@ -6,7 +6,7 @@ import attr
 import karrio.lib as lib
 import karrio.core.units as units
 
-import karrio.plugins.nordic_conventions.territories as territories
+import karrio.plugins.advisor_nordic_conventions.territories as territories
 
 POSTNORD = "postnord"
 DHL_FREIGHT_SWEDEN = "dhl_freight_sweden"

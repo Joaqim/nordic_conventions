@@ -1,7 +1,7 @@
 import importlib
 import unittest
 
-import karrio.plugins.nordic_conventions.territories as territories
+import karrio.plugins.advisor_nordic_conventions.territories as territories
 
 
 def _connector_units(carrier_name: str):

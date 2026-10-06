@@ -25,7 +25,7 @@ dependencies = [
 Homepage = "https://github.com/Joaqim/nordic_conventions"
 
 [project.entry-points."karrio.plugins"]
-nordic_conventions = "karrio.plugins.nordic_conventions:METADATA"
+advisor_nordic_conventions = "karrio.plugins.advisor_nordic_conventions:METADATA"
 
 [tool.setuptools]
 zip-safe = false

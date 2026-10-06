@@ -1,6 +1,6 @@
 import unittest
 
-import karrio.plugins.nordic_conventions.sources as sources
+import karrio.plugins.advisor_nordic_conventions.sources as sources
 
 
 class TestNordicConventionsSources(unittest.TestCase):

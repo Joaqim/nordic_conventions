@@ -2,9 +2,9 @@ import unittest
 
 import karrio.lib as lib
 
-import karrio.plugins.nordic_conventions.rules.customs_values as customs_values
-import karrio.plugins.nordic_conventions.rules.dhl_freight_sweden as dhl_freight_sweden
-import karrio.plugins.nordic_conventions.sources as sources
+import karrio.plugins.advisor_nordic_conventions.rules.customs_values as customs_values
+import karrio.plugins.advisor_nordic_conventions.rules.dhl_freight_sweden as dhl_freight_sweden
+import karrio.plugins.advisor_nordic_conventions.sources as sources
 from . import fixture
 
 PAID = dict(
@@ -91,11 +91,11 @@ class TestNordicConventionsSwitzerlandDiscount(unittest.TestCase):
             _advise(customs_values.ch_discount_on_invoice, "postnord", "CH", "postnord_parcel", PAID, FREE),
             [
                 dict(
-                    code="nordic_conventions_ch_discount_on_invoice",
+                    code="advisor_nordic_conventions_ch_discount_on_invoice",
                     level="info",
                     message=CH_DISCOUNT_TEXT,
                     details=dict(
-                        plugin="nordic_conventions",
+                        plugin="advisor_nordic_conventions",
                         lane="SE-CH",
                         sources=[sources.BAZG_RABATTE.to_dict()],
                         lines=[1],
@@ -135,11 +135,11 @@ class TestNordicConventionsZeroValueLine(unittest.TestCase):
             _advise(customs_values.zero_value_line, "postnord", "NO", "postnord_parcel", PAID, ZERO),
             [
                 dict(
-                    code="nordic_conventions_zero_value_line",
+                    code="advisor_nordic_conventions_zero_value_line",
                     level="warning",
                     message=ZERO_VALUE_TEXT,
                     details=dict(
-                        plugin="nordic_conventions",
+                        plugin="advisor_nordic_conventions",
                         lane="SE-NO",
                         sources=[
                             sources.PN_SE_NO_PAGE_NON_ZERO_VALUE.to_dict(),
@@ -164,7 +164,7 @@ class TestNordicConventionsZeroValueLine(unittest.TestCase):
                     UNVALUED,
                 )
             ],
-            ["nordic_conventions_zero_value_line"],
+            ["advisor_nordic_conventions_zero_value_line"],
         )
 
     def test_inside_the_eu_vat_area(self):
@@ -188,7 +188,7 @@ class TestNordicConventionsParcelConnectDestinations(unittest.TestCase):
                 level="warning",
                 message=text,
                 details=dict(
-                    plugin="nordic_conventions",
+                    plugin="advisor_nordic_conventions",
                     lane=lane,
                     sources=[source.to_dict() for source in cited],
                 ),
@@ -208,7 +208,7 @@ class TestNordicConventionsParcelConnectDestinations(unittest.TestCase):
                 self.assertListEqual(
                     _advise(dhl_freight_sweden.parcel_connect_not_served, "dhl_freight_sweden", "CH", service, PAID),
                     self._expected(
-                        "nordic_conventions_dhl_freight_sweden_parcel_connect_not_served", CH_NOT_SERVED_TEXT, "SE-CH"
+                        "advisor_nordic_conventions_dhl_freight_sweden_parcel_connect_not_served", CH_NOT_SERVED_TEXT, "SE-CH"
                     ),
                 )
 
@@ -218,7 +218,7 @@ class TestNordicConventionsParcelConnectDestinations(unittest.TestCase):
                 self.assertListEqual(
                     _advise(dhl_freight_sweden.parcel_connect_not_served, "dhl_freight_sweden", "GB", service, PAID),
                     self._expected(
-                        "nordic_conventions_dhl_freight_sweden_parcel_connect_not_served", GB_NOT_SERVED_TEXT, "SE-GB"
+                        "advisor_nordic_conventions_dhl_freight_sweden_parcel_connect_not_served", GB_NOT_SERVED_TEXT, "SE-GB"
                     ),
                 )
 
@@ -233,7 +233,7 @@ class TestNordicConventionsParcelConnectDestinations(unittest.TestCase):
                 self.assertListEqual(
                     _advise(dhl_freight_sweden.parcel_connect_gb_agreement, "dhl_freight_sweden", "GB", service, PAID),
                     self._expected(
-                        "nordic_conventions_dhl_freight_sweden_parcel_connect_gb_agreement",
+                        "advisor_nordic_conventions_dhl_freight_sweden_parcel_connect_gb_agreement",
                         GB_AGREEMENT_TEXT,
                         "SE-GB",
                         (sources.DHL_MAN_PARCEL_CONNECT_COUNTRIES, sources.DHL_CONNECTOR_SANDBOX_112_GB_REJECTED),

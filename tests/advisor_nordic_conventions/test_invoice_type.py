@@ -1,7 +1,7 @@
 import unittest
 
-import karrio.plugins.nordic_conventions.sources as sources
-import karrio.plugins.nordic_conventions.rules.invoice_type as invoice_type
+import karrio.plugins.advisor_nordic_conventions.sources as sources
+import karrio.plugins.advisor_nordic_conventions.rules.invoice_type as invoice_type
 from . import fixture
 
 PROFORMA_FOR_GOODS_SOLD = (
@@ -37,10 +37,10 @@ def _advise(carrier, service, customs, recipient="NO") -> list:
 
 def _message(level, text, lane, cited) -> dict:
     return dict(
-        code="nordic_conventions_invoice_type_content_mismatch",
+        code="advisor_nordic_conventions_invoice_type_content_mismatch",
         level=level,
         message=text,
-        details=dict(plugin="nordic_conventions", lane=lane, sources=cited),
+        details=dict(plugin="advisor_nordic_conventions", lane=lane, sources=cited),
     )
 
 

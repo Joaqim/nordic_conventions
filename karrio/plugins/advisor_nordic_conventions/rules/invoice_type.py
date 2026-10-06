@@ -5,10 +5,10 @@ import typing
 import karrio.core.models as models
 import karrio.core.units as units
 
-import karrio.plugins.nordic_conventions.lanes as lanes
-import karrio.plugins.nordic_conventions.sources as sources
-from karrio.plugins.nordic_conventions.codes import AdvisoryClassification
-from karrio.plugins.nordic_conventions.rules import advisory
+import karrio.plugins.advisor_nordic_conventions.lanes as lanes
+import karrio.plugins.advisor_nordic_conventions.sources as sources
+from karrio.plugins.advisor_nordic_conventions.codes import AdvisoryClassification
+from karrio.plugins.advisor_nordic_conventions.rules import advisory
 
 GIFT_OR_SAMPLE: typing.FrozenSet[str] = frozenset(
     {units.CustomsContentType.gift.name, units.CustomsContentType.sample.name}

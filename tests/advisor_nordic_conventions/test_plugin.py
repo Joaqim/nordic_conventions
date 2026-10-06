@@ -9,8 +9,8 @@ import karrio.core.metadata as metadata
 import karrio.core.settings as settings
 import karrio.references as references
 
-import karrio.plugins.nordic_conventions as nordic_conventions
-import karrio.plugins.nordic_conventions.procedures as procedures
+import karrio.plugins.advisor_nordic_conventions as advisor_nordic_conventions
+import karrio.plugins.advisor_nordic_conventions.procedures as procedures
 from . import fixture
 
 
@@ -31,14 +31,14 @@ def _plugin_messages(messages) -> list:
     return [
         message
         for message in messages
-        if (message.details or {}).get("plugin") == "nordic_conventions"
+        if (message.details or {}).get("plugin") == "advisor_nordic_conventions"
     ]
 
 
 def _advise_all(request, context) -> list:
     return [
         message
-        for advisor in nordic_conventions.ADVISORS
+        for advisor in advisor_nordic_conventions.ADVISORS
         for message in fixture.messages(advisor, request, context)
     ]
 
@@ -59,7 +59,7 @@ class TestNordicConventionsPlugin(unittest.TestCase):
         references.import_extensions()
 
         plugin = references.collect_references(plugin_registry={})["plugins"][
-            "nordic_conventions"
+            "advisor_nordic_conventions"
         ]
 
         self.assertEqual(plugin["type"], "advisor")
@@ -67,11 +67,11 @@ class TestNordicConventionsPlugin(unittest.TestCase):
             [
                 advisor
                 for plugin_id, advisor in references.get_advisors()
-                if plugin_id == "nordic_conventions"
+                if plugin_id == "advisor_nordic_conventions"
             ],
-            nordic_conventions.ADVISORS,
+            advisor_nordic_conventions.ADVISORS,
         )
-        self.assertEqual(len(nordic_conventions.ADVISORS), 15)
+        self.assertEqual(len(advisor_nordic_conventions.ADVISORS), 15)
 
     def test_messages_reach_the_sdk_runner(self):
         references.import_extensions()
@@ -88,7 +88,7 @@ class TestNordicConventionsPlugin(unittest.TestCase):
                 (
                     "postnord",
                     "postnord_se",
-                    "nordic_conventions_postnord_se_export_paper_invoice",
+                    "advisor_nordic_conventions_postnord_se_export_paper_invoice",
                 )
             ],
         )
@@ -107,9 +107,9 @@ class TestNordicConventionsPlugin(unittest.TestCase):
                 )
             ),
             [
-                "nordic_conventions_dhl_freight_sweden_attached_documents",
-                "nordic_conventions_dhl_freight_sweden_customs_mode_missing",
-                "nordic_conventions_dhl_freight_sweden_invoice_copy",
+                "advisor_nordic_conventions_dhl_freight_sweden_attached_documents",
+                "advisor_nordic_conventions_dhl_freight_sweden_customs_mode_missing",
+                "advisor_nordic_conventions_dhl_freight_sweden_invoice_copy",
             ],
         )
 
@@ -132,10 +132,10 @@ class TestNordicConventionsPlugin(unittest.TestCase):
             "dhl_freight_sweden_parcel_connect_b2c",
             customs=fixture.customs("merchandise", True, voec_number="VOEC2024001"),
             options={
-                "nordic_conventions_commercial_invoice_electronic": True,
-                "nordic_conventions_customs_declaration_paper_copy": True,
-                "nordic_conventions_customs_documents_attached_outside": True,
-                "nordic_conventions_voec_marking_printed": True,
+                "advisor_nordic_conventions_commercial_invoice_electronic": True,
+                "advisor_nordic_conventions_customs_declaration_paper_copy": True,
+                "advisor_nordic_conventions_customs_documents_attached_outside": True,
+                "advisor_nordic_conventions_voec_marking_printed": True,
             },
         )
 
@@ -148,7 +148,7 @@ class TestNordicConventionsPlugin(unittest.TestCase):
                     )
                 )
             ),
-            ["nordic_conventions_dhl_freight_sweden_customs_mode_missing"],
+            ["advisor_nordic_conventions_dhl_freight_sweden_customs_mode_missing"],
         )
 
 
@@ -186,7 +186,7 @@ class TestNordicConventionsMessages(unittest.TestCase):
             [
                 message
                 for message in messages
-                if not message["code"].startswith("nordic_conventions_")
+                if not message["code"].startswith("advisor_nordic_conventions_")
                 or "SHIPPING_SDK_" in message["code"]
                 or message["level"] not in advisors.ADVISORY_LEVELS
                 or not message["message"]
@@ -243,7 +243,7 @@ class TestNordicConventionsAttestations(unittest.TestCase):
             "SE",
             "CH",
             "postnord_mypack_home",
-            options={"nordic_conventions_commercial_invoice_paper_copy": True},
+            options={"advisor_nordic_conventions_commercial_invoice_paper_copy": True},
         )
 
         self.assertListEqual(
@@ -260,7 +260,7 @@ class TestNordicConventionsAttestations(unittest.TestCase):
             "NO",
             "postnord_parcel",
             customs=fixture.customs("merchandise", True),
-            options={"nordic_conventions_commercial_invoice_paper_copy": True},
+            options={"advisor_nordic_conventions_commercial_invoice_paper_copy": True},
         )
 
         self.assertListEqual(
@@ -271,8 +271,8 @@ class TestNordicConventionsAttestations(unittest.TestCase):
                 )
             ),
             [
-                ("nordic_conventions_attestation_conflict", "warning"),
-                ("nordic_conventions_postnord_se_no_digital_invoice", "info"),
+                ("advisor_nordic_conventions_attestation_conflict", "warning"),
+                ("advisor_nordic_conventions_postnord_se_no_digital_invoice", "info"),
             ],
         )
 
@@ -322,13 +322,13 @@ class TestNordicConventionsAttestations(unittest.TestCase):
 
 class TestNordicConventionsHookGuard(unittest.TestCase):
     def tearDown(self):
-        importlib.reload(nordic_conventions)
+        importlib.reload(advisor_nordic_conventions)
 
     def test_older_karrio_loads_the_plugin_without_advisors(self):
         with mock.patch.object(
             metadata, "PluginMetadata", PluginMetadataWithoutAdvisors
-        ), self.assertLogs(nordic_conventions.__name__, logging.WARNING) as logs:
-            module = importlib.reload(nordic_conventions)
+        ), self.assertLogs(advisor_nordic_conventions.__name__, logging.WARNING) as logs:
+            module = importlib.reload(advisor_nordic_conventions)
 
         self.assertFalse(module.HOOK_AVAILABLE)
         self.assertIsInstance(module.METADATA, PluginMetadataWithoutAdvisors)

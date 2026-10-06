@@ -1,7 +1,7 @@
 import unittest
 
-import karrio.plugins.nordic_conventions.sources as sources
-import karrio.plugins.nordic_conventions.rules.postnord as postnord
+import karrio.plugins.advisor_nordic_conventions.sources as sources
+import karrio.plugins.advisor_nordic_conventions.rules.postnord as postnord
 from . import fixture
 
 CONTEXT = fixture.context("postnord")
@@ -47,11 +47,11 @@ class TestNordicConventionsPostNordSENoDigitalInvoice(unittest.TestCase):
             fixture.messages(postnord.se_no_digital_invoice, request, CONTEXT),
             [
                 dict(
-                    code="nordic_conventions_postnord_se_no_digital_invoice",
+                    code="advisor_nordic_conventions_postnord_se_no_digital_invoice",
                     level="info",
                     message=f"{NO_DIGITAL_INVOICE_LEAD} {TRANSMITTED}",
                     details=dict(
-                        plugin="nordic_conventions",
+                        plugin="advisor_nordic_conventions",
                         lane="SE-NO",
                         sources=NO_DIGITAL_INVOICE_SOURCES,
                     ),
@@ -70,11 +70,11 @@ class TestNordicConventionsPostNordSENoDigitalInvoice(unittest.TestCase):
                     fixture.messages(postnord.se_no_digital_invoice, request, CONTEXT),
                     [
                         dict(
-                            code="nordic_conventions_postnord_se_no_digital_invoice",
+                            code="advisor_nordic_conventions_postnord_se_no_digital_invoice",
                             level="warning",
                             message=f"{NO_DIGITAL_INVOICE_LEAD} {NO_LETTER_SEK_0} {NOT_TRANSMITTED}",
                             details=dict(
-                                plugin="nordic_conventions",
+                                plugin="advisor_nordic_conventions",
                                 lane="SE-NO",
                                 sources=[
                                     *NO_DIGITAL_INVOICE_SOURCES,
@@ -96,11 +96,11 @@ class TestNordicConventionsPostNordSENoDigitalInvoice(unittest.TestCase):
                     fixture.messages(postnord.se_no_digital_invoice, request, CONTEXT),
                     [
                         dict(
-                            code="nordic_conventions_postnord_se_no_digital_invoice",
+                            code="advisor_nordic_conventions_postnord_se_no_digital_invoice",
                             level="warning",
                             message=f"{NO_DIGITAL_INVOICE_LEAD} {NOT_TRANSMITTED}",
                             details=dict(
-                                plugin="nordic_conventions",
+                                plugin="advisor_nordic_conventions",
                                 lane="SE-NO",
                                 sources=NO_DIGITAL_INVOICE_SOURCES,
                             ),
@@ -120,7 +120,7 @@ class TestNordicConventionsPostNordSENoDigitalInvoice(unittest.TestCase):
             fixture.messages(postnord.se_no_digital_invoice, request, CONTEXT), []
         )
         self.assertListEqual(
-            _codes(request), ["nordic_conventions_postnord_se_postpaket_commercial_invoice"]
+            _codes(request), ["advisor_nordic_conventions_postnord_se_postpaket_commercial_invoice"]
         )
 
     def test_non_commercial_postpaket_utrikes_to_norway_is_a_warning(self):
@@ -135,11 +135,11 @@ class TestNordicConventionsPostNordSENoDigitalInvoice(unittest.TestCase):
             fixture.messages(postnord.se_no_digital_invoice, request, CONTEXT),
             [
                 dict(
-                    code="nordic_conventions_postnord_se_no_digital_invoice",
+                    code="advisor_nordic_conventions_postnord_se_no_digital_invoice",
                     level="warning",
                     message=f"{NO_DIGITAL_INVOICE_LEAD} {NOT_TRANSMITTED}",
                     details=dict(
-                        plugin="nordic_conventions",
+                        plugin="advisor_nordic_conventions",
                         lane="SE-NO",
                         sources=NO_DIGITAL_INVOICE_SOURCES,
                     ),
@@ -177,7 +177,7 @@ class TestNordicConventionsPostNordSEPostpaketCommercialInvoice(unittest.TestCas
             fixture.messages(postnord.se_postpaket_commercial_invoice, request, CONTEXT),
             [
                 dict(
-                    code="nordic_conventions_postnord_se_postpaket_commercial_invoice",
+                    code="advisor_nordic_conventions_postnord_se_postpaket_commercial_invoice",
                     level="warning",
                     message=(
                         "Commercial PostNord Postpaket Utrikes (International Parcel, 91) outside the EU VAT area needs the CN23 export declaration "
@@ -187,7 +187,7 @@ class TestNordicConventionsPostNordSEPostpaketCommercialInvoice(unittest.TestCas
                         f"{POSTPAKET_CONNECTOR_NOTE}"
                     ),
                     details=dict(
-                        plugin="nordic_conventions",
+                        plugin="advisor_nordic_conventions",
                         lane="SE-US",
                         sources=[*POSTPAKET_SOURCES, *POSTPAKET_CODE_SOURCES],
                     ),
@@ -217,7 +217,7 @@ class TestNordicConventionsPostNordSEPostpaketCommercialInvoice(unittest.TestCas
                     postnord.se_postpaket_commercial_invoice, request, CONTEXT
                 )
             ],
-            ["nordic_conventions_postnord_se_postpaket_commercial_invoice"],
+            ["advisor_nordic_conventions_postnord_se_postpaket_commercial_invoice"],
         )
 
     def test_commercial_postpaket_utrikes_to_norway_sends_the_invoice_digitally(self):
@@ -232,7 +232,7 @@ class TestNordicConventionsPostNordSEPostpaketCommercialInvoice(unittest.TestCas
             fixture.messages(postnord.se_postpaket_commercial_invoice, request, CONTEXT),
             [
                 dict(
-                    code="nordic_conventions_postnord_se_postpaket_commercial_invoice",
+                    code="advisor_nordic_conventions_postnord_se_postpaket_commercial_invoice",
                     level="warning",
                     message=(
                         "Commercial PostNord Postpaket Utrikes (International Parcel, 91) to Norway needs the CN23 export declaration, "
@@ -242,7 +242,7 @@ class TestNordicConventionsPostNordSEPostpaketCommercialInvoice(unittest.TestCas
                         f"{POSTPAKET_CONNECTOR_NOTE}"
                     ),
                     details=dict(
-                        plugin="nordic_conventions",
+                        plugin="advisor_nordic_conventions",
                         lane="SE-NO",
                         sources=[
                             *POSTPAKET_SOURCES,
@@ -316,8 +316,8 @@ class TestNordicConventionsPostNordSEPostpaketCommercialInvoice(unittest.TestCas
                 codes
                 for codes in map(_codes, requests)
                 if {
-                    "nordic_conventions_postnord_se_no_digital_invoice",
-                    "nordic_conventions_postnord_se_postpaket_commercial_invoice",
+                    "advisor_nordic_conventions_postnord_se_no_digital_invoice",
+                    "advisor_nordic_conventions_postnord_se_postpaket_commercial_invoice",
                 }
                 <= set(codes)
             ],
@@ -333,7 +333,7 @@ class TestNordicConventionsPostNordSEExportPaperInvoice(unittest.TestCase):
             fixture.messages(postnord.se_export_paper_invoice, request, CONTEXT),
             [
                 dict(
-                    code="nordic_conventions_postnord_se_export_paper_invoice",
+                    code="advisor_nordic_conventions_postnord_se_export_paper_invoice",
                     level="warning",
                     message=(
                         "PostNord requires a commercial invoice in English in triplicate to accompany parcels from Sweden "
@@ -341,7 +341,7 @@ class TestNordicConventionsPostNordSEExportPaperInvoice(unittest.TestCase):
                         "The digital customs data sent with the booking prevails over the paper invoice on any discrepancy."
                     ),
                     details=dict(
-                        plugin="nordic_conventions",
+                        plugin="advisor_nordic_conventions",
                         lane="SE-CH",
                         sources=[
                             sources.PN_SE_EN_PAGE_PARCEL_TRIPLICATE.to_dict(),
@@ -391,7 +391,7 @@ class TestNordicConventionsPostNordSEExportPaperInvoice(unittest.TestCase):
                     postnord.se_export_paper_invoice, request, CONTEXT
                 )
             ],
-            [("nordic_conventions_postnord_se_export_paper_invoice", "SE-FI")],
+            [("advisor_nordic_conventions_postnord_se_export_paper_invoice", "SE-FI")],
         )
 
 
@@ -403,7 +403,7 @@ class TestNordicConventionsPostNordFIExportInvoice(unittest.TestCase):
             fixture.messages(postnord.fi_export_invoice, request, CONTEXT),
             [
                 dict(
-                    code="nordic_conventions_postnord_fi_export_invoice",
+                    code="advisor_nordic_conventions_postnord_fi_export_invoice",
                     level="warning",
                     message=(
                         "PostNord Finland clears customs primarily from the electronic customs data sent with the booking, "
@@ -412,7 +412,7 @@ class TestNordicConventionsPostNordFIExportInvoice(unittest.TestCase):
                         "to accompany parcels to destinations outside the EU VAT area, which is stricter than its web page."
                     ),
                     details=dict(
-                        plugin="nordic_conventions",
+                        plugin="advisor_nordic_conventions",
                         lane="FI-GB",
                         sources=[
                             sources.PN_FI_WEB_PAGE.to_dict(),
@@ -431,14 +431,14 @@ class TestNordicConventionsPostNordFIExportInvoice(unittest.TestCase):
             fixture.messages(postnord.fi_export_invoice, request, CONTEXT),
             [
                 dict(
-                    code="nordic_conventions_postnord_fi_export_invoice",
+                    code="advisor_nordic_conventions_postnord_fi_export_invoice",
                     level="warning",
                     message=(
                         "PostNord Finland requires the invoice for Norway electronically, and it must reach PostNord before the shipment. "
                         "A copy of the invoice can be emailed to tullaus.fi@postnord.com."
                     ),
                     details=dict(
-                        plugin="nordic_conventions",
+                        plugin="advisor_nordic_conventions",
                         lane="FI-NO",
                         sources=[
                             sources.PN_FI_WEB_PAGE_NORWAY.to_dict(),
@@ -454,7 +454,7 @@ class TestNordicConventionsPostNordFIExportInvoice(unittest.TestCase):
 class TestNordicConventionsPostNordDKExportDocuments(unittest.TestCase):
     def _message(self, recipient: str, copies: str) -> dict:
         return dict(
-            code="nordic_conventions_postnord_dk_export_documents",
+            code="advisor_nordic_conventions_postnord_dk_export_documents",
             level="warning",
             message=(
                 "PostNord Denmark requires the export documents in a plastic pocket visible on the parcel: "
@@ -462,7 +462,7 @@ class TestNordicConventionsPostNordDKExportDocuments(unittest.TestCase):
                 "If an export declaration was lodged, send a copy of it to eksport@postnord.com."
             ),
             details=dict(
-                plugin="nordic_conventions",
+                plugin="advisor_nordic_conventions",
                 lane=f"DK-{recipient}",
                 sources=[sources.PN_DK_EXPORT_PAGE.to_dict()],
             ),

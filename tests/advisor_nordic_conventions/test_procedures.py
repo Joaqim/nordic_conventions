@@ -1,9 +1,9 @@
 import unittest
 
-import karrio.plugins.nordic_conventions.lanes as lanes
-import karrio.plugins.nordic_conventions.procedures as procedures
-from karrio.plugins.nordic_conventions.codes import AdvisoryClassification
-from karrio.plugins.nordic_conventions.procedures import Procedure, option_key
+import karrio.plugins.advisor_nordic_conventions.lanes as lanes
+import karrio.plugins.advisor_nordic_conventions.procedures as procedures
+from karrio.plugins.advisor_nordic_conventions.codes import AdvisoryClassification
+from karrio.plugins.advisor_nordic_conventions.procedures import Procedure, option_key
 from . import fixture
 
 PAPER = Procedure.commercial_invoice_paper_copy
@@ -27,23 +27,23 @@ class TestNordicConventionsProcedures(unittest.TestCase):
             [
                 (
                     "commercial_invoice_paper_copy",
-                    "nordic_conventions_commercial_invoice_paper_copy",
+                    "advisor_nordic_conventions_commercial_invoice_paper_copy",
                 ),
                 (
                     "customs_declaration_paper_copy",
-                    "nordic_conventions_customs_declaration_paper_copy",
+                    "advisor_nordic_conventions_customs_declaration_paper_copy",
                 ),
                 (
                     "customs_documents_attached_outside",
-                    "nordic_conventions_customs_documents_attached_outside",
+                    "advisor_nordic_conventions_customs_documents_attached_outside",
                 ),
                 (
                     "commercial_invoice_electronic",
-                    "nordic_conventions_commercial_invoice_electronic",
+                    "advisor_nordic_conventions_commercial_invoice_electronic",
                 ),
                 (
                     "voec_marking_printed",
-                    "nordic_conventions_voec_marking_printed",
+                    "advisor_nordic_conventions_voec_marking_printed",
                 ),
             ],
         )
@@ -241,7 +241,7 @@ class TestNordicConventionsExpectedProcedures(unittest.TestCase):
 
 class TestNordicConventionsPackageExports(unittest.TestCase):
     def test_procedure_symbols_import_from_the_package_root(self):
-        from karrio.plugins.nordic_conventions import Procedure, expected_procedures
+        from karrio.plugins.advisor_nordic_conventions import Procedure, expected_procedures
 
         self.assertIs(Procedure, procedures.Procedure)
         self.assertIs(expected_procedures, procedures.expected_procedures)
