@@ -20,11 +20,13 @@ The plugin also does not know the postal codes the connector excludes per produc
 - The customs-mode message names the joint declaration and its destinations, Norway and Switzerland, as the connector README's customs table does.
 - To Åland the customs-mode advisory is not returned, because a booking with customs data and no customs service is accepted.
 - A new advisory, `advisor_nordic_conventions_dhl_freight_sweden_aland_customs_service_rejected` (warning), fires to Åland only when customs handling standard or full service is selected, which DHL rejects with 24003 and the connector refuses; it names the own declaration or customs data without a customs service, not the joint declaration, which the connector refuses outside Norway and Switzerland.
+- Copies the connector's `TERRITORY_POSTAL_CODES` into `lanes.py` with a cross-check test, and adds `advisor_nordic_conventions_dhl_freight_sweden_territory_postal_code_mismatch` (warning) for a recipient territory code `AX`, `IC`, `EA`, `FO`, or `GL` whose postal code is missing or outside the territory, which the connector refuses with `TerritoryPostalCodeError` (karrio-dhl-freight-sweden 142b62d); it fires whether or not the recipient read under its parent is outside the EU VAT area.
+- Copies the connector's `JOINT_DECLARATION_COUNTRIES` (f86c8ac) into `lanes.py` with a cross-check test and names its countries in the customs-mode message.
 - Copies the connector's excluded postal codes, `POSTAL_CODE_EXCLUSIONS` with the postal code formats and `POSTAL_CODE_PATTERN_EXCLUSIONS`, into a new `exclusions.py`, with a cross-check test against the connector, and returns the not-served warning for an excluded postal code after the territory mapping; the Great Britain agreement warning is not returned for an excluded postcode, so 109 and 112 to `JE*` and `GY*` are warned as not served.
 - New sources cite the connector's destinations page and README at 7a2214d.
 
 The EU VAT area tables in `territories.py`, which must match the connector's, are not changed.
-One advisory code is added; no existing code, level, or attestation changes.
+Two advisory codes are added; no existing code, level, or attestation changes.
 
 Out of scope: any connector change and PostNord territory handling.
 
@@ -36,7 +38,7 @@ None.
 
 ### Modified Capabilities
 
-- `plugins/advisor-nordic-conventions`: adds "DHL Freight Sweden territory codes are read as their parent country" and "DHL Freight Sweden customs handling is not selected to Åland", and modifies "DHL Freight Sweden needs a customs handling mode", "Advisory answering procedures", "DHL Freight Sweden Parcel Connect serves Great Britain only by separate agreement", and "DHL Freight Sweden products are not booked on lanes they do not serve".
+- `plugins/advisor-nordic-conventions`: adds "DHL Freight Sweden territory codes are read as their parent country", "DHL Freight Sweden territory codes carry a postal code of the territory", and "DHL Freight Sweden customs handling is not selected to Åland", and modifies "DHL Freight Sweden needs a customs handling mode", "Advisory answering procedures", "DHL Freight Sweden Parcel Connect serves Great Britain only by separate agreement", and "DHL Freight Sweden products are not booked on lanes they do not serve".
 
 ## Impact
 

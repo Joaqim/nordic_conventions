@@ -17,6 +17,8 @@
 - [x] 3.2 Copy the connector's excluded postal codes into `exclusions.py` with a cross-check test, warn excluded postcodes as not served, and skip the Great Britain agreement for them, test-first
 - [x] 3.3 Update the README rows, Codes list, matrix, and footnotes for 3.1 and 3.2
 
+- [x] 3.4 Copy the connector's `TERRITORY_POSTAL_CODES` into `lanes.py` with a cross-check test, add `advisor_nordic_conventions_dhl_freight_sweden_territory_postal_code_mismatch` for a recipient territory code outside its territory, and update the README, test-first
+
 ## 4. Documentation
 
 - [x] 4.1 Update the README advisory rows, the Requirements at a glance matrix, the scope text, and the footnotes for the new sources

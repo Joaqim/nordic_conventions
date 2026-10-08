@@ -38,6 +38,13 @@ The verdicts follow the connector: a numeric range compares the digits the count
 The connector refuses a booking whose postal code has no verdict ("requires a postal code"); the plugin warns only on an excluded verdict, leaving malformed and missing codes to the connector's error.
 The check runs on the mapped country codes, as the connector's does, and in the not-served rule after the lane check, so a lane outside the product's countries keeps the lane message; the Great Britain agreement rule skips an excluded recipient postcode.
 
+## Territory postal codes
+
+The connector refuses a territory code `AX`, `IC`, `EA`, `FO`, or `GL` whose postal code is missing or outside the territory before mapping it (`TERRITORY_POSTAL_CODES`, `TerritoryPostalCodeError`, 142b62d).
+Mapped, such a recipient is usually the parent's mainland and inside the EU VAT area, where `lane_of` returns no lane, so the advisory reads the lane through `shipper_lane_of`, which applies every scope condition of `lane_of` except the recipient's EU VAT area.
+`DHLTerritoryPostalCodes` copies the connector's named tuple with its `describe` and `matches`, and the cross-check compares the table as plain tuples.
+Only the recipient is checked, because a shipper with a territory code is never in Sweden after mapping and is out of scope.
+
 ## Specification ordering
 
 The delta modifies "DHL Freight Sweden products are not booked on lanes they do not serve", the name the unarchived change `dhl-product-lanes-not-served` gives that requirement, so `dhl-product-lanes-not-served` must be archived first.

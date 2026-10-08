@@ -26,6 +26,30 @@ The answering set of the code SHALL be empty, because its remedy lies in the boo
 - **WHEN** a DHL Freight Sweden shipment from Sweden to Norway is created with `dhl_freight_sweden_customs_handling_full_service` set
 - **THEN** the plugin does not return code `advisor_nordic_conventions_dhl_freight_sweden_aland_customs_service_rejected`
 
+### Requirement: DHL Freight Sweden territory codes carry a postal code of the territory
+
+For a DHL Freight Sweden shipment from Sweden whose recipient carries the country code `AX`, `IC`, `EA`, `FO`, or `GL` with a postal code that is missing or, normalised under the parent country as in "The EU VAT area follows Tullverket for goods", lies outside the territory (`FI` 22000-22999 for `AX`; `ES` 35000-35999 or 38000-38999 for `IC`; `ES` 51000-51999 or 52000-52999 for `EA`; `DK` 3800-3999 or a three-digit code for `FO`; `DK` 3800-3999 for `GL`), the plugin SHALL return code `advisor_nordic_conventions_dhl_freight_sweden_territory_postal_code_mismatch` at level `warning`.
+This requirement qualifies "Advice is limited to Nordic shippers at shipment creation": the advisory SHALL be returned whether or not the recipient, read under its parent country, lies outside the EU VAT area, because such a code is otherwise booked as the parent's mainland.
+The message SHALL name the territory code, the territory, the parent country, the postal codes the connector requires, and the recipient's postal code or its absence, state that the connector refuses the booking, and advise the parent country code for an address outside the territory.
+The territories and their postal codes SHALL be the connector's `TERRITORY_POSTAL_CODES`, copied into the plugin and checked against the connector by a test that runs when the connector is importable; `JE`, `GG`, `IM`, and `XI` have no range and SHALL NOT be checked.
+`details` SHALL cite the connector's `TerritoryPostalCodeError` (S, karrio-dhl-freight-sweden branch `products-manual-country-lists` at 142b62d).
+The answering set of the code SHALL be empty, because its remedy lies in the booking's address.
+
+#### Scenario: Åland code with a mainland postal code
+
+- **WHEN** a DHL Freight Sweden shipment from Sweden to `AX` with postal code 00100, or with no postal code, is created
+- **THEN** the plugin returns code `advisor_nordic_conventions_dhl_freight_sweden_territory_postal_code_mismatch` at level `warning`
+
+#### Scenario: Territory code inside its territory
+
+- **WHEN** a DHL Freight Sweden shipment from Sweden to `AX` with postal code AX-22100, `IC` with postal code 35001, or `FO` with postal code FO-100 is created
+- **THEN** the plugin does not return code `advisor_nordic_conventions_dhl_freight_sweden_territory_postal_code_mismatch`
+
+#### Scenario: Jersey is not checked
+
+- **WHEN** a DHL Freight Sweden shipment from Sweden to `JE` with postal code JE2 3AB is created
+- **THEN** the plugin does not return code `advisor_nordic_conventions_dhl_freight_sweden_territory_postal_code_mismatch`
+
 ### Requirement: DHL Freight Sweden territory codes are read as their parent country
 
 For a `dhl_freight_sweden` advisor context, the plugin SHALL read the shipper's and the recipient's country codes as the DHL Freight Sweden connector books them, replacing a territory code by its parent country: `AX` by `FI`, `FO` and `GL` by `DK`, `IC` and `EA` by `ES`, and `JE`, `GG`, `IM`, and `XI` by `GB`, before the scope and EU VAT area checks of "Advice is limited to Nordic shippers at shipment creation" and in every DHL Freight Sweden advisory that reads a country.
@@ -100,7 +124,7 @@ The answering sets SHALL be lane-aware as follows.
 `advisor_nordic_conventions_dhl_freight_sweden_invoice_copy` is answered by `commercial_invoice_electronic`.
 `advisor_nordic_conventions_dhl_freight_sweden_attached_documents` is answered by `customs_documents_attached_outside`.
 `advisor_nordic_conventions_dhl_freight_sweden_voec_marking` is answered by `voec_marking_printed`.
-`advisor_nordic_conventions_ch_discount_on_invoice`, `advisor_nordic_conventions_zero_value_line`, `advisor_nordic_conventions_dhl_freight_sweden_parcel_connect_not_served`, and `advisor_nordic_conventions_dhl_freight_sweden_parcel_connect_gb_agreement` SHALL map to the empty set, because their remedy lies in the invoice content, the declared values, or the booked product.
+`advisor_nordic_conventions_ch_discount_on_invoice`, `advisor_nordic_conventions_zero_value_line`, `advisor_nordic_conventions_dhl_freight_sweden_parcel_connect_not_served`, `advisor_nordic_conventions_dhl_freight_sweden_parcel_connect_gb_agreement`, and `advisor_nordic_conventions_dhl_freight_sweden_territory_postal_code_mismatch` SHALL map to the empty set, because their remedy lies in the invoice content, the declared values, the booked product, or the address.
 
 #### Scenario: Mapping is complete
 
