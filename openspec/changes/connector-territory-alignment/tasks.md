@@ -12,9 +12,9 @@
 
 ## 3. Documentation
 
-- [ ] 3.1 Update the README advisory rows, the Requirements at a glance matrix, the scope text, and the footnotes for the new sources
+- [x] 3.1 Update the README advisory rows, the Requirements at a glance matrix, the scope text, and the footnotes for the new sources
 
 ## 4. Verification
 
-- [ ] 4.1 Run `python -m unittest discover -s tests`, the parity suite with `PYTHONPATH=../karrio-dhl-freight-sweden`, the `AGENTS.md` verification commands, and `openspec validate connector-territory-alignment --strict`
-- [ ] 4.2 Run the connector's offline tests and `pyright` to confirm the connector is unchanged
+- [x] 4.1 Run `python -m unittest discover -s tests`, the parity suite with `PYTHONPATH=../karrio-dhl-freight-sweden`, the `AGENTS.md` verification commands, and `openspec validate connector-territory-alignment --strict`
+- [x] 4.2 Run the connector's offline tests and `pyright` to confirm the connector is unchanged
