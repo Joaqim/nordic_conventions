@@ -39,8 +39,8 @@ TV_EXPORT_DOCUMENTS_URL = "https://www.tullverket.se/sv/foretag/exporteravaror/d
 DHL_EXPRESS_CUSTOMS_URL = "https://mydhl.express.dhl/content/dam/downloads/global/en/customs-guide/express_global_customs_customer_guidelines.pdf.coredownload.pdf"
 DHL_CONNECTOR_README_URL = "https://github.com/PrimePack-AB/karrio-dhl-freight-sweden/blob/7a2214d/README.md (read 2026-10-08)"
 DHL_CONNECTOR_DESTINATIONS_URL = "https://github.com/PrimePack-AB/karrio-dhl-freight-sweden/blob/7a2214d/docs/concepts/destinations.md (read 2026-10-08)"
-DHL_CONNECTOR_TERRITORY_CHECK = "karrio-dhl-freight-sweden branch products-manual-country-lists@142b62d, karrio/providers/dhl_freight_sweden/units.py TERRITORY_POSTAL_CODES and shipment/create.py TerritoryPostalCodeError (committed 2026-10-08, not yet pushed)"
-DHL_CONNECTOR_JOINT_DECLARATION_CHECK = "karrio-dhl-freight-sweden branch products-manual-country-lists@f86c8ac, karrio/providers/dhl_freight_sweden/units.py JOINT_DECLARATION_COUNTRIES and shipment/create.py JointDeclarationDestinationError (committed 2026-10-08, not yet pushed)"
+DHL_CONNECTOR_TERRITORY_CHECK = "https://github.com/PrimePack-AB/karrio-dhl-freight-sweden/commit/142b62d (committed 2026-10-08)"
+DHL_CONNECTOR_JOINT_DECLARATION_CHECK = "https://github.com/PrimePack-AB/karrio-dhl-freight-sweden/commit/f86c8ac (committed 2026-10-08)"
 DHL_CONNECTOR_REJECTION_112_GB_URL = "https://github.com/PrimePack-AB/karrio-dhl-freight-sweden/blob/28c1ccb/tests/dhl_freight_sweden/fixtures/sandbox/rejection-22005-112-se-gb.json (captured 2026-10-06)"
 
 
