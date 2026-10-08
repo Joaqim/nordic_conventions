@@ -357,12 +357,58 @@ class TestNordicConventionsParcelConnectDestinations(unittest.TestCase):
             ),
         )
 
-    def test_parcel_connect_to_jersey_needs_the_great_britain_agreement(self):
+    def test_excluded_postal_codes_are_not_served(self):
+        jersey = (
+            "does not ship to GB postal codes JE*, GY*, BT* (Jersey, Guernsey, and Northern Ireland)."
+        )
+        for recipient, lane, service, text in (
+            ("JE", "SE-GB", "dhl_freight_sweden_parcel_connect_plus", f"DHL Freight Sweden Parcel Connect Plus (112) {jersey}"),
+            ("GB_JE", "SE-GB", "109", f"DHL Freight Sweden Parcel Connect (109) {jersey}"),
+            (
+                "IC_CODE",
+                "SE-ES",
+                "109",
+                "DHL Freight Sweden Parcel Connect (109) does not ship to ES postal codes 35000-35999 (Canary Islands).",
+            ),
+            (
+                "IC",
+                "SE-ES",
+                "601",
+                "DHL Freight Sweden Home Delivery International B2C (601) does not ship to ES postal codes 35*, 38*, 51*, 52* "
+                "(Product API catalog postalCodeExcludes).",
+            ),
+        ):
+            with self.subTest(recipient=recipient, service=service):
+                self.assertListEqual(
+                    _advise(dhl_freight_sweden.parcel_connect_not_served, "dhl_freight_sweden", recipient, service, PAID),
+                    self._expected(
+                        "advisor_nordic_conventions_dhl_freight_sweden_parcel_connect_not_served",
+                        text,
+                        lane,
+                        (sources.DHL_MAN_EXCLUDED_AREAS, sources.DHL_CONNECTOR_EXCLUDED_POSTAL_CODES),
+                    ),
+                )
+
+    def test_excluded_jersey_postcode_is_not_an_agreement_case(self):
+        for recipient in ("JE", "GB_JE"):
+            with self.subTest(recipient=recipient):
+                self.assertListEqual(
+                    _advise(
+                        dhl_freight_sweden.parcel_connect_gb_agreement,
+                        "dhl_freight_sweden",
+                        recipient,
+                        "dhl_freight_sweden_parcel_connect_plus",
+                        PAID,
+                    ),
+                    [],
+                )
+
+    def test_parcel_connect_to_the_isle_of_man_needs_the_great_britain_agreement(self):
         self.assertListEqual(
             _advise(
                 dhl_freight_sweden.parcel_connect_gb_agreement,
                 "dhl_freight_sweden",
-                "JE",
+                "IM",
                 "dhl_freight_sweden_parcel_connect_plus",
                 PAID,
             ),

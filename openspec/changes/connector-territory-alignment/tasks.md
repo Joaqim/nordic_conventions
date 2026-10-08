@@ -14,8 +14,8 @@
 ## 3. Decisions of 2026-10-08
 
 - [x] 3.1 Return no customs-mode advisory to Åland, and add `advisor_nordic_conventions_dhl_freight_sweden_aland_customs_service_rejected` for standard or full service to Åland, without the joint declaration, test-first
-- [ ] 3.2 Copy the connector's excluded postal codes into `exclusions.py` with a cross-check test, warn excluded postcodes as not served, and skip the Great Britain agreement for them, test-first
-- [ ] 3.3 Update the README rows, Codes list, matrix, and footnotes for 3.1 and 3.2
+- [x] 3.2 Copy the connector's excluded postal codes into `exclusions.py` with a cross-check test, warn excluded postcodes as not served, and skip the Great Britain agreement for them, test-first
+- [x] 3.3 Update the README rows, Codes list, matrix, and footnotes for 3.1 and 3.2
 
 ## 4. Documentation
 

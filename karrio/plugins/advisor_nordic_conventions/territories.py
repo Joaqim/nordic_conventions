@@ -150,6 +150,22 @@ def postal_prefix_codes(country_code: str) -> typing.Tuple[str, ...]:
     )
 
 
+def outside_by_postal_territory(
+    country_code: typing.Optional[str],
+    postal_code: typing.Optional[str],
+) -> bool:
+    """Whether the postal code alone places a member-state address outside the EU VAT area.
+
+    That is a removed prefix code listed in ``NON_EU_VAT_POSTAL_TERRITORY_PREFIXES``
+    or a purely numeric code whose digit count ``NON_EU_VAT_POSTAL_CODE_LENGTHS`` lists.
+    """
+    country = (country_code or "").upper()
+    prefix_code, postal = _postal_code(country, postal_code)
+    return (country, prefix_code) in NON_EU_VAT_POSTAL_TERRITORY_PREFIXES or (
+        postal.isdigit() and (country, len(postal)) in NON_EU_VAT_POSTAL_CODE_LENGTHS
+    )
+
+
 def normalized_postal_code(
     country_code: typing.Optional[str],
     postal_code: typing.Optional[str],

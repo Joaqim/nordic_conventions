@@ -313,6 +313,16 @@ DHL_MAN_PRODUCT_LANES = Source(
     _ref("Product manual v5.26", f"{DHL_MAN_URL} §5.1 p.13, §5.2 p.15 to §5.19 p.82, §5.15 p.65"),
     "DHL Freight Sweden product manual v5.26: the overview classifies Paket (102), Service Point B2C (103) and C2B (104), Hemleverans Paket (118), Special (209), Pall (210), Stycke (211), Parti (212), Home Delivery (401), and Home Delivery Return (402, 502) as domestic, and Parcel Return Connect (107), Parcel Connect (109), Parcel Connect Plus (112), Road Freight Standard (202), Road Freight Direct (205), Road Freight Priority (233), Standard Pallet International (SPI), and Home Delivery International B2C (601) as international; each product's \"Valid countries\" table lists its countries, SE alone for the domestic products; 202, 205, 233, SPI, and 601 \"can be used to and from Sweden\"; 107 \"can only be used when a DHL PARCEL CONNECT (109) shipment is to be returned to the original sender\".",
 )
+DHL_MAN_EXCLUDED_AREAS = Source(
+    "W",
+    _ref("Product manual v5.26", f"{DHL_MAN_URL} §5.3 p.18, §5.4 p.23, §5.9 p.43, §5.11 p.52, §5.14 p.63, §5.15 p.66"),
+    "DHL Freight Sweden product manual v5.26 \"Excluded regions/areas\": postal codes Parcel Connect Plus (112), Parcel Connect (109), and Parcel Return Connect (107, from the listed countries) do not serve in DK, ES, FR, IT, NO, and PT, Jersey, Guernsey, and Northern Ireland under GB, and the Caribbean Netherlands; Road Freight Standard (202), Road Freight Direct (205), and SPI exclude UA 95000-99999.",
+)
+DHL_CONNECTOR_EXCLUDED_POSTAL_CODES = Source(
+    "S",
+    _ref("Excluded postal codes", DHL_CONNECTOR_DESTINATIONS_URL),
+    "The DHL Freight Sweden connector refuses a booking whose shipper or recipient postal code a product excludes, after mapping territory codes to their parent, with ExcludedDestinationError; for 202, 233, and 601 it applies the Product API catalog's postalCodeExcludes quoted from product matches answers.",
+)
 DHL_CONNECTOR_SANDBOX_112_GB_REJECTED = Source(
     "S",
     _ref("Sandbox rejection 22005", DHL_CONNECTOR_REJECTION_112_GB_URL),

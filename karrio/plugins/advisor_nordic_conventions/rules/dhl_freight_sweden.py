@@ -4,6 +4,7 @@ import typing
 
 import karrio.core.models as models
 
+import karrio.plugins.advisor_nordic_conventions.exclusions as exclusions
 import karrio.plugins.advisor_nordic_conventions.lanes as lanes
 import karrio.plugins.advisor_nordic_conventions.sources as sources
 from karrio.plugins.advisor_nordic_conventions.codes import AdvisoryClassification
@@ -232,6 +233,16 @@ def voec_marking(request, context) -> typing.List[models.Message]:
     ]
 
 
+def _excluded_party(request, lane: lanes.Lane, product_code: str) -> typing.Optional[exclusions.ExcludedParty]:
+    return exclusions.excluded_party(
+        product_code,
+        dict(
+            shipper=(lane.shipper_country, getattr(request.shipper, "postal_code", None)),
+            recipient=(lane.recipient_country, getattr(request.recipient, "postal_code", None)),
+        ),
+    )
+
+
 def parcel_connect_not_served(request, context) -> typing.List[models.Message]:
     lane = lanes.lane_of(request, context)
 
@@ -240,10 +251,12 @@ def parcel_connect_not_served(request, context) -> typing.List[models.Message]:
 
     product_code = lanes.dhl_product_code(lane.service)
 
-    if product_code is None or lanes.dhl_lane_served(
-        product_code, lane.shipper_country, lane.recipient_country
-    ):
+    if product_code is None:
         return []
+
+    if lanes.dhl_lane_served(product_code, lane.shipper_country, lane.recipient_country):
+        excluded = _excluded_party(request, lane, product_code)
+        return [] if excluded is None else [_excluded_postal_code(lane, product_code, excluded)]
 
     return [
         advisory(
@@ -263,6 +276,20 @@ def parcel_connect_not_served(request, context) -> typing.List[models.Message]:
     ]
 
 
+def _excluded_postal_code(
+    lane: lanes.Lane, product_code: str, excluded: exclusions.ExcludedParty
+) -> models.Message:
+    direction = "to" if excluded.party == "recipient" else "from"
+    return advisory(
+        AdvisoryClassification.dhl_freight_sweden_parcel_connect_not_served,
+        "warning",
+        f"DHL Freight Sweden {DHL_PRODUCT_NAMES[product_code]} ({product_code}) "
+        f"does not ship {direction} {excluded.exclusion.excluded_codes()}.",
+        lane,
+        [sources.DHL_MAN_EXCLUDED_AREAS, sources.DHL_CONNECTOR_EXCLUDED_POSTAL_CODES],
+    )
+
+
 def parcel_connect_gb_agreement(request, context) -> typing.List[models.Message]:
     lane = lanes.lane_of(request, context)
 
@@ -270,6 +297,7 @@ def parcel_connect_gb_agreement(request, context) -> typing.List[models.Message]
         _dhl_freight_sweden(lane)
         and lane.recipient_country == GREAT_BRITAIN
         and lane.service in PARCEL_CONNECT_BY_AGREEMENT
+        and _excluded_party(request, lane, lanes.dhl_product_code(lane.service) or "") is None
     ):
         return []
 
