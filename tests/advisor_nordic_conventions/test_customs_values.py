@@ -61,13 +61,20 @@ ZERO_VALUE_TEXT = (
     "A commercial or pro forma invoice may never carry a value of 0, even for gifts or samples; "
     "declare each line's customs value."
 )
-CH_NOT_SERVED_TEXT = (
-    "DHL Freight Sweden Parcel Connect (109), Parcel Connect Plus (112), and Parcel Return Connect (107) "
-    "do not serve Switzerland. "
+SWITZERLAND_ALTERNATIVES = (
     "Book Switzerland on a product that serves it, such as Home Delivery International B2C (601), "
     "Road Freight Standard (202), Road Freight Direct (205), or Road Freight Priority (233)."
 )
-GB_NOT_SERVED_TEXT = "DHL Freight Sweden Parcel Return Connect (107) does not serve Great Britain."
+RETURN_TO_SWEDEN = "Parcel Return Connect (107) only returns a parcel from abroad to its original sender in Sweden."
+CH_NOT_SERVED_TEXT = {
+    "109": f"DHL Freight Sweden Parcel Connect (109) does not ship from SE to CH. {SWITZERLAND_ALTERNATIVES}",
+    "112": f"DHL Freight Sweden Parcel Connect Plus (112) does not ship from SE to CH. {SWITZERLAND_ALTERNATIVES}",
+    "107": (
+        f"DHL Freight Sweden Parcel Return Connect (107) does not ship from SE to CH. "
+        f"{RETURN_TO_SWEDEN} {SWITZERLAND_ALTERNATIVES}"
+    ),
+}
+GB_NOT_SERVED_TEXT = f"DHL Freight Sweden Parcel Return Connect (107) does not ship from SE to GB. {RETURN_TO_SWEDEN}"
 GB_AGREEMENT_TEXT = (
     "DHL Freight Sweden serves Great Britain on Parcel Connect (109) and Parcel Connect Plus (112) "
     "only by separate agreement with DHL; book Great Britain on them only under such an agreement."
@@ -181,7 +188,7 @@ class TestNordicConventionsZeroValueLine(unittest.TestCase):
 
 
 class TestNordicConventionsParcelConnectDestinations(unittest.TestCase):
-    def _expected(self, code, text, lane, cited=(sources.DHL_MAN_PARCEL_CONNECT_COUNTRIES,)):
+    def _expected(self, code, text, lane, cited=(sources.DHL_MAN_PRODUCT_LANES,)):
         return [
             dict(
                 code=code,
@@ -196,19 +203,21 @@ class TestNordicConventionsParcelConnectDestinations(unittest.TestCase):
         ]
 
     def test_parcel_connect_family_to_switzerland_is_not_served(self):
-        for service in (
-            "dhl_freight_sweden_parcel_connect_b2c",
-            "109",
-            "dhl_freight_sweden_parcel_connect_plus",
-            "112",
-            "dhl_freight_sweden_parcel_return_connect_c2b",
-            "107",
+        for service, code in (
+            ("dhl_freight_sweden_parcel_connect_b2c", "109"),
+            ("109", "109"),
+            ("dhl_freight_sweden_parcel_connect_plus", "112"),
+            ("112", "112"),
+            ("dhl_freight_sweden_parcel_return_connect_c2b", "107"),
+            ("107", "107"),
         ):
             with self.subTest(service=service):
                 self.assertListEqual(
                     _advise(dhl_freight_sweden.parcel_connect_not_served, "dhl_freight_sweden", "CH", service, PAID),
                     self._expected(
-                        "advisor_nordic_conventions_dhl_freight_sweden_parcel_connect_not_served", CH_NOT_SERVED_TEXT, "SE-CH"
+                        "advisor_nordic_conventions_dhl_freight_sweden_parcel_connect_not_served",
+                        CH_NOT_SERVED_TEXT[code],
+                        "SE-CH",
                     ),
                 )
 
@@ -220,6 +229,65 @@ class TestNordicConventionsParcelConnectDestinations(unittest.TestCase):
                     self._expected(
                         "advisor_nordic_conventions_dhl_freight_sweden_parcel_connect_not_served", GB_NOT_SERVED_TEXT, "SE-GB"
                     ),
+                )
+
+    def test_parcel_return_connect_from_sweden_is_never_served(self):
+        for recipient in ("NO", "US", "LI"):
+            with self.subTest(recipient=recipient):
+                self.assertListEqual(
+                    _advise(dhl_freight_sweden.parcel_connect_not_served, "dhl_freight_sweden", recipient, "107", PAID),
+                    self._expected(
+                        "advisor_nordic_conventions_dhl_freight_sweden_parcel_connect_not_served",
+                        f"DHL Freight Sweden Parcel Return Connect (107) does not ship from SE to {recipient}. {RETURN_TO_SWEDEN}",
+                        f"SE-{recipient}",
+                    ),
+                )
+
+    def test_products_to_countries_outside_their_lists_are_not_served(self):
+        for service, recipient, text in (
+            ("dhl_freight_sweden_paket", "NO", "DHL Freight Sweden Paket (102) does not ship from SE to NO."),
+            ("118", "GB", "DHL Freight Sweden Hemleverans Paket (118) does not ship from SE to GB."),
+            ("109", "US", "DHL Freight Sweden Parcel Connect (109) does not ship from SE to US."),
+            ("233", "UA", "DHL Freight Sweden Road Freight Priority (233) does not ship from SE to UA."),
+            (
+                "dhl_freight_sweden_road_freight_standard",
+                "US",
+                "DHL Freight Sweden Road Freight Standard (202) does not ship from SE to US.",
+            ),
+            ("601", "LI", "DHL Freight Sweden Home Delivery International B2C (601) does not ship from SE to LI."),
+            ("SPI", "IS", "DHL Freight Sweden Standard Pallet International (SPI) does not ship from SE to IS."),
+        ):
+            with self.subTest(service=service, recipient=recipient):
+                self.assertListEqual(
+                    _advise(dhl_freight_sweden.parcel_connect_not_served, "dhl_freight_sweden", recipient, service, PAID),
+                    self._expected(
+                        "advisor_nordic_conventions_dhl_freight_sweden_parcel_connect_not_served",
+                        text,
+                        f"SE-{recipient}",
+                    ),
+                )
+
+    def test_products_on_their_lanes_are_served(self):
+        for service, recipient in (
+            ("202", "LI"),
+            ("205", "CH"),
+            ("SPI", "UA"),
+            ("233", "LI"),
+            ("601", "NO"),
+            ("dhl_freight_sweden_parcel_connect_plus", "NO"),
+        ):
+            with self.subTest(service=service, recipient=recipient):
+                self.assertListEqual(
+                    _advise(dhl_freight_sweden.parcel_connect_not_served, "dhl_freight_sweden", recipient, service, PAID),
+                    [],
+                )
+
+    def test_unknown_service_is_not_advised(self):
+        for service in ("dhl_freight_sweden_unknown", "999"):
+            with self.subTest(service=service):
+                self.assertListEqual(
+                    _advise(dhl_freight_sweden.parcel_connect_not_served, "dhl_freight_sweden", "NO", service, PAID),
+                    [],
                 )
 
     def test_parcel_connect_to_great_britain_needs_a_separate_agreement(self):

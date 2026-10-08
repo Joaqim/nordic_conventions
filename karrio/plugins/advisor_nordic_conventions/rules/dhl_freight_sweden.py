@@ -28,23 +28,35 @@ PARCEL_RETURN_CONNECT: typing.FrozenSet[str] = frozenset(
 PARCEL_CONNECT_BY_AGREEMENT: typing.FrozenSet[str] = PARCEL_CONNECT_FAMILY - PARCEL_RETURN_CONNECT
 SWITZERLAND = "CH"
 GREAT_BRITAIN = "GB"
-NOT_SERVED: typing.Dict[str, typing.Tuple[typing.FrozenSet[str], str]] = {
-    SWITZERLAND: (
-        PARCEL_CONNECT_FAMILY,
-        " ".join(
-            [
-                "DHL Freight Sweden Parcel Connect (109), Parcel Connect Plus (112), and Parcel Return Connect (107)",
-                "do not serve Switzerland.",
-                "Book Switzerland on a product that serves it, such as Home Delivery International B2C (601),",
-                "Road Freight Standard (202), Road Freight Direct (205), or Road Freight Priority (233).",
-            ]
-        ),
-    ),
-    GREAT_BRITAIN: (
-        PARCEL_RETURN_CONNECT,
-        "DHL Freight Sweden Parcel Return Connect (107) does not serve Great Britain.",
-    ),
+PARCEL_RETURN_CONNECT_CODE = "107"
+DHL_PRODUCT_NAMES: typing.Dict[str, str] = {
+    "102": "Paket",
+    "103": "Service Point B2C",
+    "104": "Service Point C2B",
+    "107": "Parcel Return Connect",
+    "109": "Parcel Connect",
+    "112": "Parcel Connect Plus",
+    "118": "Hemleverans Paket",
+    "202": "Road Freight Standard",
+    "205": "Road Freight Direct",
+    "209": "Special",
+    "210": "Pall",
+    "211": "Stycke",
+    "212": "Parti",
+    "233": "Road Freight Priority",
+    "401": "Home Delivery",
+    "402": "Home Delivery Return",
+    "502": "Home Delivery Return",
+    "601": "Home Delivery International B2C",
+    "SPI": "Standard Pallet International",
 }
+RETURN_TO_SWEDEN = "Parcel Return Connect (107) only returns a parcel from abroad to its original sender in Sweden."
+SWITZERLAND_ALTERNATIVES = " ".join(
+    [
+        "Book Switzerland on a product that serves it, such as Home Delivery International B2C (601),",
+        "Road Freight Standard (202), Road Freight Direct (205), or Road Freight Priority (233).",
+    ]
+)
 
 REMINDER_FEES: typing.Dict[str, str] = {"GB": "650 kr"}
 DEFAULT_REMINDER_FEE = "390 kr"
@@ -174,18 +186,27 @@ def parcel_connect_not_served(request, context) -> typing.List[models.Message]:
     if not _dhl_freight_sweden(lane):
         return []
 
-    services, text = NOT_SERVED.get(lane.recipient_country, (frozenset(), ""))
+    product_code = lanes.dhl_product_code(lane.service)
 
-    if lane.service not in services:
+    if product_code is None or lanes.dhl_lane_served(
+        product_code, lane.shipper_country, lane.recipient_country
+    ):
         return []
 
     return [
         advisory(
             AdvisoryClassification.dhl_freight_sweden_parcel_connect_not_served,
             "warning",
-            text,
+            " ".join(
+                [
+                    f"DHL Freight Sweden {DHL_PRODUCT_NAMES[product_code]} ({product_code})",
+                    f"does not ship from {lane.shipper_country} to {lane.recipient_country}.",
+                    *([RETURN_TO_SWEDEN] if product_code == PARCEL_RETURN_CONNECT_CODE else []),
+                    *([SWITZERLAND_ALTERNATIVES] if lane.recipient_country == SWITZERLAND else []),
+                ]
+            ),
             lane,
-            [sources.DHL_MAN_PARCEL_CONNECT_COUNTRIES],
+            [sources.DHL_MAN_PRODUCT_LANES],
         )
     ]
 

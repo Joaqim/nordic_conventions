@@ -17,6 +17,8 @@ ADDRESSES = dict(
     GB=dict(country_code="GB", postal_code="SW1A 1AA", city="London"),
     LI=dict(country_code="LI", postal_code="9490", city="Vaduz"),
     US=dict(country_code="US", postal_code="10001", city="New York"),
+    UA=dict(country_code="UA", postal_code="01001", city="Kyiv"),
+    IS=dict(country_code="IS", postal_code="101", city="Reykjavík"),
 )
 
 PARCELS = [dict(weight=1.0, weight_unit="KG")]

@@ -291,6 +291,11 @@ DHL_MAN_PARCEL_CONNECT_COUNTRIES = Source(
     _ref("Product manual v5.26", f"{DHL_MAN_URL} §5.3 p.18, §5.14 p.63, §5.15 p.66"),
     "DHL Freight Sweden product manual v5.26: Parcel Connect (109) serves AT, BE, BG, CZ, DE, DK, EE, ES, FI, FR, GB (by separate agreement only), HR, HU, IE, IT, LT, LU, LV, NL, NO, PL, PT, RO, SI, and SK; Parcel Connect Plus (112) the same, FR only through the print and transportInstruction APIs; Parcel Return Connect (107) the same except GB; 109 and 112 exclude FR 97100-99999; Switzerland is served by Road Freight Standard (202), Road Freight Direct (205), Road Freight Priority (233), SPI, and Home Delivery International (601).",
 )
+DHL_MAN_PRODUCT_LANES = Source(
+    "W",
+    _ref("Product manual v5.26", f"{DHL_MAN_URL} §5.1 p.13, §5.2 p.15 to §5.19 p.82, §5.15 p.65"),
+    "DHL Freight Sweden product manual v5.26: the overview classifies Paket (102), Service Point B2C (103) and C2B (104), Hemleverans Paket (118), Special (209), Pall (210), Stycke (211), Parti (212), Home Delivery (401), and Home Delivery Return (402, 502) as domestic, and Parcel Return Connect (107), Parcel Connect (109), Parcel Connect Plus (112), Road Freight Standard (202), Road Freight Direct (205), Road Freight Priority (233), Standard Pallet International (SPI), and Home Delivery International B2C (601) as international; each product's \"Valid countries\" table lists its countries, SE alone for the domestic products; 202, 205, 233, SPI, and 601 \"can be used to and from Sweden\"; 107 \"can only be used when a DHL PARCEL CONNECT (109) shipment is to be returned to the original sender\".",
+)
 DHL_CONNECTOR_SANDBOX_112_GB_REJECTED = Source(
     "S",
     _ref("Sandbox rejection 22005", DHL_CONNECTOR_REJECTION_112_GB_URL),
