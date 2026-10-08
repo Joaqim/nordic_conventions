@@ -23,8 +23,20 @@ An `AX`, `IC`, `EA`, `FO`, or `GL` address whose postcode falls in none of those
 ## Åland
 
 The connector's rule (`_check_aland_customs_services`, `units.in_aland`): when the shipper or the recipient, after mapping, is `FI` with a normalised postcode in 22000-22999, customs handling standard and full service are refused before the booking request; the own declaration, the joint declaration, and no customs service pass, and DHL booked 109 to FI 22100 with customs data and no customs service.
-The customs-mode advisory keeps its trigger and level; for an Åland recipient its message drops standard and full service and names the alternatives the connector accepts.
+The customs-mode advisory is not returned for an Åland recipient, because a booking without a customs service is accepted there.
+A separate code, `advisor_nordic_conventions_dhl_freight_sweden_aland_customs_service_rejected`, fires only when standard or full service is selected, read through `lane.dhl_customs_options`, which parses the unified option names with karrio's option helper as the connector's initializer does.
+A new code rather than the customs-mode code is used because the shipment has selected a customs mode; a consumer keying on `customs_mode_missing` would otherwise read a selected mode as a missing one.
+Its message names the own declaration and customs data without a customs service, and not the joint declaration, which the connector refuses outside Norway and Switzerland.
+`DHL_ALAND_POSTAL_RANGE` copies the connector's `ALAND_POSTAL_RANGE`, and a test checks the connector's `ALAND_REJECTED_CUSTOMS_SERVICES` against the two services the message names.
 Because the plugin advises only Swedish shippers, only the recipient can be in Åland.
+
+## Excluded postal codes
+
+`exclusions.py` copies the connector's `POSTAL_CODE_FORMATS`, `POSTAL_CODE_EXCLUSIONS`, and `POSTAL_CODE_PATTERN_EXCLUSIONS` as named tuples with the connector's fields, product codes as strings, so the cross-check compares them as plain tuples.
+`POSTAL_CODE_PATTERN_EXCLUSIONS` is copied with `POSTAL_CODE_EXCLUSIONS` because the `JE*` and `GY*` exclusions of 109 and 112 live there.
+The verdicts follow the connector: a numeric range compares the digits the country's format keys on, and a code outside the format has no verdict; a Danish range marked for the territories also excludes a code led by `FO` or `GL` or of three digits; a pattern is matched with `fnmatchcase` against the normalised code.
+The connector refuses a booking whose postal code has no verdict ("requires a postal code"); the plugin warns only on an excluded verdict, leaving malformed and missing codes to the connector's error.
+The check runs on the mapped country codes, as the connector's does, and in the not-served rule after the lane check, so a lane outside the product's countries keeps the lane message; the Great Britain agreement rule skips an excluded recipient postcode.
 
 ## Specification ordering
 
