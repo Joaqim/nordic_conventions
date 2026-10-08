@@ -31,7 +31,7 @@ What the carriers ask for goods sent from Sweden, Denmark, or Finland to outside
 | PostNord FI parcel | [E-invoice before shipping](#advisor_nordic_conventions_postnord_fi_export_invoice) | [3× signed English invoice](#advisor_nordic_conventions_postnord_fi_export_invoice) |
 | PostNord DK parcel | [2× invoice in visible pocket](#advisor_nordic_conventions_postnord_dk_export_documents) | [CH, LI 3×, GB 2× invoice; else CN23 + 2× invoice](#advisor_nordic_conventions_postnord_dk_export_documents) |
 | PostNord FI or DK 91, letter | — | — |
-| DHL Freight SE, any | [Customs mode](#advisor_nordic_conventions_dhl_freight_sweden_customs_mode_missing) + [invoice copy](#advisor_nordic_conventions_dhl_freight_sweden_invoice_copy) + [VOEC on label if booked](#advisor_nordic_conventions_dhl_freight_sweden_voec_marking) | [Customs mode](#advisor_nordic_conventions_dhl_freight_sweden_customs_mode_missing) + [invoice copy](#advisor_nordic_conventions_dhl_freight_sweden_invoice_copy) |
+| DHL Freight SE, any | [Customs mode](#advisor_nordic_conventions_dhl_freight_sweden_customs_mode_missing) + [invoice copy](#advisor_nordic_conventions_dhl_freight_sweden_invoice_copy) + [VOEC on label if booked](#advisor_nordic_conventions_dhl_freight_sweden_voec_marking) | [Customs mode](#advisor_nordic_conventions_dhl_freight_sweden_customs_mode_missing) + [invoice copy](#advisor_nordic_conventions_dhl_freight_sweden_invoice_copy); [Åland: no standard or full service](#advisor_nordic_conventions_dhl_freight_sweden_aland_customs_service_rejected) |
 | DHL Parcel Connect (109) | [+ 2 document copies outside package](#advisor_nordic_conventions_dhl_freight_sweden_attached_documents) | [+ 2 document copies outside package](#advisor_nordic_conventions_dhl_freight_sweden_attached_documents); [not served outside its countries, e.g. CH](#advisor_nordic_conventions_dhl_freight_sweden_parcel_connect_not_served); [Great Britain by agreement only](#advisor_nordic_conventions_dhl_freight_sweden_parcel_connect_gb_agreement) |
 | DHL Parcel Connect Plus (112) | — | [Not served outside its countries, e.g. CH](#advisor_nordic_conventions_dhl_freight_sweden_parcel_connect_not_served); [Great Britain by agreement only](#advisor_nordic_conventions_dhl_freight_sweden_parcel_connect_gb_agreement) |
 | DHL Parcel Return Connect (107) | [Not served from Sweden](#advisor_nordic_conventions_dhl_freight_sweden_parcel_connect_not_served) | [Not served from Sweden](#advisor_nordic_conventions_dhl_freight_sweden_parcel_connect_not_served) |
@@ -83,7 +83,8 @@ Non-EU means outside the EU VAT area.
 
 | Advisory | Level | Destinations | Trigger | Sources |
 |---|---|---|---|---|
-| <a id="advisor_nordic_conventions_dhl_freight_sweden_customs_mode_missing"></a>Customs mode missing | `warning` | all non-EU | No customs service option set by unified name; to Åland the message names the own declaration, the joint declaration, or no customs service instead of standard and full service | DHL product manual[^dhl-man], DHL connector README[^dhl-connector-readme], DHL connector destinations page[^dhl-connector-destinations], DHL price list[^dhl-prl], DHL connector spec[^dfs] |
+| <a id="advisor_nordic_conventions_dhl_freight_sweden_customs_mode_missing"></a>Customs mode missing | `warning` | all non-EU | No customs service option set by unified name, except to Åland (FI 22000-22999, also under `AX`), where a booking without one is accepted | DHL product manual[^dhl-man], DHL connector README[^dhl-connector-readme], DHL price list[^dhl-prl], DHL connector spec[^dfs] |
+| <a id="advisor_nordic_conventions_dhl_freight_sweden_aland_customs_service_rejected"></a>Åland customs service | `warning` | all non-EU | A recipient in Åland (FI 22000-22999, also under `AX`) with customs handling standard or full service set, which DHL rejects with 24003 and the connector refuses; the message names the own declaration or customs data without a customs service | DHL product manual[^dhl-man], DHL connector destinations page[^dhl-connector-destinations] |
 | <a id="advisor_nordic_conventions_dhl_freight_sweden_invoice_copy"></a>Invoice copy | `warning` | all non-EU | Any service | DHL product manual[^dhl-man], DHL export customs information[^dhl-cie], DHL price list[^dhl-prl] |
 | <a id="advisor_nordic_conventions_dhl_freight_sweden_attached_documents"></a>Documents outside package | `warning` | all non-EU | Parcel Connect (`dhl_freight_sweden_parcel_connect_b2c`, 109) | DHL product manual[^dhl-man] |
 | <a id="advisor_nordic_conventions_dhl_freight_sweden_voec_marking"></a>VOEC marking | `warning` | Norway | `customs.options.voec_number` set | DHL product manual[^dhl-man], DHL connector spec[^dfs] |
@@ -107,6 +108,7 @@ Non-EU means outside the EU VAT area.
 - Export invoice: `advisor_nordic_conventions_postnord_fi_export_invoice`
 - Export documents: `advisor_nordic_conventions_postnord_dk_export_documents`
 - Customs mode missing: `advisor_nordic_conventions_dhl_freight_sweden_customs_mode_missing`
+- Åland customs service: `advisor_nordic_conventions_dhl_freight_sweden_aland_customs_service_rejected`
 - Invoice copy: `advisor_nordic_conventions_dhl_freight_sweden_invoice_copy`
 - Documents outside package: `advisor_nordic_conventions_dhl_freight_sweden_attached_documents`
 - VOEC marking: `advisor_nordic_conventions_dhl_freight_sweden_voec_marking`

@@ -58,6 +58,11 @@ SWITZERLAND_ALTERNATIVES = " ".join(
     ]
 )
 
+ALAND_REJECTED_CUSTOMS_OPTIONS: typing.Dict[str, str] = {
+    lanes.DHLCustomsOption.dhl_freight_sweden_customs_handling_standard.name: "customs handling standard",
+    lanes.DHLCustomsOption.dhl_freight_sweden_customs_handling_full_service.name: "customs handling full service",
+}
+
 REMINDER_FEES: typing.Dict[str, str] = {"GB": "650 kr"}
 DEFAULT_REMINDER_FEE = "390 kr"
 
@@ -66,14 +71,18 @@ def _dhl_freight_sweden(lane: typing.Optional[lanes.Lane]) -> bool:
     return lane is not None and lane.carrier_name == lanes.DHL_FREIGHT_SWEDEN
 
 
+def _to_aland(request, lane: lanes.Lane) -> bool:
+    return lanes.dhl_in_aland(lane.recipient_country, getattr(request.recipient, "postal_code", None))
+
+
 def customs_mode_missing(request, context) -> typing.List[models.Message]:
     lane = lanes.lane_of(request, context)
 
     if not (_dhl_freight_sweden(lane) and not lane.dhl_customs_options):
         return []
 
-    if lanes.dhl_in_aland(lane.recipient_country, getattr(request.recipient, "postal_code", None)):
-        return [_aland_customs_mode_missing(lane)]
+    if _to_aland(request, lane):
+        return []
 
     return [
         advisory(
@@ -104,28 +113,35 @@ def customs_mode_missing(request, context) -> typing.List[models.Message]:
     ]
 
 
-def _aland_customs_mode_missing(lane: lanes.Lane) -> models.Message:
-    return advisory(
-        AdvisoryClassification.dhl_freight_sweden_customs_mode_missing,
-        "warning",
-        " ".join(
-            [
-                "DHL Freight Sweden rejects customs handling (standard or full service) to Åland",
-                "(FI 22000-22999) with error 24003, and the connector refuses both before booking.",
-                "Book Åland with an own declaration (dhl_freight_sweden_customs_own_declaration),",
-                "a joint declaration (dhl_freight_sweden_customs_joint_declaration),",
-                "or customs data and no customs service, which DHL accepted for Parcel Connect (109)",
-                "without showing how it clears customs.",
-            ]
-        ),
-        lane,
-        [
-            sources.DFS_CUSTOMS_SERVICES_OPT_IN,
-            sources.DHL_MAN_CUSTOMS_SELECTION,
-            sources.DHL_CONNECTOR_ALAND_CUSTOMS,
-            sources.DHL_OWN_DECLARATION_FEE_INFERENCE,
-        ],
-    )
+def aland_customs_service_rejected(request, context) -> typing.List[models.Message]:
+    lane = lanes.lane_of(request, context)
+
+    if not (_dhl_freight_sweden(lane) and _to_aland(request, lane)):
+        return []
+
+    rejected = sorted(lane.dhl_customs_options & ALAND_REJECTED_CUSTOMS_OPTIONS.keys())
+
+    if not rejected:
+        return []
+
+    return [
+        advisory(
+            AdvisoryClassification.dhl_freight_sweden_aland_customs_service_rejected,
+            "warning",
+            " ".join(
+                [
+                    "DHL Freight Sweden rejects",
+                    " and ".join(f"{ALAND_REJECTED_CUSTOMS_OPTIONS[option]} ({option})" for option in rejected),
+                    "to Åland (FI 22000-22999) with error 24003, and the connector refuses the selection before booking.",
+                    "Book Åland with an own declaration (dhl_freight_sweden_customs_own_declaration)",
+                    "or with customs data and no customs service, which DHL accepted for Parcel Connect (109)",
+                    "without showing how it clears customs.",
+                ]
+            ),
+            lane,
+            [sources.DHL_MAN_CUSTOMS_SELECTION, sources.DHL_CONNECTOR_ALAND_CUSTOMS],
+        )
+    ]
 
 
 def invoice_copy(request, context) -> typing.List[models.Message]:

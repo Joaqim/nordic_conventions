@@ -103,42 +103,79 @@ class TestNordicConventionsDHLFreightSwedenCustomsModeMissing(unittest.TestCase)
 
 
 class TestNordicConventionsDHLFreightSwedenAlandCustomsMode(unittest.TestCase):
-    def test_no_customs_option_to_aland(self):
-        for recipient in ("AX", "AX_PREFIXED"):
-            with self.subTest(recipient=recipient):
-                self.assertListEqual(
-                    _advise(dhl_freight_sweden.customs_mode_missing, recipient=recipient),
-                    [
-                        dict(
-                            code="advisor_nordic_conventions_dhl_freight_sweden_customs_mode_missing",
-                            level="warning",
-                            message=(
-                                "DHL Freight Sweden rejects customs handling (standard or full service) to Åland "
-                                "(FI 22000-22999) with error 24003, and the connector refuses both before booking. "
-                                "Book Åland with an own declaration (dhl_freight_sweden_customs_own_declaration), "
-                                "a joint declaration (dhl_freight_sweden_customs_joint_declaration), "
-                                "or customs data and no customs service, which DHL accepted for Parcel Connect (109) "
-                                "without showing how it clears customs."
-                            ),
-                            details=dict(
-                                plugin="advisor_nordic_conventions",
-                                lane="SE-FI",
-                                sources=[
-                                    sources.DFS_CUSTOMS_SERVICES_OPT_IN.to_dict(),
-                                    sources.DHL_MAN_CUSTOMS_SELECTION.to_dict(),
-                                    sources.DHL_CONNECTOR_ALAND_CUSTOMS.to_dict(),
-                                    sources.DHL_OWN_DECLARATION_FEE_INFERENCE.to_dict(),
-                                ],
-                            ),
-                        )
+    ALAND_CODE = "advisor_nordic_conventions_dhl_freight_sweden_aland_customs_service_rejected"
+
+    def _expected(self, services: str) -> list:
+        return [
+            dict(
+                code=self.ALAND_CODE,
+                level="warning",
+                message=(
+                    f"DHL Freight Sweden rejects {services} to Åland (FI 22000-22999) with error 24003, "
+                    "and the connector refuses the selection before booking. "
+                    "Book Åland with an own declaration (dhl_freight_sweden_customs_own_declaration) "
+                    "or with customs data and no customs service, which DHL accepted for Parcel Connect (109) "
+                    "without showing how it clears customs."
+                ),
+                details=dict(
+                    plugin="advisor_nordic_conventions",
+                    lane="SE-FI",
+                    sources=[
+                        sources.DHL_MAN_CUSTOMS_SELECTION.to_dict(),
+                        sources.DHL_CONNECTOR_ALAND_CUSTOMS.to_dict(),
                     ],
+                ),
+            )
+        ]
+
+    def test_no_customs_option_to_aland_is_bookable(self):
+        for recipient in ("AX", "AX_PREFIXED"):
+            for advisor in (dhl_freight_sweden.customs_mode_missing, dhl_freight_sweden.aland_customs_service_rejected):
+                with self.subTest(recipient=recipient, advisor=advisor.__name__):
+                    self.assertListEqual(
+                        _advise(advisor, recipient=recipient, customs=fixture.customs("merchandise", True)),
+                        [],
+                    )
+
+    def test_standard_or_full_service_to_aland(self):
+        standard = "customs handling standard (dhl_freight_sweden_customs_handling_standard)"
+        full_service = "customs handling full service (dhl_freight_sweden_customs_handling_full_service)"
+        for recipient, options, services in (
+            ("AX", dict(dhl_freight_sweden_customs_handling_standard=True), standard),
+            ("AX_PREFIXED", dict(dhl_freight_sweden_customs_handling_full_service="true"), full_service),
+            (
+                "AX",
+                dict(dhl_freight_sweden_customs_handling_standard=True, dhl_freight_sweden_customs_handling_full_service=True),
+                f"{full_service} and {standard}",
+            ),
+        ):
+            with self.subTest(recipient=recipient, options=options):
+                self.assertListEqual(
+                    _advise(dhl_freight_sweden.aland_customs_service_rejected, recipient=recipient, options=options),
+                    self._expected(services),
                 )
 
-    def test_aland_message_suggests_no_refused_customs_service(self):
-        message = _advise(dhl_freight_sweden.customs_mode_missing, recipient="AX")[0]["message"]
+    def test_aland_message_omits_the_joint_declaration(self):
+        message = _advise(
+            dhl_freight_sweden.aland_customs_service_rejected,
+            recipient="AX",
+            options=dict(dhl_freight_sweden_customs_handling_standard=True),
+        )[0]["message"]
 
-        self.assertNotIn("dhl_freight_sweden_customs_handling_standard", message)
-        self.assertNotIn("dhl_freight_sweden_customs_handling_full_service", message)
+        self.assertNotIn("joint", message)
+
+    def test_accepted_services_to_aland_and_refused_services_elsewhere_are_not_advised(self):
+        for recipient, option in (
+            ("AX", "dhl_freight_sweden_customs_own_declaration"),
+            ("AX", "dhl_freight_sweden_customs_joint_declaration"),
+            ("NO", "dhl_freight_sweden_customs_handling_full_service"),
+            ("FI", "dhl_freight_sweden_customs_handling_standard"),
+        ):
+            with self.subTest(recipient=recipient, option=option):
+                self.assertListEqual(
+                    _advise(dhl_freight_sweden.aland_customs_service_rejected, recipient=recipient, options={option: True}),
+                    [],
+                )
 
     def test_aland_postal_range_matches_connector(self):
         try:
@@ -149,7 +186,7 @@ class TestNordicConventionsDHLFreightSwedenAlandCustomsMode(unittest.TestCase):
         self.assertTupleEqual(lanes.DHL_ALAND_POSTAL_RANGE, units.ALAND_POSTAL_RANGE)
         self.assertSetEqual(
             set(units.ALAND_REJECTED_CUSTOMS_SERVICES),
-            {"dhl_freight_sweden_customs_handling_standard", "dhl_freight_sweden_customs_handling_full_service"},
+            set(dhl_freight_sweden.ALAND_REJECTED_CUSTOMS_OPTIONS),
         )
 
     def test_mainland_finland_is_not_aland(self):

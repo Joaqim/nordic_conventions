@@ -16,6 +16,7 @@ class AdvisoryClassification(str, enum.Enum):
     postnord_fi_export_invoice = "advisor_nordic_conventions_postnord_fi_export_invoice"
     postnord_dk_export_documents = "advisor_nordic_conventions_postnord_dk_export_documents"
     dhl_freight_sweden_customs_mode_missing = "advisor_nordic_conventions_dhl_freight_sweden_customs_mode_missing"
+    dhl_freight_sweden_aland_customs_service_rejected = "advisor_nordic_conventions_dhl_freight_sweden_aland_customs_service_rejected"
     dhl_freight_sweden_invoice_copy = "advisor_nordic_conventions_dhl_freight_sweden_invoice_copy"
     dhl_freight_sweden_attached_documents = "advisor_nordic_conventions_dhl_freight_sweden_attached_documents"
     dhl_freight_sweden_voec_marking = "advisor_nordic_conventions_dhl_freight_sweden_voec_marking"

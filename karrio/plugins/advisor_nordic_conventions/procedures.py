@@ -40,6 +40,7 @@ RULES: typing.Tuple[Rule, ...] = (
     postnord.fi_export_invoice,
     postnord.dk_export_documents,
     dhl_freight_sweden.customs_mode_missing,
+    dhl_freight_sweden.aland_customs_service_rejected,
     dhl_freight_sweden.invoice_copy,
     dhl_freight_sweden.attached_documents,
     dhl_freight_sweden.voec_marking,
@@ -112,6 +113,7 @@ ANSWERING: typing.Dict[AdvisoryClassification, AnsweringSet] = {
     AdvisoryClassification.postnord_fi_export_invoice: _fi_export,
     AdvisoryClassification.postnord_dk_export_documents: _dk_export,
     AdvisoryClassification.dhl_freight_sweden_customs_mode_missing: _always(),
+    AdvisoryClassification.dhl_freight_sweden_aland_customs_service_rejected: _always(),
     AdvisoryClassification.dhl_freight_sweden_invoice_copy: _always(
         Procedure.commercial_invoice_electronic
     ),
