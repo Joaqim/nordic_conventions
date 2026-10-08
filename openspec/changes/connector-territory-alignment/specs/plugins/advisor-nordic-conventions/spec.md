@@ -50,6 +50,34 @@ The answering set of the code SHALL be empty, because its remedy lies in the boo
 - **WHEN** a DHL Freight Sweden shipment from Sweden to `JE` with postal code JE2 3AB is created
 - **THEN** the plugin does not return code `advisor_nordic_conventions_dhl_freight_sweden_territory_postal_code_mismatch`
 
+### Requirement: DHL Freight Sweden joint declaration is selected only to Norway or Switzerland
+
+For a DHL Freight Sweden shipment from Sweden to a destination outside the EU VAT area on which `dhl_freight_sweden_customs_joint_declaration` is set, read as the plugin reads every DHL Freight Sweden customs service option, and whose recipient country after the territory mapping is not in the connector's `JOINT_DECLARATION_COUNTRIES` (`NO`, `CH`), the plugin SHALL return code `advisor_nordic_conventions_dhl_freight_sweden_joint_declaration_destination` at level `warning`.
+The scope matches the connector's `JointDeclarationDestinationError` (S, karrio-dhl-freight-sweden branch `products-manual-country-lists` at f86c8ac), applied only across the EU VAT area border; inside the area the connector drops customs services with a warning instead, and the plugin, which advises only recipients outside the area, SHALL return no message there.
+The message SHALL name the option, state that the joint declaration is valid only to Norway or Switzerland and that the connector refuses it to the recipient country, and name customs handling (standard or full service) or an own declaration as alternatives, or, for a recipient in Åland as "DHL Freight Sweden customs handling is not selected to Åland" defines it, an own declaration or customs data with no customs service.
+`details` SHALL cite the manual's joint declaration (W, MAN v5.26 §6.8 p.98) and the connector's refusal.
+The answering set of the code SHALL be empty, because its remedy lies in the booking's customs service options.
+
+#### Scenario: Joint declaration to Great Britain
+
+- **WHEN** a DHL Freight Sweden shipment from Sweden to Great Britain, or to `JE`, is created with `dhl_freight_sweden_customs_joint_declaration` set
+- **THEN** the plugin returns code `advisor_nordic_conventions_dhl_freight_sweden_joint_declaration_destination` at level `warning`
+
+#### Scenario: Joint declaration to Åland
+
+- **WHEN** a DHL Freight Sweden shipment from Sweden to `AX` with postal code 22100 is created with `dhl_freight_sweden_customs_joint_declaration` set
+- **THEN** the plugin returns code `advisor_nordic_conventions_dhl_freight_sweden_joint_declaration_destination`, and the message does not suggest customs handling standard or full service
+
+#### Scenario: Joint declaration to Norway or Switzerland
+
+- **WHEN** a DHL Freight Sweden shipment from Sweden to Norway or Switzerland is created with `dhl_freight_sweden_customs_joint_declaration` set
+- **THEN** the plugin does not return code `advisor_nordic_conventions_dhl_freight_sweden_joint_declaration_destination`
+
+#### Scenario: Joint declaration inside the EU VAT area
+
+- **WHEN** a DHL Freight Sweden shipment from Sweden to Germany, or to `XI` with postal code BT1 1AA, is created with `dhl_freight_sweden_customs_joint_declaration` set
+- **THEN** the plugin returns no message
+
 ### Requirement: DHL Freight Sweden territory codes are read as their parent country
 
 For a `dhl_freight_sweden` advisor context, the plugin SHALL read the shipper's and the recipient's country codes as the DHL Freight Sweden connector books them, replacing a territory code by its parent country: `AX` by `FI`, `FO` and `GL` by `DK`, `IC` and `EA` by `ES`, and `JE`, `GG`, `IM`, and `XI` by `GB`, before the scope and EU VAT area checks of "Advice is limited to Nordic shippers at shipment creation" and in every DHL Freight Sweden advisory that reads a country.
@@ -114,7 +142,7 @@ For a recipient in Åland, as "DHL Freight Sweden customs handling is not select
 ### Requirement: Advisory answering procedures
 
 The plugin SHALL hold, for every advisory classification, the set of procedures whose performance answers it; the set is empty when no out-of-booking procedure answers it, and the plugin SHALL keep the mapping complete over all classifications.
-`advisor_nordic_conventions_dhl_freight_sweden_customs_mode_missing`, `advisor_nordic_conventions_dhl_freight_sweden_aland_customs_service_rejected`, and `advisor_nordic_conventions_invoice_type_content_mismatch` SHALL map to the empty set, because their remedy lies inside the booking request, in the connector's customs service options and the `customs.commercial_invoice` flag.
+`advisor_nordic_conventions_dhl_freight_sweden_customs_mode_missing`, `advisor_nordic_conventions_dhl_freight_sweden_aland_customs_service_rejected`, `advisor_nordic_conventions_dhl_freight_sweden_joint_declaration_destination`, and `advisor_nordic_conventions_invoice_type_content_mismatch` SHALL map to the empty set, because their remedy lies inside the booking request, in the connector's customs service options and the `customs.commercial_invoice` flag.
 The answering sets SHALL be lane-aware as follows.
 `advisor_nordic_conventions_postnord_se_no_digital_invoice` is answered by `commercial_invoice_electronic`.
 `advisor_nordic_conventions_postnord_se_postpaket_commercial_invoice` is answered, for Norway, by `customs_declaration_paper_copy` and `commercial_invoice_electronic`, and for other destinations by `customs_declaration_paper_copy` and `commercial_invoice_paper_copy`, resting on the terms' CN23 in two copies and invoice copies with the parcel (FN:103, FN:111, W).

@@ -18,6 +18,7 @@
 - [x] 3.3 Update the README rows, Codes list, matrix, and footnotes for 3.1 and 3.2
 
 - [x] 3.4 Copy the connector's `TERRITORY_POSTAL_CODES` into `lanes.py` with a cross-check test, add `advisor_nordic_conventions_dhl_freight_sweden_territory_postal_code_mismatch` for a recipient territory code outside its territory, and update the README, test-first
+- [x] 3.5 Add `advisor_nordic_conventions_dhl_freight_sweden_joint_declaration_destination` for the joint declaration across the EU VAT area border to a recipient outside `JOINT_DECLARATION_COUNTRIES`, with README, matrix, codes list, and footnote, test-first
 
 ## 4. Documentation
 

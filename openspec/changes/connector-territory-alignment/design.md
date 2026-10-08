@@ -46,6 +46,11 @@ Mapped, such a recipient is usually the parent's mainland and inside the EU VAT 
 `DHLTerritoryPostalCodes` copies the connector's named tuple with its `describe` and `matches`, and the cross-check compares the table as plain tuples.
 Only the recipient is checked, because a shipper with a territory code is never in Sweden after mapping and is out of scope.
 
+## Joint declaration destination
+
+The advisory reads the selected joint declaration from `lane.dhl_customs_options` and the recipient's mapped country from the lane, so it runs only where `lane_of` gives a lane, from inside to outside the EU VAT area, the scope in which the connector applies `JointDeclarationDestinationError`.
+For an Åland recipient its alternatives leave out standard and full service, which the connector refuses there.
+
 ## Specification ordering
 
 The delta modifies "DHL Freight Sweden products are not booked on lanes they do not serve", the name the unarchived change `dhl-product-lanes-not-served` gives that requirement, so `dhl-product-lanes-not-served` must be archived first.
