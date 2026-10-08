@@ -29,10 +29,12 @@ class TestNordicConventionsDHLFreightSwedenCustomsModeMissing(unittest.TestCase)
                     code="advisor_nordic_conventions_dhl_freight_sweden_customs_mode_missing",
                     level="warning",
                     message=(
-                        "DHL Freight Sweden requires customs handling (standard or full service) or an own declaration "
+                        "DHL Freight Sweden requires customs handling (standard or full service), an own declaration, "
+                        "or a joint declaration to Norway or Switzerland "
                         "to be selected for destinations outside the EU VAT area, and this booking selects none. "
                         "Set the shipment option dhl_freight_sweden_customs_handling_standard, "
-                        "dhl_freight_sweden_customs_handling_full_service, or dhl_freight_sweden_customs_own_declaration; "
+                        "dhl_freight_sweden_customs_handling_full_service, dhl_freight_sweden_customs_own_declaration, "
+                        "or dhl_freight_sweden_customs_joint_declaration; "
                         "the connector selects none implicitly because each carries a DHL fee."
                     ),
                     details=dict(
@@ -41,6 +43,8 @@ class TestNordicConventionsDHLFreightSwedenCustomsModeMissing(unittest.TestCase)
                         sources=[
                             sources.DFS_CUSTOMS_SERVICES_OPT_IN.to_dict(),
                             sources.DHL_MAN_CUSTOMS_SELECTION.to_dict(),
+                            sources.DHL_MAN_JOINT_DECLARATION.to_dict(),
+                            sources.DHL_CONNECTOR_JOINT_DECLARATION_DESTINATIONS.to_dict(),
                             sources.DHL_PRL_NO_FEE_FREE_MODE.to_dict(),
                             sources.DHL_OWN_DECLARATION_FEE_INFERENCE.to_dict(),
                         ],

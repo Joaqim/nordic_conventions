@@ -37,6 +37,7 @@ BAZG_R_69_03_URL = "https://www.bazg.admin.ch/dam/de/sd-web/mIvoM5CF7ydH/steuerb
 PN_SE_NO_PAGE_URL = "https://www.postnord.se/privat/skicka/skicka-brev-och-paket-utomlands/skicka-paket-till-norge/ (read 2026-10-02)"
 TV_EXPORT_DOCUMENTS_URL = "https://www.tullverket.se/sv/foretag/exporteravaror/deklareravarorvidexport/styrkandehandlingarvidexport.4.78aa922815794d801e25e3.html (updated 2026-06-12, read 2026-10-02)"
 DHL_EXPRESS_CUSTOMS_URL = "https://mydhl.express.dhl/content/dam/downloads/global/en/customs-guide/express_global_customs_customer_guidelines.pdf.coredownload.pdf"
+DHL_CONNECTOR_README_URL = "https://github.com/PrimePack-AB/karrio-dhl-freight-sweden/blob/7a2214d/README.md (read 2026-10-08)"
 DHL_CONNECTOR_REJECTION_112_GB_URL = "https://github.com/PrimePack-AB/karrio-dhl-freight-sweden/blob/28c1ccb/tests/dhl_freight_sweden/fixtures/sandbox/rejection-22005-112-se-gb.json (captured 2026-10-06)"
 
 
@@ -184,6 +185,16 @@ DHL_MAN_CUSTOMS_SELECTION = Source(
     "W",
     _ref("FN:196", f"{DHL_MAN_URL} §7.6.1 p.163, §6.7 p.96"),
     "Customs handling (Standard or Full service) or own declaration must be selected for CH, GB, NO, Åland (FI 22) and other non-EU destinations.",
+)
+DHL_MAN_JOINT_DECLARATION = Source(
+    "W",
+    _ref("Product manual v5.26", f"{DHL_MAN_URL} §6.8 p.98"),
+    "Customs, joint declaration: valid country NO; needs a separate agreement; cannot be combined with the other customs services.",
+)
+DHL_CONNECTOR_JOINT_DECLARATION_DESTINATIONS = Source(
+    "S",
+    _ref("Customs services", DHL_CONNECTOR_README_URL),
+    "The DHL Freight Sweden connector's customs table names NO and CH for the joint declaration (dhl_freight_sweden_customs_joint_declaration), the manual naming NO only, because product matches on its sandbox account list customsJointDeclaration to NO and CH; the connector does not check the destination.",
 )
 DHL_PRL_NO_FEE_FREE_MODE = Source(
     "W",
