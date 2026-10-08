@@ -207,6 +207,47 @@ def dhl_parent_country(country_code: str) -> str:
 DHL_ALAND_POSTAL_RANGE: typing.Tuple[str, int, int] = ("FI", 22000, 22999)
 
 
+class DHLTerritoryPostalCodes(typing.NamedTuple):
+    """The postal codes of a territory the DHL Freight Sweden connector books under its parent country.
+
+    A code matches when, normalised under the parent, it is numeric and lies
+    in one of ``ranges`` or has ``digits`` digits.
+    """
+
+    name: str
+    parent: str
+    ranges: typing.Tuple[typing.Tuple[int, int], ...]
+    digits: typing.Optional[int] = None
+
+    def describe(self) -> str:
+        article = "an" if self.parent[0] in "AEFHILMNORSX" else "a"
+        ranges = " or ".join(f"{low}-{high}" for low, high in self.ranges)
+        digits = f" or of {DIGIT_WORDS[self.digits]} digits" if self.digits else ""
+        return f"{article} {self.parent} postal code in {ranges}{digits}"
+
+    def matches(self, postal_code: typing.Optional[str]) -> bool:
+        postal = territories.normalized_postal_code(self.parent, postal_code)
+        return postal.isdigit() and (
+            any(low <= int(postal) <= high for low, high in self.ranges)
+            or len(postal) == self.digits
+        )
+
+
+DIGIT_WORDS = {3: "three"}
+
+# The DHL Freight Sweden connector's TERRITORY_POSTAL_CODES (karrio-dhl-freight-sweden
+# 142b62d, units.py): the connector refuses a territory code whose postal code
+# is missing or lies outside these codes with TerritoryPostalCodeError, before
+# mapping it to the parent. JE, GG, IM, and XI have no numeric range.
+DHL_TERRITORY_POSTAL_CODES: typing.Dict[str, DHLTerritoryPostalCodes] = {
+    "AX": DHLTerritoryPostalCodes("Åland", "FI", ((22000, 22999),)),
+    "IC": DHLTerritoryPostalCodes("Canary Islands", "ES", ((35000, 35999), (38000, 38999))),
+    "EA": DHLTerritoryPostalCodes("Ceuta and Melilla", "ES", ((51000, 51999), (52000, 52999))),
+    "FO": DHLTerritoryPostalCodes("Faroe Islands", "DK", ((3800, 3999),), digits=3),
+    "GL": DHLTerritoryPostalCodes("Greenland", "DK", ((3800, 3999),)),
+}
+
+
 # The DHL Freight Sweden connector's JOINT_DECLARATION_COUNTRIES (karrio-dhl-freight-sweden
 # f86c8ac, units.py): across the EU VAT area border the connector refuses the
 # customs joint declaration to other recipient countries.
@@ -313,6 +354,17 @@ def lane_of(request: typing.Any, context: typing.Any) -> typing.Optional[Lane]:
     country codes are read as the connector books them, a territory code as
     its parent country (``dhl_parent_country``), before any check.
     """
+    return _lane(request, context, recipient_outside_only=True)
+
+
+def shipper_lane_of(request: typing.Any, context: typing.Any) -> typing.Optional[Lane]:
+    """The shipment lane as ``lane_of`` reads it, for a recipient inside or outside the EU VAT area."""
+    return _lane(request, context, recipient_outside_only=False)
+
+
+def _lane(
+    request: typing.Any, context: typing.Any, recipient_outside_only: bool
+) -> typing.Optional[Lane]:
     if getattr(context, "operation", None) != "shipping":
         return None
 
@@ -328,8 +380,9 @@ def lane_of(request: typing.Any, context: typing.Any) -> typing.Optional[Lane]:
         and territories.in_eu_vat_area(
             shipper_country, getattr(shipper, "postal_code", None)
         )
-        and not territories.in_eu_vat_area(
-            recipient_country, getattr(recipient, "postal_code", None)
+        and not (
+            recipient_outside_only
+            and territories.in_eu_vat_area(recipient_country, getattr(recipient, "postal_code", None))
         )
     )
 

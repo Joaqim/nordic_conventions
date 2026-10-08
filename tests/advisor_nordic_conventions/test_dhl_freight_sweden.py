@@ -208,6 +208,92 @@ class TestNordicConventionsDHLFreightSwedenAlandCustomsMode(unittest.TestCase):
         )
 
 
+class TestNordicConventionsDHLFreightSwedenTerritoryPostalCode(unittest.TestCase):
+    CODE = "advisor_nordic_conventions_dhl_freight_sweden_territory_postal_code_mismatch"
+
+    def test_territory_code_outside_its_territory(self):
+        for recipient, lane, text in (
+            (
+                "AX_MAINLAND",
+                "SE-FI",
+                "DHL Freight Sweden books country code AX (Åland) as FI, and the connector refuses the booking "
+                "unless the recipient has an FI postal code in 22000-22999; this recipient has postal code '00100'. "
+                "Use the country code FI for an address outside Åland.",
+            ),
+            (
+                "AX_NO_POSTAL_CODE",
+                "SE-FI",
+                "DHL Freight Sweden books country code AX (Åland) as FI, and the connector refuses the booking "
+                "unless the recipient has an FI postal code in 22000-22999; this recipient has no postal code. "
+                "Use the country code FI for an address outside Åland.",
+            ),
+            (
+                "IC_MAINLAND",
+                "SE-ES",
+                "DHL Freight Sweden books country code IC (Canary Islands) as ES, and the connector refuses the booking "
+                "unless the recipient has an ES postal code in 35000-35999 or 38000-38999; "
+                "this recipient has postal code '28001'. Use the country code ES for an address outside Canary Islands.",
+            ),
+            (
+                "GL_FAROESE",
+                "SE-DK",
+                "DHL Freight Sweden books country code GL (Greenland) as DK, and the connector refuses the booking "
+                "unless the recipient has a DK postal code in 3800-3999; this recipient has postal code '100'. "
+                "Use the country code DK for an address outside Greenland.",
+            ),
+        ):
+            with self.subTest(recipient=recipient):
+                self.assertListEqual(
+                    _advise(dhl_freight_sweden.territory_postal_code_mismatch, recipient=recipient),
+                    [
+                        dict(
+                            code=self.CODE,
+                            level="warning",
+                            message=text,
+                            details=dict(
+                                plugin="advisor_nordic_conventions",
+                                lane=lane,
+                                sources=[sources.DHL_CONNECTOR_TERRITORY_POSTAL_CODES.to_dict()],
+                            ),
+                        )
+                    ],
+                )
+
+    def test_territory_code_inside_its_territory_or_unchecked(self):
+        for recipient in ("AX_CODE", "AX_PREFIXED", "IC_CODE", "FO", "JE", "XI_NON_BT", "AX", "NO"):
+            with self.subTest(recipient=recipient):
+                self.assertListEqual(
+                    _advise(dhl_freight_sweden.territory_postal_code_mismatch, recipient=recipient),
+                    [],
+                )
+
+    def test_postnord_and_rating_are_not_advised(self):
+        request = fixture.shipment("SE", "AX_MAINLAND", "postnord_parcel")
+        self.assertListEqual(
+            fixture.messages(dhl_freight_sweden.territory_postal_code_mismatch, request, fixture.context("postnord")),
+            [],
+        )
+        self.assertListEqual(
+            fixture.messages(
+                dhl_freight_sweden.territory_postal_code_mismatch,
+                fixture.shipment("SE", "AX_MAINLAND", PARCEL_CONNECT),
+                fixture.context("dhl_freight_sweden", operation="rating"),
+            ),
+            [],
+        )
+
+    def test_territory_postal_codes_match_connector(self):
+        try:
+            units = importlib.import_module("karrio.providers.dhl_freight_sweden.units")
+        except ImportError:
+            self.skipTest("dhl_freight_sweden connector is not importable")
+
+        self.assertDictEqual(
+            {code: tuple(territory) for code, territory in lanes.DHL_TERRITORY_POSTAL_CODES.items()},
+            {code: tuple(territory) for code, territory in units.TERRITORY_POSTAL_CODES.items()},
+        )
+
+
 class TestNordicConventionsDHLFreightSwedenInvoiceCopy(unittest.TestCase):
     def _message(self, recipient: str, fee: str) -> dict:
         return dict(

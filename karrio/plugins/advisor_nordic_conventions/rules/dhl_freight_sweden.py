@@ -150,6 +150,40 @@ def aland_customs_service_rejected(request, context) -> typing.List[models.Messa
     ]
 
 
+def territory_postal_code_mismatch(request, context) -> typing.List[models.Message]:
+    lane = lanes.shipper_lane_of(request, context)
+
+    if not _dhl_freight_sweden(lane):
+        return []
+
+    recipient = request.recipient
+    code = (recipient.country_code or "").upper()
+    territory = lanes.DHL_TERRITORY_POSTAL_CODES.get(code)
+
+    if territory is None or territory.matches(recipient.postal_code):
+        return []
+
+    postal_code = recipient.postal_code
+    got = f"postal code {postal_code!r}" if str(postal_code or "").strip() else "no postal code"
+
+    return [
+        advisory(
+            AdvisoryClassification.dhl_freight_sweden_territory_postal_code_mismatch,
+            "warning",
+            " ".join(
+                [
+                    f"DHL Freight Sweden books country code {code} ({territory.name}) as {territory.parent},",
+                    f"and the connector refuses the booking unless the recipient has {territory.describe()};",
+                    f"this recipient has {got}.",
+                    f"Use the country code {territory.parent} for an address outside {territory.name}.",
+                ]
+            ),
+            lane,
+            [sources.DHL_CONNECTOR_TERRITORY_POSTAL_CODES],
+        )
+    ]
+
+
 def invoice_copy(request, context) -> typing.List[models.Message]:
     lane = lanes.lane_of(request, context)
 

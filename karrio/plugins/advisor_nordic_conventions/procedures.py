@@ -47,6 +47,7 @@ RULES: typing.Tuple[Rule, ...] = (
     invoice_type.invoice_type_content_mismatch,
     dhl_freight_sweden.parcel_connect_not_served,
     dhl_freight_sweden.parcel_connect_gb_agreement,
+    dhl_freight_sweden.territory_postal_code_mismatch,
     customs_values.ch_discount_on_invoice,
     customs_values.zero_value_line,
 )
@@ -129,6 +130,7 @@ ANSWERING: typing.Dict[AdvisoryClassification, AnsweringSet] = {
     AdvisoryClassification.zero_value_line: _always(),
     AdvisoryClassification.dhl_freight_sweden_parcel_connect_not_served: _always(),
     AdvisoryClassification.dhl_freight_sweden_parcel_connect_gb_agreement: _always(),
+    AdvisoryClassification.dhl_freight_sweden_territory_postal_code_mismatch: _always(),
 }
 
 
