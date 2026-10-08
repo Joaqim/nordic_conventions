@@ -18,7 +18,8 @@ PostNord shipments are not mapped, because the PostNord connector sends the code
 `territories.py` and its parity-bound tables do not change; the mapping only changes which country code they are asked about.
 After mapping, `XI` with a `BT` postcode is `GB` `BT…`, inside the area for goods, so the shipment is out of scope, as the connector drops its customs data; `XI` with another postcode is outside.
 `AX` 22100 becomes `FI` 22100 and stays outside through the `FI` 22000-22999 range; `IC`, `EA`, `FO`, and `GL` stay outside through their parent's ranges and the Faroese three-digit rule.
-An `AX`, `IC`, `EA`, `FO`, or `GL` address whose postcode falls in none of those ranges becomes inside, matching the connector; before this change the plugin treated these codes as outside whatever the postcode.
+An `AX`, `IC`, `EA`, `FO`, or `GL` address whose postcode falls in none of those ranges becomes inside, so the lane advisories stop; the connector refuses such a booking (142b62d), and the territory postal code advisory below warns about it.
+Before this change the plugin treated these codes as outside whatever the postcode.
 
 ## Åland
 
