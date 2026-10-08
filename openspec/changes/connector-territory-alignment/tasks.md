@@ -8,6 +8,7 @@
 ## 2. Customs-mode message
 
 - [x] 2.1 Name the joint declaration to Norway or Switzerland in the customs-mode message, test-first
+- [x] 2.3 Copy the connector's `JOINT_DECLARATION_COUNTRIES` into `lanes.py` with a cross-check test and name its countries in the customs-mode message
 - [x] 2.2 Give Åland recipients a customs-mode message without standard and full service, citing the connector's Åland evidence, test-first (superseded by 3.1)
 
 ## 3. Decisions of 2026-10-08

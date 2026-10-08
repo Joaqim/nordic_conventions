@@ -55,6 +55,15 @@ class TestNordicConventionsDHLFreightSwedenCustomsModeMissing(unittest.TestCase)
             ],
         )
 
+    def test_joint_declaration_countries_match_connector(self):
+        self.assertTupleEqual(lanes.DHL_JOINT_DECLARATION_COUNTRIES, ("NO", "CH"))
+        try:
+            units = importlib.import_module("karrio.providers.dhl_freight_sweden.units")
+        except ImportError:
+            self.skipTest("dhl_freight_sweden connector is not importable")
+
+        self.assertTupleEqual(lanes.DHL_JOINT_DECLARATION_COUNTRIES, tuple(units.JOINT_DECLARATION_COUNTRIES))
+
     def test_selected_customs_option_silences_the_advisory(self):
         for option in CUSTOMS_OPTIONS:
             with self.subTest(option=option):

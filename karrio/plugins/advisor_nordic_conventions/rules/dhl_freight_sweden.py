@@ -63,6 +63,11 @@ ALAND_REJECTED_CUSTOMS_OPTIONS: typing.Dict[str, str] = {
     lanes.DHLCustomsOption.dhl_freight_sweden_customs_handling_full_service.name: "customs handling full service",
 }
 
+COUNTRY_NAMES: typing.Dict[str, str] = {"NO": "Norway", "CH": "Switzerland"}
+JOINT_DECLARATION_DESTINATIONS = " or ".join(
+    COUNTRY_NAMES[country] for country in lanes.DHL_JOINT_DECLARATION_COUNTRIES
+)
+
 REMINDER_FEES: typing.Dict[str, str] = {"GB": "650 kr"}
 DEFAULT_REMINDER_FEE = "390 kr"
 
@@ -91,7 +96,7 @@ def customs_mode_missing(request, context) -> typing.List[models.Message]:
             " ".join(
                 [
                     "DHL Freight Sweden requires customs handling (standard or full service), an own declaration,",
-                    "or a joint declaration to Norway or Switzerland",
+                    f"or a joint declaration to {JOINT_DECLARATION_DESTINATIONS}",
                     "to be selected for destinations outside the EU VAT area, and this booking selects none.",
                     "Set the shipment option dhl_freight_sweden_customs_handling_standard,",
                     "dhl_freight_sweden_customs_handling_full_service, dhl_freight_sweden_customs_own_declaration,",

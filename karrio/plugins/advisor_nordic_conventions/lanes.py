@@ -207,6 +207,12 @@ def dhl_parent_country(country_code: str) -> str:
 DHL_ALAND_POSTAL_RANGE: typing.Tuple[str, int, int] = ("FI", 22000, 22999)
 
 
+# The DHL Freight Sweden connector's JOINT_DECLARATION_COUNTRIES (karrio-dhl-freight-sweden
+# f86c8ac, units.py): across the EU VAT area border the connector refuses the
+# customs joint declaration to other recipient countries.
+DHL_JOINT_DECLARATION_COUNTRIES: typing.Tuple[str, ...] = ("NO", "CH")
+
+
 def dhl_in_aland(country_code: str, postal_code: typing.Optional[str]) -> bool:
     """Whether an address lies in Åland as the DHL Freight Sweden connector decides it."""
     country, low, high = DHL_ALAND_POSTAL_RANGE

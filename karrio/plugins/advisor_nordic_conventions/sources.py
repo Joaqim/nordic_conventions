@@ -195,7 +195,7 @@ DHL_MAN_JOINT_DECLARATION = Source(
 DHL_CONNECTOR_JOINT_DECLARATION_DESTINATIONS = Source(
     "S",
     _ref("Customs services", DHL_CONNECTOR_README_URL),
-    "The DHL Freight Sweden connector's customs table names NO and CH for the joint declaration (dhl_freight_sweden_customs_joint_declaration), the manual naming NO only, because product matches on its sandbox account list customsJointDeclaration to NO and CH; the connector does not check the destination.",
+    "The DHL Freight Sweden connector's customs table names NO and CH for the joint declaration (dhl_freight_sweden_customs_joint_declaration), the manual naming NO only, because product matches on its sandbox account list customsJointDeclaration to NO and CH; from karrio-dhl-freight-sweden f86c8ac the connector refuses the joint declaration to other recipient countries across the EU VAT area border (JOINT_DECLARATION_COUNTRIES).",
 )
 DHL_CONNECTOR_ALAND_CUSTOMS = Source(
     "S",
