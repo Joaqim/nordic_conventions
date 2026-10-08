@@ -184,6 +184,42 @@ def territory_postal_code_mismatch(request, context) -> typing.List[models.Messa
     ]
 
 
+def joint_declaration_destination(request, context) -> typing.List[models.Message]:
+    lane = lanes.lane_of(request, context)
+
+    if not (
+        _dhl_freight_sweden(lane)
+        and lanes.DHLCustomsOption.dhl_freight_sweden_customs_joint_declaration.name in lane.dhl_customs_options
+        and lane.recipient_country not in lanes.DHL_JOINT_DECLARATION_COUNTRIES
+    ):
+        return []
+
+    alternatives = (
+        "an own declaration (dhl_freight_sweden_customs_own_declaration) or customs data with no customs service"
+        if _to_aland(request, lane)
+        else "customs handling (dhl_freight_sweden_customs_handling_standard or "
+        "dhl_freight_sweden_customs_handling_full_service) or an own declaration "
+        "(dhl_freight_sweden_customs_own_declaration)"
+    )
+
+    return [
+        advisory(
+            AdvisoryClassification.dhl_freight_sweden_joint_declaration_destination,
+            "warning",
+            " ".join(
+                [
+                    "DHL Freight Sweden's customs joint declaration (dhl_freight_sweden_customs_joint_declaration)",
+                    f"is valid only to {JOINT_DECLARATION_DESTINATIONS},",
+                    f"and the connector refuses it to {lane.recipient_country}.",
+                    f"Select {alternatives} instead.",
+                ]
+            ),
+            lane,
+            [sources.DHL_MAN_JOINT_DECLARATION, sources.DHL_CONNECTOR_JOINT_DECLARATION_DESTINATION],
+        )
+    ]
+
+
 def invoice_copy(request, context) -> typing.List[models.Message]:
     lane = lanes.lane_of(request, context)
 

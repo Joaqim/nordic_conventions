@@ -27,3 +27,4 @@ class AdvisoryClassification(str, enum.Enum):
     dhl_freight_sweden_parcel_connect_not_served = "advisor_nordic_conventions_dhl_freight_sweden_parcel_connect_not_served"
     dhl_freight_sweden_parcel_connect_gb_agreement = "advisor_nordic_conventions_dhl_freight_sweden_parcel_connect_gb_agreement"
     dhl_freight_sweden_territory_postal_code_mismatch = "advisor_nordic_conventions_dhl_freight_sweden_territory_postal_code_mismatch"
+    dhl_freight_sweden_joint_declaration_destination = "advisor_nordic_conventions_dhl_freight_sweden_joint_declaration_destination"

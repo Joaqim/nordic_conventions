@@ -294,6 +294,96 @@ class TestNordicConventionsDHLFreightSwedenTerritoryPostalCode(unittest.TestCase
         )
 
 
+class TestNordicConventionsDHLFreightSwedenJointDeclarationDestination(unittest.TestCase):
+    CODE = "advisor_nordic_conventions_dhl_freight_sweden_joint_declaration_destination"
+    JOINT = dict(dhl_freight_sweden_customs_joint_declaration=True)
+
+    def _expected(self, lane: str, country: str, alternatives: str) -> list:
+        return [
+            dict(
+                code=self.CODE,
+                level="warning",
+                message=(
+                    "DHL Freight Sweden's customs joint declaration (dhl_freight_sweden_customs_joint_declaration) "
+                    f"is valid only to Norway or Switzerland, and the connector refuses it to {country}. "
+                    f"Select {alternatives} instead."
+                ),
+                details=dict(
+                    plugin="advisor_nordic_conventions",
+                    lane=lane,
+                    sources=[
+                        sources.DHL_MAN_JOINT_DECLARATION.to_dict(),
+                        sources.DHL_CONNECTOR_JOINT_DECLARATION_DESTINATION.to_dict(),
+                    ],
+                ),
+            )
+        ]
+
+    def test_joint_declaration_outside_norway_and_switzerland(self):
+        handling = (
+            "customs handling (dhl_freight_sweden_customs_handling_standard or "
+            "dhl_freight_sweden_customs_handling_full_service) or an own declaration "
+            "(dhl_freight_sweden_customs_own_declaration)"
+        )
+        aland = (
+            "an own declaration (dhl_freight_sweden_customs_own_declaration) "
+            "or customs data with no customs service"
+        )
+        for recipient, service, lane, country, alternatives in (
+            ("GB", "dhl_freight_sweden_road_freight_standard", "SE-GB", "GB", handling),
+            ("JE", "dhl_freight_sweden_road_freight_priority", "SE-GB", "GB", handling),
+            ("US", PARCEL_CONNECT, "SE-US", "US", handling),
+            ("AX_CODE", PARCEL_CONNECT, "SE-FI", "FI", aland),
+        ):
+            with self.subTest(recipient=recipient):
+                self.assertListEqual(
+                    _advise(
+                        dhl_freight_sweden.joint_declaration_destination,
+                        recipient=recipient,
+                        service=service,
+                        options=self.JOINT,
+                    ),
+                    self._expected(lane, country, alternatives),
+                )
+
+    def test_joint_declaration_to_norway_or_switzerland(self):
+        for recipient, service in (("NO", PARCEL_CONNECT), ("CH", "dhl_freight_sweden_road_freight_standard")):
+            with self.subTest(recipient=recipient):
+                self.assertListEqual(
+                    _advise(
+                        dhl_freight_sweden.joint_declaration_destination,
+                        recipient=recipient,
+                        service=service,
+                        options=self.JOINT,
+                    ),
+                    [],
+                )
+
+    def test_inside_the_eu_vat_area_is_not_advised(self):
+        for recipient in ("DE", "XI"):
+            with self.subTest(recipient=recipient):
+                self.assertListEqual(
+                    _advise(
+                        dhl_freight_sweden.joint_declaration_destination,
+                        recipient=recipient,
+                        service="dhl_freight_sweden_road_freight_standard",
+                        options=self.JOINT,
+                    ),
+                    [],
+                )
+
+    def test_without_the_joint_declaration_is_not_advised(self):
+        self.assertListEqual(
+            _advise(
+                dhl_freight_sweden.joint_declaration_destination,
+                recipient="GB",
+                service="dhl_freight_sweden_road_freight_standard",
+                options=dict(dhl_freight_sweden_customs_own_declaration=True),
+            ),
+            [],
+        )
+
+
 class TestNordicConventionsDHLFreightSwedenInvoiceCopy(unittest.TestCase):
     def _message(self, recipient: str, fee: str) -> dict:
         return dict(

@@ -40,6 +40,7 @@ DHL_EXPRESS_CUSTOMS_URL = "https://mydhl.express.dhl/content/dam/downloads/globa
 DHL_CONNECTOR_README_URL = "https://github.com/PrimePack-AB/karrio-dhl-freight-sweden/blob/7a2214d/README.md (read 2026-10-08)"
 DHL_CONNECTOR_DESTINATIONS_URL = "https://github.com/PrimePack-AB/karrio-dhl-freight-sweden/blob/7a2214d/docs/concepts/destinations.md (read 2026-10-08)"
 DHL_CONNECTOR_TERRITORY_CHECK = "karrio-dhl-freight-sweden branch products-manual-country-lists@142b62d, karrio/providers/dhl_freight_sweden/units.py TERRITORY_POSTAL_CODES and shipment/create.py TerritoryPostalCodeError (committed 2026-10-08, not yet pushed)"
+DHL_CONNECTOR_JOINT_DECLARATION_CHECK = "karrio-dhl-freight-sweden branch products-manual-country-lists@f86c8ac, karrio/providers/dhl_freight_sweden/units.py JOINT_DECLARATION_COUNTRIES and shipment/create.py JointDeclarationDestinationError (committed 2026-10-08, not yet pushed)"
 DHL_CONNECTOR_REJECTION_112_GB_URL = "https://github.com/PrimePack-AB/karrio-dhl-freight-sweden/blob/28c1ccb/tests/dhl_freight_sweden/fixtures/sandbox/rejection-22005-112-se-gb.json (captured 2026-10-06)"
 
 
@@ -328,6 +329,11 @@ DHL_CONNECTOR_TERRITORY_POSTAL_CODES = Source(
     "S",
     _ref("TerritoryPostalCodeError", DHL_CONNECTOR_TERRITORY_CHECK),
     "The DHL Freight Sweden connector refuses a shipper or recipient with the country code AX, IC, EA, FO, or GL whose postal code is missing or, normalised under the parent, lies outside the territory (FI 22000-22999; ES 35000-35999 or 38000-38999; ES 51000-51999 or 52000-52999; DK 3800-3999 or three digits; DK 3800-3999), because such a code would otherwise be booked as the parent's mainland, inside the EU VAT area, with its customs data dropped.",
+)
+DHL_CONNECTOR_JOINT_DECLARATION_DESTINATION = Source(
+    "S",
+    _ref("JointDeclarationDestinationError", DHL_CONNECTOR_JOINT_DECLARATION_CHECK),
+    "Across the EU VAT area border the DHL Freight Sweden connector refuses dhl_freight_sweden_customs_joint_declaration to a recipient country, after the territory mapping, other than NO, the manual's only valid country, and CH, which product matches offer; inside the area it drops customs services with a warning instead.",
 )
 DHL_CONNECTOR_SANDBOX_112_GB_REJECTED = Source(
     "S",
