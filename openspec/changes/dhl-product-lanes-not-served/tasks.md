@@ -8,4 +8,4 @@
 
 ## 2. Verification
 
-- [ ] 2.1 Run `python -m unittest discover -s tests`, the parity suite with `PYTHONPATH=../karrio-dhl-freight-sweden`, the `AGENTS.md` verification commands, and `openspec validate dhl-product-lanes-not-served --strict`
+- [x] 2.1 Run `python -m unittest discover -s tests`, the parity suite with `PYTHONPATH=../karrio-dhl-freight-sweden`, the `AGENTS.md` verification commands, and `openspec validate dhl-product-lanes-not-served --strict`
