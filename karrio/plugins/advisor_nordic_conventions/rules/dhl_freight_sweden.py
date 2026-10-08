@@ -72,6 +72,9 @@ def customs_mode_missing(request, context) -> typing.List[models.Message]:
     if not (_dhl_freight_sweden(lane) and not lane.dhl_customs_options):
         return []
 
+    if lanes.dhl_in_aland(lane.recipient_country, getattr(request.recipient, "postal_code", None)):
+        return [_aland_customs_mode_missing(lane)]
+
     return [
         advisory(
             AdvisoryClassification.dhl_freight_sweden_customs_mode_missing,
@@ -99,6 +102,30 @@ def customs_mode_missing(request, context) -> typing.List[models.Message]:
             fees="No fee-free customs mode exists for destinations outside the EU VAT area.",
         )
     ]
+
+
+def _aland_customs_mode_missing(lane: lanes.Lane) -> models.Message:
+    return advisory(
+        AdvisoryClassification.dhl_freight_sweden_customs_mode_missing,
+        "warning",
+        " ".join(
+            [
+                "DHL Freight Sweden rejects customs handling (standard or full service) to Åland",
+                "(FI 22000-22999) with error 24003, and the connector refuses both before booking.",
+                "Book Åland with an own declaration (dhl_freight_sweden_customs_own_declaration),",
+                "a joint declaration (dhl_freight_sweden_customs_joint_declaration),",
+                "or customs data and no customs service, which DHL accepted for Parcel Connect (109)",
+                "without showing how it clears customs.",
+            ]
+        ),
+        lane,
+        [
+            sources.DFS_CUSTOMS_SERVICES_OPT_IN,
+            sources.DHL_MAN_CUSTOMS_SELECTION,
+            sources.DHL_CONNECTOR_ALAND_CUSTOMS,
+            sources.DHL_OWN_DECLARATION_FEE_INFERENCE,
+        ],
+    )
 
 
 def invoice_copy(request, context) -> typing.List[models.Message]:

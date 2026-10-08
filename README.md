@@ -83,7 +83,7 @@ Non-EU means outside the EU VAT area.
 
 | Advisory | Level | Destinations | Trigger | Sources |
 |---|---|---|---|---|
-| <a id="advisor_nordic_conventions_dhl_freight_sweden_customs_mode_missing"></a>Customs mode missing | `warning` | all non-EU | No customs service option set by unified name | DHL product manual[^dhl-man], DHL connector README[^dhl-connector-readme], DHL price list[^dhl-prl], DHL connector spec[^dfs] |
+| <a id="advisor_nordic_conventions_dhl_freight_sweden_customs_mode_missing"></a>Customs mode missing | `warning` | all non-EU | No customs service option set by unified name; to Åland the message names the own declaration, the joint declaration, or no customs service instead of standard and full service | DHL product manual[^dhl-man], DHL connector README[^dhl-connector-readme], DHL connector destinations page[^dhl-connector-destinations], DHL price list[^dhl-prl], DHL connector spec[^dfs] |
 | <a id="advisor_nordic_conventions_dhl_freight_sweden_invoice_copy"></a>Invoice copy | `warning` | all non-EU | Any service | DHL product manual[^dhl-man], DHL export customs information[^dhl-cie], DHL price list[^dhl-prl] |
 | <a id="advisor_nordic_conventions_dhl_freight_sweden_attached_documents"></a>Documents outside package | `warning` | all non-EU | Parcel Connect (`dhl_freight_sweden_parcel_connect_b2c`, 109) | DHL product manual[^dhl-man] |
 | <a id="advisor_nordic_conventions_dhl_freight_sweden_voec_marking"></a>VOEC marking | `warning` | Norway | `customs.options.voec_number` set | DHL product manual[^dhl-man], DHL connector spec[^dfs] |
@@ -185,6 +185,7 @@ The connector cross-check tests run when the PostNord and DHL Freight Sweden con
 [^pn-dk-page]: postnord.dk export page, Wayback 2026-03-10: <https://www.postnord.dk/erhverv/eksport/> (`PN_DK_PAGE_URL`).
 [^dhl-man]: DHL Freight Sweden product manual v5.26, updated 2026-10-01, valid from 2026-11-01, sha256 050660c37ba93d1ae9514c50dfa42c2010bc87763ccaff51a740b2526af11b73, listed at <https://dhlpaket.se/dashboard/specifications/products/> (`DHL_MAN_URL`).
 [^dhl-connector-readme]: DHL Freight Sweden connector README at commit 7a2214d, read 2026-10-08: <https://github.com/PrimePack-AB/karrio-dhl-freight-sweden/blob/7a2214d/README.md> (`DHL_CONNECTOR_README_URL`).
+[^dhl-connector-destinations]: DHL Freight Sweden connector destinations page at commit 7a2214d, read 2026-10-08: <https://github.com/PrimePack-AB/karrio-dhl-freight-sweden/blob/7a2214d/docs/concepts/destinations.md> (`DHL_CONNECTOR_DESTINATIONS_URL`).
 [^dhl-connector-gb-rejection]: DHL Freight Sweden connector sandbox rejection of Parcel Connect Plus (112) from SE to GB, captured 2026-10-06: <https://github.com/PrimePack-AB/karrio-dhl-freight-sweden/blob/28c1ccb/tests/dhl_freight_sweden/fixtures/sandbox/rejection-22005-112-se-gb.json> (`DHL_CONNECTOR_REJECTION_112_GB_URL`).
 [^dhl-cie]: DHL Freight Sweden customs information export, 2025-02-03: <https://www.dhl.com/content/dam/dhl/local/se/dhl-freight/documents/pdf/se-freight-customs-information-export-en.pdf> (`DHL_CIE_URL`).
 [^dhl-prl]: DHL Freight Sweden price list for additional services, valid 2026-05-01: <https://www.dhl.com/content/dam/dhl/local/se/dhl-freight/documents/pdf/se-freight-price-list-additional-services-sv.pdf> (`DHL_PRL_URL`).

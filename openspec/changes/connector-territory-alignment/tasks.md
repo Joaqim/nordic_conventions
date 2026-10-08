@@ -8,7 +8,7 @@
 ## 2. Customs-mode message
 
 - [x] 2.1 Name the joint declaration to Norway or Switzerland in the customs-mode message, test-first
-- [ ] 2.2 Give Åland recipients a customs-mode message without standard and full service, citing the connector's Åland evidence, test-first
+- [x] 2.2 Give Åland recipients a customs-mode message without standard and full service, citing the connector's Åland evidence, test-first
 
 ## 3. Documentation
 

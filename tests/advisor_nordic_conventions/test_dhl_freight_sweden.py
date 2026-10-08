@@ -1,6 +1,7 @@
 import importlib
 import unittest
 
+import karrio.plugins.advisor_nordic_conventions.lanes as lanes
 import karrio.plugins.advisor_nordic_conventions.sources as sources
 import karrio.plugins.advisor_nordic_conventions.rules.dhl_freight_sweden as dhl_freight_sweden
 from . import fixture
@@ -98,6 +99,66 @@ class TestNordicConventionsDHLFreightSwedenCustomsModeMissing(unittest.TestCase)
                 options=dict(dhl_freight_sweden_customs_handling_full_service="false"),
             ),
             [],
+        )
+
+
+class TestNordicConventionsDHLFreightSwedenAlandCustomsMode(unittest.TestCase):
+    def test_no_customs_option_to_aland(self):
+        for recipient in ("AX", "AX_PREFIXED"):
+            with self.subTest(recipient=recipient):
+                self.assertListEqual(
+                    _advise(dhl_freight_sweden.customs_mode_missing, recipient=recipient),
+                    [
+                        dict(
+                            code="advisor_nordic_conventions_dhl_freight_sweden_customs_mode_missing",
+                            level="warning",
+                            message=(
+                                "DHL Freight Sweden rejects customs handling (standard or full service) to Åland "
+                                "(FI 22000-22999) with error 24003, and the connector refuses both before booking. "
+                                "Book Åland with an own declaration (dhl_freight_sweden_customs_own_declaration), "
+                                "a joint declaration (dhl_freight_sweden_customs_joint_declaration), "
+                                "or customs data and no customs service, which DHL accepted for Parcel Connect (109) "
+                                "without showing how it clears customs."
+                            ),
+                            details=dict(
+                                plugin="advisor_nordic_conventions",
+                                lane="SE-FI",
+                                sources=[
+                                    sources.DFS_CUSTOMS_SERVICES_OPT_IN.to_dict(),
+                                    sources.DHL_MAN_CUSTOMS_SELECTION.to_dict(),
+                                    sources.DHL_CONNECTOR_ALAND_CUSTOMS.to_dict(),
+                                    sources.DHL_OWN_DECLARATION_FEE_INFERENCE.to_dict(),
+                                ],
+                            ),
+                        )
+                    ],
+                )
+
+    def test_aland_message_suggests_no_refused_customs_service(self):
+        message = _advise(dhl_freight_sweden.customs_mode_missing, recipient="AX")[0]["message"]
+
+        self.assertNotIn("dhl_freight_sweden_customs_handling_standard", message)
+        self.assertNotIn("dhl_freight_sweden_customs_handling_full_service", message)
+
+    def test_aland_postal_range_matches_connector(self):
+        try:
+            units = importlib.import_module("karrio.providers.dhl_freight_sweden.units")
+        except ImportError:
+            self.skipTest("dhl_freight_sweden connector is not importable")
+
+        self.assertTupleEqual(lanes.DHL_ALAND_POSTAL_RANGE, units.ALAND_POSTAL_RANGE)
+        self.assertSetEqual(
+            set(units.ALAND_REJECTED_CUSTOMS_SERVICES),
+            {"dhl_freight_sweden_customs_handling_standard", "dhl_freight_sweden_customs_handling_full_service"},
+        )
+
+    def test_mainland_finland_is_not_aland(self):
+        self.assertListEqual(
+            [
+                lanes.dhl_in_aland(country, postal_code)
+                for country, postal_code in (("FI", "00100"), ("FI", "FI-22100"), ("FI", "22 999"), ("SE", "22100"), ("FI", None))
+            ],
+            [False, True, True, False, False],
         )
 
 

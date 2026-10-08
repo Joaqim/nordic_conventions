@@ -150,6 +150,14 @@ def postal_prefix_codes(country_code: str) -> typing.Tuple[str, ...]:
     )
 
 
+def normalized_postal_code(
+    country_code: typing.Optional[str],
+    postal_code: typing.Optional[str],
+) -> str:
+    """A postal code normalised as ``in_eu_vat_area`` compares it."""
+    return _postal_code((country_code or "").upper(), postal_code)[1]
+
+
 def _postal_code(
     country: str, postal_code: typing.Optional[str]
 ) -> typing.Tuple[typing.Optional[str], str]:

@@ -201,6 +201,21 @@ def dhl_parent_country(country_code: str) -> str:
     return DHL_TERRITORY_PARENTS.get(country_code.upper(), country_code)
 
 
+# The DHL Freight Sweden connector's ALAND_POSTAL_RANGE (karrio-dhl-freight-sweden
+# 9e2b98f, units.py): to or from these postal codes DHL rejected customs
+# handling standard and full service with 24003, and the connector refuses both.
+DHL_ALAND_POSTAL_RANGE: typing.Tuple[str, int, int] = ("FI", 22000, 22999)
+
+
+def dhl_in_aland(country_code: str, postal_code: typing.Optional[str]) -> bool:
+    """Whether an address lies in Åland as the DHL Freight Sweden connector decides it."""
+    country, low, high = DHL_ALAND_POSTAL_RANGE
+    if dhl_parent_country(country_code) != country:
+        return False
+    postal = territories.normalized_postal_code(country, postal_code)
+    return postal.isdigit() and low <= int(postal) <= high
+
+
 def dhl_product_code(service: typing.Optional[str]) -> typing.Optional[str]:
     """The DHL Freight Sweden product code a unified name or carrier code names, if any."""
     if service in DHL_PRODUCT_LANES:
