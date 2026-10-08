@@ -25,5 +25,5 @@
 
 ## 5. Verification
 
-- [ ] 5.1 Run `python -m unittest discover -s tests`, the parity suite with `PYTHONPATH=../karrio-dhl-freight-sweden`, the `AGENTS.md` verification commands, and `openspec validate connector-territory-alignment --strict`
-- [ ] 5.2 Run the connector's offline tests and `pyright` to confirm the connector is unchanged
+- [x] 5.1 Run `python -m unittest discover -s tests`, the parity suite with `PYTHONPATH=../karrio-dhl-freight-sweden`, the `AGENTS.md` verification commands, and `openspec validate connector-territory-alignment --strict`
+- [x] 5.2 Run the connector's offline tests and `pyright` to confirm the connector is unchanged
