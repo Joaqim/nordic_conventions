@@ -214,5 +214,54 @@ class TestNordicConventionsProductGroups(unittest.TestCase):
         )
 
 
+
+class TestNordicConventionsDHLProductLanes(unittest.TestCase):
+    def test_lanes_follow_the_manual_valid_countries(self):
+        cases = [
+            ("102", "SE", "SE", True),
+            ("102", "SE", "NO", False),
+            ("109", "SE", "NO", True),
+            ("109", "SE", "CH", False),
+            ("112", "SE", "GB", True),
+            ("107", "DE", "SE", True),
+            ("107", "SE", "NO", False),
+            ("107", "GB", "SE", False),
+            ("202", "SE", "LI", True),
+            ("202", "SE", "US", False),
+            ("202", "UA", "SE", True),
+            ("233", "SE", "GR", False),
+            ("233", "SE", "LI", True),
+            ("601", "SE", "GR", True),
+            ("601", "SE", "LI", False),
+            ("SPI", "SE", "SE", False),
+        ]
+        for product, origin, destination, served in cases:
+            with self.subTest(product=product, lane=(origin, destination)):
+                self.assertEqual(lanes.dhl_lane_served(product, origin, destination), served)
+
+    def test_dhl_product_codes_cover_unified_names_and_codes(self):
+        self.assertEqual(lanes.dhl_product_code("dhl_freight_sweden_parcel_return_connect_c2b"), "107")
+        self.assertEqual(lanes.dhl_product_code("107"), "107")
+        self.assertIsNone(lanes.dhl_product_code("dhl_freight_sweden_unknown"))
+        self.assertIsNone(lanes.dhl_product_code(None))
+        self.assertEqual(set(lanes.DHL_PRODUCT_CODES.values()), set(lanes.DHL_PRODUCT_LANES))
+        self.assertEqual(set(lanes.DHL_PRODUCT_LANE_CITATIONS), set(lanes.DHL_PRODUCT_LANES))
+
+    def test_dhl_product_lanes_match_connector(self):
+        units = _connector_units("dhl_freight_sweden")
+        if units is None:
+            self.skipTest("dhl_freight_sweden connector is not importable")
+
+        self.assertDictEqual(
+            {code: tuple(map(tuple, product_lanes)) for code, product_lanes in lanes.DHL_PRODUCT_LANES.items()},
+            {code: tuple(map(tuple, product_lanes)) for code, product_lanes in units.PRODUCT_LANES.items()},
+        )
+        self.assertDictEqual(lanes.DHL_PRODUCT_LANE_CITATIONS, dict(units.PRODUCT_LANE_CITATIONS))
+        self.assertDictEqual(
+            lanes.DHL_PRODUCT_CODES,
+            {service.name: service.value for service in units.ShippingService},
+        )
+
+
 if __name__ == "__main__":
     unittest.main()
