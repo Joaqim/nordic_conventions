@@ -282,6 +282,19 @@ class TestNordicConventionsDHLFreightSwedenTerritoryPostalCode(unittest.TestCase
             [],
         )
 
+    def test_describe_states_any_digit_count(self):
+        self.assertListEqual(
+            [
+                lanes.DHLTerritoryPostalCodes("Test", "DK", ((3800, 3999),), digits=digits).describe()
+                for digits in (3, 4, None)
+            ],
+            [
+                "a DK postal code in 3800-3999 or of three digits",
+                "a DK postal code in 3800-3999 or of 4 digits",
+                "a DK postal code in 3800-3999",
+            ],
+        )
+
     def test_territory_postal_codes_match_connector(self):
         try:
             units = importlib.import_module("karrio.providers.dhl_freight_sweden.units")

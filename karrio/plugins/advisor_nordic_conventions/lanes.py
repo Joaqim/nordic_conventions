@@ -222,7 +222,7 @@ class DHLTerritoryPostalCodes(typing.NamedTuple):
     def describe(self) -> str:
         article = "an" if self.parent[0] in "AEFHILMNORSX" else "a"
         ranges = " or ".join(f"{low}-{high}" for low, high in self.ranges)
-        digits = f" or of {DIGIT_WORDS[self.digits]} digits" if self.digits else ""
+        digits = f" or of {DIGIT_WORDS.get(self.digits, str(self.digits))} digits" if self.digits else ""
         return f"{article} {self.parent} postal code in {ranges}{digits}"
 
     def matches(self, postal_code: typing.Optional[str]) -> bool:
