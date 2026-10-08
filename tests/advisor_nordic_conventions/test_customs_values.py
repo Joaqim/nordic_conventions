@@ -341,6 +341,39 @@ class TestNordicConventionsParcelConnectDestinations(unittest.TestCase):
                     [],
                 )
 
+    def test_territory_codes_served_under_their_parent_country_are_not_warned(self):
+        for recipient, service in (("AX_CODE", "109"), ("AX_CODE", "dhl_freight_sweden_parcel_connect_plus"), ("JE", "233")):
+            with self.subTest(recipient=recipient, service=service):
+                self.assertListEqual(
+                    _advise(dhl_freight_sweden.parcel_connect_not_served, "dhl_freight_sweden", recipient, service, PAID),
+                    [],
+                )
+
+    def test_parcel_return_connect_to_jersey_reads_as_great_britain(self):
+        self.assertListEqual(
+            _advise(dhl_freight_sweden.parcel_connect_not_served, "dhl_freight_sweden", "JE", "107", PAID),
+            self._expected(
+                "advisor_nordic_conventions_dhl_freight_sweden_parcel_connect_not_served", GB_NOT_SERVED_TEXT, "SE-GB"
+            ),
+        )
+
+    def test_parcel_connect_to_jersey_needs_the_great_britain_agreement(self):
+        self.assertListEqual(
+            _advise(
+                dhl_freight_sweden.parcel_connect_gb_agreement,
+                "dhl_freight_sweden",
+                "JE",
+                "dhl_freight_sweden_parcel_connect_plus",
+                PAID,
+            ),
+            self._expected(
+                "advisor_nordic_conventions_dhl_freight_sweden_parcel_connect_gb_agreement",
+                GB_AGREEMENT_TEXT,
+                "SE-GB",
+                (sources.DHL_MAN_PARCEL_CONNECT_COUNTRIES, sources.DHL_CONNECTOR_SANDBOX_112_GB_REJECTED),
+            ),
+        )
+
     def test_postnord_is_not_advised(self):
         for advisor, recipient in (
             (dhl_freight_sweden.parcel_connect_not_served, "CH"),

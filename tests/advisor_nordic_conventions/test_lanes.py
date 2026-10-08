@@ -270,6 +270,36 @@ class TestNordicConventionsDHLTerritoryParents(unittest.TestCase):
             dict(AX="FI", fo="DK", GL="DK", IC="ES", EA="ES", JE="GB", GG="GB", IM="GB", XI="GB", GB="GB", NO="NO", **{"": ""}),
         )
 
+    def test_dhl_lanes_read_territory_codes_as_their_parent_country(self):
+        dhl = dict(service="dhl_freight_sweden_parcel_connect_b2c", carrier="dhl_freight_sweden")
+        self.assertDictEqual(
+            {
+                recipient: getattr(_lane("SE", recipient, **dhl), "recipient_country", None)
+                for recipient in ("XI", "XI_NON_BT", "AX_CODE", "JE")
+            },
+            dict(XI=None, XI_NON_BT="GB", AX_CODE="FI", JE="GB"),
+        )
+
+    def test_postnord_lanes_keep_territory_codes(self):
+        self.assertDictEqual(
+            {recipient: _lane("SE", recipient).recipient_country for recipient in ("XI", "AX_CODE", "JE")},
+            dict(XI="XI", AX_CODE="AX", JE="JE"),
+        )
+
+    def test_dhl_lane_served_reads_territory_codes_as_their_parent_country(self):
+        cases = [
+            ("109", "SE", "AX", True),
+            ("109", "SE", "JE", True),
+            ("107", "AX", "SE", True),
+            ("107", "JE", "SE", False),
+            ("107", "GB", "SE", False),
+            ("233", "SE", "IC", True),
+            ("202", "SE", "FO", True),
+        ]
+        for product, origin, destination, served in cases:
+            with self.subTest(product=product, lane=(origin, destination)):
+                self.assertEqual(lanes.dhl_lane_served(product, origin, destination), served)
+
     def test_dhl_territory_parents_match_connector(self):
         units = _connector_units("dhl_freight_sweden")
         if units is None:

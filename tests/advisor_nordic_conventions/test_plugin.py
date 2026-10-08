@@ -207,6 +207,7 @@ class TestNordicConventionsMessages(unittest.TestCase):
             ("postnord", "shipping", "SE", "DE", "postnord_parcel"),
             ("dhl_freight_sweden", "shipping", "SE", "DE", "109"),
             ("dhl_freight_sweden", "shipping", "SE", "GR", "202"),
+            ("dhl_freight_sweden", "shipping", "SE", "XI", "202"),
             ("postnord", "shipping", "AX", "NO", "postnord_parcel"),
             ("postnord", "rating", "SE", "NO", "postnord_parcel"),
         ]

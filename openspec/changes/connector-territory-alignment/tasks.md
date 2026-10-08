@@ -2,8 +2,8 @@
 
 ## 1. Territory codes
 
-- [ ] 1.1 Copy the connector's `TERRITORY_PARENTS` into `lanes.py` as `DHL_TERRITORY_PARENTS`, with a cross-check test against the connector that is skipped when it is not importable, test-first
-- [ ] 1.2 Map DHL Freight Sweden shipper and recipient country codes in `lane_of` before the scope checks, and in `dhl_lane_served`, test-first: `XI` `BT` out of scope, 109 to `AX` not warned, `JE` reads as `GB` for the reminder fee, the agreement, and 107, PostNord unchanged
+- [x] 1.1 Copy the connector's `TERRITORY_PARENTS` into `lanes.py` as `DHL_TERRITORY_PARENTS`, with a cross-check test against the connector that is skipped when it is not importable, test-first
+- [x] 1.2 Map DHL Freight Sweden shipper and recipient country codes in `lane_of` before the scope checks, and in `dhl_lane_served`, test-first: `XI` `BT` out of scope, 109 to `AX` not warned, `JE` reads as `GB` for the reminder fee, the agreement, and 107, PostNord unchanged
 
 ## 2. Customs-mode message
 

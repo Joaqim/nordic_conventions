@@ -209,7 +209,8 @@ def dhl_product_code(service: typing.Optional[str]) -> typing.Optional[str]:
 
 
 def dhl_lane_served(product_code: str, origin: str, destination: str) -> bool:
-    """Whether the product carries shipments from ``origin`` to ``destination``, as given."""
+    """Whether the product carries shipments from ``origin`` to ``destination``, territory codes read as their parent."""
+    origin, destination = dhl_parent_country(origin), dhl_parent_country(destination)
     return any(
         origin in lane.origins and destination in lane.destinations
         for lane in DHL_PRODUCT_LANES.get(product_code, ())
@@ -287,7 +288,9 @@ def lane_of(request: typing.Any, context: typing.Any) -> typing.Optional[Lane]:
 
     The plugin advises only at shipment creation, for PostNord shippers in
     Sweden, Denmark, or Finland and DHL Freight Sweden shippers in Sweden,
-    sending from inside to outside the EU VAT area.
+    sending from inside to outside the EU VAT area. For DHL Freight Sweden the
+    country codes are read as the connector books them, a territory code as
+    its parent country (``dhl_parent_country``), before any check.
     """
     if getattr(context, "operation", None) != "shipping":
         return None
@@ -295,8 +298,9 @@ def lane_of(request: typing.Any, context: typing.Any) -> typing.Optional[Lane]:
     carrier_name = getattr(context, "carrier_name", None)
     shipper = getattr(request, "shipper", None)
     recipient = getattr(request, "recipient", None)
-    shipper_country = (getattr(shipper, "country_code", None) or "").upper()
-    recipient_country = (getattr(recipient, "country_code", None) or "").upper()
+    country_of = dhl_parent_country if carrier_name == DHL_FREIGHT_SWEDEN else (lambda code: code)
+    shipper_country = country_of((getattr(shipper, "country_code", None) or "").upper())
+    recipient_country = country_of((getattr(recipient, "country_code", None) or "").upper())
 
     in_scope = (
         shipper_country in SHIPPER_COUNTRIES.get(carrier_name, frozenset())
