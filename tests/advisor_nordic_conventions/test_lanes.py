@@ -263,5 +263,20 @@ class TestNordicConventionsDHLProductLanes(unittest.TestCase):
         )
 
 
+class TestNordicConventionsDHLTerritoryParents(unittest.TestCase):
+    def test_territory_codes_read_as_their_parent_country(self):
+        self.assertDictEqual(
+            {code: lanes.dhl_parent_country(code) for code in ("AX", "fo", "GL", "IC", "EA", "JE", "GG", "IM", "XI", "GB", "NO", "")},
+            dict(AX="FI", fo="DK", GL="DK", IC="ES", EA="ES", JE="GB", GG="GB", IM="GB", XI="GB", GB="GB", NO="NO", **{"": ""}),
+        )
+
+    def test_dhl_territory_parents_match_connector(self):
+        units = _connector_units("dhl_freight_sweden")
+        if units is None:
+            self.skipTest("dhl_freight_sweden connector is not importable")
+
+        self.assertDictEqual(lanes.DHL_TERRITORY_PARENTS, dict(units.TERRITORY_PARENTS))
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -183,6 +183,24 @@ DHL_PRODUCT_LANE_CITATIONS: typing.Dict[str, str] = {
 }
 
 
+# The DHL Freight Sweden connector's TERRITORY_PARENTS (karrio-dhl-freight-sweden
+# 9e2b98f, units.py): the country DHL serves a territory code under, which the
+# connector sends instead of the territory code before its customs-area, lane,
+# and excluded postal code checks.
+DHL_TERRITORY_PARENTS: typing.Dict[str, str] = {
+    **territories.NUMERIC_POSTAL_TERRITORY_PARENTS,
+    "JE": "GB",  # Jersey
+    "GG": "GB",  # Guernsey
+    "IM": "GB",  # Isle of Man
+    "XI": "GB",  # Northern Ireland
+}
+
+
+def dhl_parent_country(country_code: str) -> str:
+    """The country DHL Freight Sweden books a territory code under; other codes unchanged."""
+    return DHL_TERRITORY_PARENTS.get(country_code.upper(), country_code)
+
+
 def dhl_product_code(service: typing.Optional[str]) -> typing.Optional[str]:
     """The DHL Freight Sweden product code a unified name or carrier code names, if any."""
     if service in DHL_PRODUCT_LANES:
