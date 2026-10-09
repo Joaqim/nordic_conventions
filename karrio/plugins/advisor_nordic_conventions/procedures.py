@@ -133,6 +133,12 @@ ANSWERING: typing.Dict[AdvisoryClassification, AnsweringSet] = {
     AdvisoryClassification.dhl_freight_sweden_parcel_connect_gb_agreement: _always(),
     AdvisoryClassification.dhl_freight_sweden_territory_postal_code_mismatch: _always(),
     AdvisoryClassification.dhl_freight_sweden_joint_declaration_destination: _always(),
+    AdvisoryClassification.dhl_freight_sweden_cyprus_documents: _always(),
+    AdvisoryClassification.dhl_freight_sweden_greek_tax_ids: _always(),
+    AdvisoryClassification.dhl_freight_sweden_sent_information: _always(),
+    AdvisoryClassification.dhl_freight_sweden_uit_information: _always(),
+    AdvisoryClassification.dhl_freight_sweden_ekaer_information: _always(),
+    AdvisoryClassification.dhl_freight_sweden_spain_dg_documents: _always(),
 }
 
 
