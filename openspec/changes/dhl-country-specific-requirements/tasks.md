@@ -8,7 +8,7 @@
 ## 2. Codes and sources
 
 - [x] 2.1 Test-first: extend `tests/advisor_nordic_conventions/test_codes.py` to expect the six new codes (`dhl_freight_sweden_cyprus_documents`, `dhl_freight_sweden_greek_tax_ids`, `dhl_freight_sweden_sent_information`, `dhl_freight_sweden_uit_information`, `dhl_freight_sweden_ekaer_information`, `dhl_freight_sweden_spain_dg_documents`), watch it fail, then add them to `karrio/plugins/advisor_nordic_conventions/codes.py`; verify `test_codes.py` passes.
-- [ ] 2.2 Add `DHL_CSR_URL` to `sources.py` in the `DHL_MAN_URL` annotation style (page URL, document name, accessed 2026-10-09) plus the `Source` objects the six rules cite (CSR for Cyprus and Spain, CSR plus the manual's product tables for Greece, the connector tables for the product sets and threshold); verify `test_sources.py` passes and every new `Source` is cited by a rule or test.
+- [x] 2.2 Add `DHL_CSR_URL` to `sources.py` in the `DHL_MAN_URL` annotation style (page URL, document name, accessed 2026-10-09) plus the `Source` objects the six rules cite (CSR for Cyprus and Spain, CSR plus the manual's product tables for Greece, the connector tables for the product sets and threshold); verify `test_sources.py` passes and every new `Source` is cited by a rule or test.
 
 ## 3. Lane gate
 

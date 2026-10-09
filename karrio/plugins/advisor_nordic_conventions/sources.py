@@ -32,6 +32,7 @@ PN_DK_PAGE_URL = "https://www.postnord.dk/erhverv/eksport/ (Wayback 2026-03-10)"
 DHL_MAN_URL = "https://dhlpaket.se/dashboard/specifications/products/ (product manual v5.26, updated 2026-10-01, valid from 2026-11-01, sha256 050660c37ba93d1ae9514c50dfa42c2010bc87763ccaff51a740b2526af11b73)"
 DHL_CIE_URL = "https://www.dhl.com/content/dam/dhl/local/se/dhl-freight/documents/pdf/se-freight-customs-information-export-en.pdf (2025-02-03)"
 DHL_PRL_URL = "https://www.dhl.com/content/dam/dhl/local/se/dhl-freight/documents/pdf/se-freight-price-list-additional-services-sv.pdf (valid 2026-05-01)"
+DHL_CSR_URL = "https://www.dhl.com/se-en/home/freight/help-center-for-european-road-and-rail/useful-information-and-downloads.html (Country-specific shipping requirements (English), accessed 2026-10-09)"
 BRING_URL = "https://www.bring.se/tjanster/tull/tulldokument"
 BAZG_R_69_03_URL = "https://www.bazg.admin.ch/dam/de/sd-web/mIvoM5CF7ydH/steuerbemessungsgrundlage-de.pdf (valid 2025-01-01)"
 PN_SE_NO_PAGE_URL = "https://www.postnord.se/privat/skicka/skicka-brev-och-paket-utomlands/skicka-paket-till-norge/ (read 2026-10-02)"
@@ -258,6 +259,41 @@ DHL_MAN_VOEC_PARCEL_CONNECT = Source(
     "W",
     _ref("FN:206", f"{DHL_MAN_URL} §6.5 p.92, §6.6 p.94"),
     "The voecSupplyVAT service is VOEC with Parcel Connect (109) to Norway, sent in the API as additionalServices.voecSupplyVAT.vatId.",
+)
+DHL_CSR_CYPRUS_DOCUMENTS = Source(
+    "W",
+    _ref("Cyprus", DHL_CSR_URL),
+    "Country-specific requirements for Cyprus: a commercial invoice and packing list are required to prove the Union status of the goods, a T2L document where applicable, copies of the recipient's ID documents, front and back, when the recipient is a private individual, and the documents can be uploaded in myDHL Freight.",
+)
+DHL_CSR_GREEK_TAX_IDS = Source(
+    "W",
+    _ref("Greece", DHL_CSR_URL),
+    "Country-specific requirements for Greece: the sender's and the recipient's VAT numbers are required, and EL000000000 can be used for a private individual.",
+)
+DHL_CSR_SPAIN_DG_DOCUMENTS = Source(
+    "W",
+    _ref("Spain", DHL_CSR_URL),
+    "Country-specific requirements for Spain: dangerous goods shipments to and from Spain must carry both a dangerous goods declaration and a material safety data sheet, which can be uploaded in myDHL Freight.",
+)
+DHL_MAN_GREEK_TAX_ID_PRODUCTS = Source(
+    "W",
+    _ref("Product manual v5.26", f"{DHL_MAN_URL} §5.4 p.22, §5.11 p.51, §5.19 p.81"),
+    "The shipment information of Road Freight Standard (202), SPI, and Home Delivery International (601) makes a VAT number or TIN mandatory for all parties on shipments to and from Greece.",
+)
+DHL_CONNECTOR_GREEK_TAX_ID_PRODUCTS = Source(
+    "S",
+    _ref("Inside the EU VAT area", DHL_CONNECTOR_README_URL),
+    "The connector refuses 202, SPI, or 601 to or from GR without a VAT number or TIN for both parties (PartyTaxIdError), reading each party's tax id from federal_tax_id or state_tax_id; the product set is PARTY_TAX_ID_PRODUCTS in its units.py.",
+)
+DHL_CONNECTOR_TRANSPORT_DECLARATION_PRODUCTS = Source(
+    "S",
+    _ref("Inside the EU VAT area", DHL_CONNECTOR_README_URL),
+    "Inside the EU VAT area the connector carries a transport declaration on three lanes: SENT to or from PL, and EKAER and UIT to or from HU and RO, on TRANSPORT_DECLARATION_PRODUCTS (202, 205, 233, SPI, and 601) in its units.py.",
+)
+DHL_CONNECTOR_TRANSPORT_DECLARATION_DEFAULTS = Source(
+    "S",
+    _ref("Inside the EU VAT area", DHL_CONNECTOR_README_URL),
+    "Without a declaration option the connector declares SENT free, declares EKAER or UIT free below 500 kg total gross weight (TRANSPORT_DECLARATION_FREE_WEIGHT_LIMIT_KG), refuses an undeclared EKAER or UIT shipment at or above, and fails a missing or contradictory declaration with SentInformationError or TransportDeclarationError; weight is the only criterion it checks.",
 )
 
 # Invoice type
