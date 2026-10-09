@@ -223,5 +223,80 @@ class TestNordicConventionsDHLCountryRequirementsSentInformation(unittest.TestCa
         )
 
 
+class TestNordicConventionsDHLCountryRequirementsUitInformation(unittest.TestCase):
+    CODE = "advisor_nordic_conventions_dhl_freight_sweden_uit_information"
+
+    def _expected(self, level: str) -> list:
+        return [
+            dict(
+                code=self.CODE,
+                level=level,
+                message=(
+                    "DHL Freight Sweden requires a UIT code on a shipment to Romania on this product "
+                    "when the goods exceed 500 kg gross weight, exceed 10 000 RON in value, "
+                    "or are high-risk fiscal goods. "
+                    "The code is provided by the Romanian party, UIT FREE is entered when the goods "
+                    "are not subject, and the connector validates the declaration's consistency."
+                ),
+                details=dict(
+                    plugin="advisor_nordic_conventions",
+                    lane="SE-RO",
+                    sources=[
+                        sources.DHL_CONNECTOR_TRANSPORT_DECLARATION_PRODUCTS.to_dict(),
+                        sources.DHL_CONNECTOR_TRANSPORT_DECLARATION_DEFAULTS.to_dict(),
+                    ],
+                ),
+            )
+        ]
+
+    def test_romanian_lane_at_500_kg_warns(self):
+        self.assertListEqual(
+            _advise(
+                dhl_country_requirements.uit_information,
+                recipient="RO",
+                parcels=[dict(weight=250.0, weight_unit="KG"), dict(weight=250.0, weight_unit="KG")],
+            ),
+            self._expected("warning"),
+        )
+
+    def test_romanian_lane_below_the_weight_criterion_informs(self):
+        self.assertListEqual(
+            _advise(
+                dhl_country_requirements.uit_information,
+                recipient="RO",
+                parcels=[dict(weight=100.0, weight_unit="KG")],
+            ),
+            self._expected("info"),
+        )
+
+    def test_pound_parcel_weights_normalize_to_kilograms(self):
+        for parcels, level in (
+            (
+                [dict(weight=1102.31, weight_unit="LB"), dict(weight=2.5, weight_unit="KG")],
+                "warning",
+            ),
+            ([dict(weight=1102.31, weight_unit="LB")], "info"),
+        ):
+            with self.subTest(parcels=parcels):
+                self.assertListEqual(
+                    _advise(
+                        dhl_country_requirements.uit_information,
+                        recipient="RO",
+                        parcels=parcels,
+                    ),
+                    self._expected(level),
+                )
+
+    def test_product_outside_the_set_receives_no_uit_advice(self):
+        self.assertListEqual(
+            _advise(
+                dhl_country_requirements.uit_information,
+                recipient="RO",
+                service=PARCEL_CONNECT,
+            ),
+            [],
+        )
+
+
 if __name__ == "__main__":
     unittest.main()

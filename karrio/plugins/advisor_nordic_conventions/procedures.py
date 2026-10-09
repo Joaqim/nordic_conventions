@@ -55,6 +55,7 @@ RULES: typing.Tuple[Rule, ...] = (
     dhl_country_requirements.cyprus_documents,
     dhl_country_requirements.greek_tax_ids,
     dhl_country_requirements.sent_information,
+    dhl_country_requirements.uit_information,
 )
 
 AnsweringSet = typing.Callable[[lanes.Lane], typing.FrozenSet[Procedure]]

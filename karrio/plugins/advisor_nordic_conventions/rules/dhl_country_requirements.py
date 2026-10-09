@@ -41,6 +41,15 @@ def total_weight_kg(request: typing.Any) -> float:
     )
 
 
+def _transport_declaration_level(request: typing.Any) -> str:
+    """Warning at or above the connector's free weight limit, info below, as the connector compares it."""
+    return (
+        "warning"
+        if total_weight_kg(request) >= TRANSPORT_DECLARATION_FREE_WEIGHT_LIMIT_KG
+        else "info"
+    )
+
+
 def is_private_individual(recipient: typing.Any) -> bool:
     """Whether the recipient address reads as a private individual: residential, or no company name."""
     return bool(getattr(recipient, "residential", False)) or not str(
@@ -122,6 +131,37 @@ def sent_information(request, context) -> typing.List[models.Message]:
                     "The connector validates the pair's consistency when given and declares the shipment",
                     "SENT free with no information given, so deciding whether the goods are subject",
                     "is the booker's responsibility.",
+                ]
+            ),
+            lane,
+            [
+                sources.DHL_CONNECTOR_TRANSPORT_DECLARATION_PRODUCTS,
+                sources.DHL_CONNECTOR_TRANSPORT_DECLARATION_DEFAULTS,
+            ],
+        )
+    ]
+
+
+def uit_information(request, context) -> typing.List[models.Message]:
+    lane = lanes.country_lane_of(request, context)
+
+    if not (_dhl_freight_sweden(lane) and lane.recipient_country == ROMANIA):
+        return []
+
+    if lanes.dhl_product_code(lane.service) not in TRANSPORT_DECLARATION_PRODUCTS:
+        return []
+
+    return [
+        advisory(
+            AdvisoryClassification.dhl_freight_sweden_uit_information,
+            _transport_declaration_level(request),
+            " ".join(
+                [
+                    "DHL Freight Sweden requires a UIT code on a shipment to Romania on this product",
+                    "when the goods exceed 500 kg gross weight, exceed 10 000 RON in value,",
+                    "or are high-risk fiscal goods.",
+                    "The code is provided by the Romanian party, UIT FREE is entered when the goods",
+                    "are not subject, and the connector validates the declaration's consistency.",
                 ]
             ),
             lane,
