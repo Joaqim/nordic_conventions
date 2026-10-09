@@ -15,6 +15,16 @@ ADDRESSES = dict(
     DE=dict(country_code="DE", postal_code="10115", city="Berlin"),
     GR=dict(country_code="GR", postal_code="10431", city="Athens"),
     CY=dict(country_code="CY", postal_code="1010", city="Nicosia"),
+    CY_BUSINESS=dict(
+        country_code="CY", postal_code="1010", city="Nicosia", company_name="Ledra Trading Ltd"
+    ),
+    CY_RESIDENTIAL=dict(
+        country_code="CY",
+        postal_code="1010",
+        city="Nicosia",
+        company_name="Ledra Trading Ltd",
+        residential=True,
+    ),
     PL=dict(country_code="PL", postal_code="00-001", city="Warsaw"),
     RO=dict(country_code="RO", postal_code="010011", city="Bucharest"),
     ES=dict(country_code="ES", postal_code="28001", city="Madrid"),

@@ -71,7 +71,7 @@ class TestNordicConventionsPlugin(unittest.TestCase):
             ],
             advisor_nordic_conventions.ADVISORS,
         )
-        self.assertEqual(len(advisor_nordic_conventions.ADVISORS), 18)
+        self.assertEqual(len(advisor_nordic_conventions.ADVISORS), 19)
 
     def test_messages_reach_the_sdk_runner(self):
         references.import_extensions()

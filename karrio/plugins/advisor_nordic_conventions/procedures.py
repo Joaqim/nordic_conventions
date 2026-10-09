@@ -7,6 +7,7 @@ import karrio.core.models as models
 
 import karrio.plugins.advisor_nordic_conventions.lanes as lanes
 import karrio.plugins.advisor_nordic_conventions.rules.customs_values as customs_values
+import karrio.plugins.advisor_nordic_conventions.rules.dhl_country_requirements as dhl_country_requirements
 import karrio.plugins.advisor_nordic_conventions.rules.dhl_freight_sweden as dhl_freight_sweden
 import karrio.plugins.advisor_nordic_conventions.rules.invoice_type as invoice_type
 import karrio.plugins.advisor_nordic_conventions.rules.postnord as postnord
@@ -51,6 +52,7 @@ RULES: typing.Tuple[Rule, ...] = (
     dhl_freight_sweden.joint_declaration_destination,
     customs_values.ch_discount_on_invoice,
     customs_values.zero_value_line,
+    dhl_country_requirements.cyprus_documents,
 )
 
 AnsweringSet = typing.Callable[[lanes.Lane], typing.FrozenSet[Procedure]]
