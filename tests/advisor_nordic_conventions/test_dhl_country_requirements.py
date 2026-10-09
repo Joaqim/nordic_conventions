@@ -149,5 +149,79 @@ class TestNordicConventionsDHLCountryRequirementsGreekTaxIds(unittest.TestCase):
         )
 
 
+class TestNordicConventionsDHLCountryRequirementsSentInformation(unittest.TestCase):
+    CODE = "advisor_nordic_conventions_dhl_freight_sweden_sent_information"
+    FIVE_HUNDRED_KG = [dict(weight=500.0, weight_unit="KG")]
+
+    def _expected(self) -> list:
+        return [
+            dict(
+                code=self.CODE,
+                level="info",
+                message=(
+                    "DHL Freight Sweden requires a SENT reference number and a Carrier Key Code "
+                    "on a shipment to Poland on this product when the goods are subject "
+                    "to the Polish SENT monitoring system. "
+                    "The connector validates the pair's consistency when given and declares the shipment "
+                    "SENT free with no information given, so deciding whether the goods are subject "
+                    "is the booker's responsibility."
+                ),
+                details=dict(
+                    plugin="advisor_nordic_conventions",
+                    lane="SE-PL",
+                    sources=[
+                        sources.DHL_CONNECTOR_TRANSPORT_DECLARATION_PRODUCTS.to_dict(),
+                        sources.DHL_CONNECTOR_TRANSPORT_DECLARATION_DEFAULTS.to_dict(),
+                    ],
+                ),
+            )
+        ]
+
+    def test_polish_lane_receives_the_sent_reminder(self):
+        self.assertListEqual(
+            _advise(
+                dhl_country_requirements.sent_information,
+                recipient="PL",
+                parcels=self.FIVE_HUNDRED_KG,
+            ),
+            self._expected(),
+        )
+
+    def test_every_transport_declaration_product_receives_the_reminder(self):
+        for service in ("205", "233", "SPI", "dhl_freight_sweden_home_delivery_international_b2c"):
+            with self.subTest(service=service):
+                self.assertListEqual(
+                    _advise(
+                        dhl_country_requirements.sent_information,
+                        recipient="PL",
+                        service=service,
+                    ),
+                    self._expected(),
+                )
+
+    def test_sent_data_given_still_receives_the_reminder(self):
+        self.assertListEqual(
+            _advise(
+                dhl_country_requirements.sent_information,
+                recipient="PL",
+                options=dict(
+                    dhl_freight_sweden_sent_ref="SENT1234567890",
+                    dhl_freight_sweden_sent_carkey="CARKEY123456",
+                ),
+            ),
+            self._expected(),
+        )
+
+    def test_product_outside_the_set_receives_no_sent_advice(self):
+        self.assertListEqual(
+            _advise(
+                dhl_country_requirements.sent_information,
+                recipient="PL",
+                service=PARCEL_CONNECT,
+            ),
+            [],
+        )
+
+
 if __name__ == "__main__":
     unittest.main()

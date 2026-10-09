@@ -88,6 +88,7 @@ def shipment(
     service: str,
     customs: typing.Optional[dict] = None,
     options: typing.Optional[dict] = None,
+    parcels: typing.Optional[typing.List[dict]] = None,
     is_return: bool = False,
 ) -> models.ShipmentRequest:
     return lib.to_object(
@@ -97,7 +98,7 @@ def shipment(
                 service=service,
                 shipper=ADDRESSES[shipper],
                 recipient=ADDRESSES[recipient],
-                parcels=PARCELS,
+                parcels=parcels or PARCELS,
                 customs=customs,
                 options=options,
                 is_return=is_return or None,
