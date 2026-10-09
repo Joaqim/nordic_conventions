@@ -2,7 +2,7 @@
 
 ## 1. Spec and vocabulary groundwork
 
-- [ ] 1.1 Edit `openspec/specs/plugins/advisor-nordic-conventions/spec.md` directly: rewrite the Purpose paragraph to drop "sending goods outside the EU VAT area" in favor of destination scope living in each advisory's requirement, and add the CSR shorthand (DHL Freight "Country-specific shipping requirements (English)", dhl.com European road and rail help center, accessed 2026-10-09) to the source-reference paragraph; verify `openspec validate dhl-country-specific-requirements --strict` still passes and the paragraphs read correctly.
+- [x] 1.1 Edit `openspec/specs/plugins/advisor-nordic-conventions/spec.md` directly: rewrite the Purpose paragraph to drop "sending goods outside the EU VAT area" in favor of destination scope living in each advisory's requirement, and add the CSR shorthand (DHL Freight "Country-specific shipping requirements (English)", dhl.com European road and rail help center, accessed 2026-10-09) to the source-reference paragraph; verify `openspec validate dhl-country-specific-requirements --strict` still passes and the paragraphs read correctly.
 - [ ] 1.2 Extend the Destinations vocabulary sentence in `AGENTS.md` with the six named countries (Cyprus, Greece, Poland, Romania, Spain, Hungary); verify by grepping `AGENTS.md` for the extended list and confirming the README-sync rules still parse as one sentence.
 
 ## 2. Codes and sources

@@ -1,10 +1,11 @@
 # plugins/advisor-nordic-conventions Specification
 
 ## Purpose
-Defines the Nordic conventions plugin, an advisor-only karrio plugin that adds non-blocking trade-document advisories to PostNord and DHL Freight Sweden shipment responses for Swedish, Danish, and Finnish shippers sending goods outside the EU VAT area, each advisory citing the carrier or authority source it rests on.
+Defines the Nordic conventions plugin, an advisor-only karrio plugin that adds non-blocking trade-document advisories to PostNord and DHL Freight Sweden shipment responses for Swedish, Danish, and Finnish shippers, each advisory covering the destinations its own requirement names and citing the carrier or authority source it rests on.
 
 Source references in this spec use FN for the karrio fork's `docs/notes/customs/nordic-trade-documents-facts.md` (branch `docs-openspec`, commit baf8eb3dd) with line numbers, and keep the note's evidence tags: S is repository code or vendored specification, W is public carrier or authority documentation, and I is inference.
 Connector behaviour cited as S refers to the karrio fork's main specs `openspec/specs/postnord/customs-declaration/spec.md` (PNS) and `openspec/specs/dhl-freight-sweden/customs/spec.md` (DFS), both on branch `docs-openspec` at commit 60312fe2e.
+CSR is the DHL Freight "Country-specific shipping requirements (English)" PDF fetched from the dhl.com European road and rail help center (`https://www.dhl.com/se-en/home/freight/help-center-for-european-road-and-rail/useful-information-and-downloads.html`), accessed 2026-10-09.
 The parcel customs invoice PNS specifies entered the PostNord connector on the fork branch `feat-postnord-customs-invoice` (tip face88f37), merged into the fork's develop by 52d21fbfb.
 PostNord parcel products are the PostNord services that are neither letter services nor International Parcel (`postnord_postpaket_utrikes`), as defined by PNS lines 10-11.
 PostNord letter services are `postnord_tracked` (`04`), `postnord_tracked_letter` (`34`), `postnord_export_letter` (`UX`), `postnord_varubrev_first_class` (`86`), `postnord_expressbrev` (`LX`), `postnord_rek` (`RR`), `postnord_rek_retur` (`RK`), `postnord_rek_extra` (`RL`), `postnord_rekommanderet_brev` (`RE`), `postnord_rekommanderet_quickbrev` (`RQ`), `postnord_varde` (`VV`), and `postnord_afleveringsattest` (`AF`), the letter set of the PostNord connector (karrio `develop` at 7a56ffa5b, `modules/connectors/postnord/karrio/providers/postnord/units.py:269-284`, S).
