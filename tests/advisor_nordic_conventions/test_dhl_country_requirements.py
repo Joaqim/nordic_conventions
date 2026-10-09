@@ -1,3 +1,4 @@
+import importlib
 import unittest
 
 import karrio.core.units as core_units
@@ -419,6 +420,38 @@ class TestNordicConventionsDHLCountryRequirementsSpainDGDocuments(unittest.TestC
 
     def test_the_option_key_is_the_sdk_universal_registry_key(self):
         self.assertEqual(core_units.ShippingOption.dangerous_good.name, "dangerous_good")
+
+
+class TestNordicConventionsDHLCountryRequirementsConnectorParity(unittest.TestCase):
+    def _connector_units(self):
+        try:
+            return importlib.import_module("karrio.providers.dhl_freight_sweden.units")
+        except ImportError:
+            self.skipTest("dhl_freight_sweden connector is not importable")
+
+    def test_greek_tax_id_products_match_connector(self):
+        units = self._connector_units()
+
+        self.assertSetEqual(
+            dhl_country_requirements.GREEK_TAX_ID_PRODUCTS,
+            set(units.PARTY_TAX_ID_PRODUCTS),
+        )
+
+    def test_transport_declaration_products_match_connector(self):
+        units = self._connector_units()
+
+        self.assertSetEqual(
+            dhl_country_requirements.TRANSPORT_DECLARATION_PRODUCTS,
+            set(units.TRANSPORT_DECLARATION_PRODUCTS),
+        )
+
+    def test_transport_declaration_free_weight_limit_matches_connector(self):
+        units = self._connector_units()
+
+        self.assertEqual(
+            dhl_country_requirements.TRANSPORT_DECLARATION_FREE_WEIGHT_LIMIT_KG,
+            units.TRANSPORT_DECLARATION_FREE_WEIGHT_LIMIT_KG,
+        )
 
 
 if __name__ == "__main__":

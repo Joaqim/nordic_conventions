@@ -22,7 +22,7 @@
 - [x] 4.4 Add the UIT rule (warning at or above, info below, the summed-kg threshold); test-first with the three delta scenarios at exactly 500 kg and 100 kg, including a product outside the set; verify with an RO fixture and a multi-parcel LB-weight case proving unit normalization.
 - [x] 4.5 Add the EKAER rule mirroring UIT for HU; test-first with the three delta scenarios; verify with an HU fixture.
 - [x] 4.6 Add the Spain rule (`dangerous_good` option on ES lanes); test-first with the three delta scenarios, pinning the universal option key; verify with a mainland-ES fixture (the existing ES entries are Canary Islands territory variants).
-- [ ] 4.7 Add parity tests comparing the copied product sets and the 500 kg limit against the connector's `units.py` via importlib, skipping when the connector is not importable; verify they pass with `PYTHONPATH` pointing at the connector and skip cleanly without it.
+- [x] 4.7 Add parity tests comparing the copied product sets and the 500 kg limit against the connector's `units.py` via importlib, skipping when the connector is not importable; verify they pass with `PYTHONPATH` pointing at the connector and skip cleanly without it.
 
 ## 5. README sync
 
