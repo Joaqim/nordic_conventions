@@ -1,5 +1,7 @@
 import unittest
 
+import karrio.core.units as core_units
+
 import karrio.plugins.advisor_nordic_conventions.sources as sources
 import karrio.plugins.advisor_nordic_conventions.rules.dhl_country_requirements as dhl_country_requirements
 from . import fixture
@@ -353,6 +355,70 @@ class TestNordicConventionsDHLCountryRequirementsEkaerInformation(unittest.TestC
             ),
             [],
         )
+
+
+class TestNordicConventionsDHLCountryRequirementsSpainDGDocuments(unittest.TestCase):
+    CODE = "advisor_nordic_conventions_dhl_freight_sweden_spain_dg_documents"
+    DANGEROUS = dict(dangerous_good=True)
+
+    def _expected(self) -> list:
+        return [
+            dict(
+                code=self.CODE,
+                level="warning",
+                message=(
+                    "DHL Freight Sweden requires both a dangerous goods declaration and a material safety "
+                    "data sheet attached on dangerous goods shipments to Spain, "
+                    "and the documents can be uploaded in myDHL Freight."
+                ),
+                details=dict(
+                    plugin="advisor_nordic_conventions",
+                    lane="SE-ES",
+                    sources=[sources.DHL_CSR_SPAIN_DG_DOCUMENTS.to_dict()],
+                ),
+            )
+        ]
+
+    def test_dangerous_goods_to_spain(self):
+        self.assertListEqual(
+            _advise(
+                dhl_country_requirements.spain_dg_documents,
+                recipient="ES",
+                options=self.DANGEROUS,
+            ),
+            self._expected(),
+        )
+
+    def test_dangerous_goods_to_spain_outside_the_eu_vat_area(self):
+        for recipient in ("IC", "IC_CODE"):
+            with self.subTest(recipient=recipient):
+                self.assertListEqual(
+                    _advise(
+                        dhl_country_requirements.spain_dg_documents,
+                        recipient=recipient,
+                        options=self.DANGEROUS,
+                    ),
+                    self._expected(),
+                )
+
+    def test_ordinary_goods_to_spain_receive_no_advice(self):
+        self.assertListEqual(
+            _advise(dhl_country_requirements.spain_dg_documents, recipient="ES"),
+            [],
+        )
+
+    def test_dangerous_goods_elsewhere_receive_no_advice(self):
+        self.assertListEqual(
+            _advise(
+                dhl_country_requirements.spain_dg_documents,
+                recipient="DE",
+                options=self.DANGEROUS,
+            ),
+            [],
+        )
+
+    def test_the_option_key_is_the_sdk_universal_registry_key(self):
+        self.assertEqual(core_units.ShippingOption.dangerous_good.name, "dangerous_good")
 
 
 if __name__ == "__main__":

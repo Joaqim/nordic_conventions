@@ -4,6 +4,7 @@ import typing
 
 import karrio.core.models as models
 import karrio.core.units as units
+import karrio.lib as lib
 
 import karrio.plugins.advisor_nordic_conventions.lanes as lanes
 import karrio.plugins.advisor_nordic_conventions.sources as sources
@@ -200,6 +201,36 @@ def ekaer_information(request, context) -> typing.List[models.Message]:
                 sources.DHL_CONNECTOR_TRANSPORT_DECLARATION_PRODUCTS,
                 sources.DHL_CONNECTOR_TRANSPORT_DECLARATION_DEFAULTS,
             ],
+        )
+    ]
+
+
+def spain_dg_documents(request, context) -> typing.List[models.Message]:
+    # Mainland Spain enters through the country gate; the Canary Islands and
+    # Ceuta and Melilla, outside the EU VAT area, enter through lane_of.
+    lane = lanes.country_lane_of(request, context) or lanes.lane_of(request, context)
+
+    if not (_dhl_freight_sweden(lane) and lane.recipient_country == SPAIN):
+        return []
+
+    options = lib.to_shipping_options(dict(getattr(request, "options", None) or {}))
+
+    if not options.dangerous_good.state:
+        return []
+
+    return [
+        advisory(
+            AdvisoryClassification.dhl_freight_sweden_spain_dg_documents,
+            "warning",
+            " ".join(
+                [
+                    "DHL Freight Sweden requires both a dangerous goods declaration and a material safety data sheet",
+                    "attached on dangerous goods shipments to Spain,",
+                    "and the documents can be uploaded in myDHL Freight.",
+                ]
+            ),
+            lane,
+            [sources.DHL_CSR_SPAIN_DG_DOCUMENTS],
         )
     ]
 
