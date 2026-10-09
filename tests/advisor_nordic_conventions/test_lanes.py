@@ -159,6 +159,56 @@ class TestNordicConventionsScope(unittest.TestCase):
         )
 
 
+class TestNordicConventionsCountryLane(unittest.TestCase):
+    def _country_lane(self, shipper: str, recipient: str):
+        return lanes.country_lane_of(
+            fixture.shipment(
+                shipper, recipient, "dhl_freight_sweden_road_freight_standard"
+            ),
+            fixture.context("dhl_freight_sweden"),
+        )
+
+    def test_country_lane_admits_eu_vat_recipients(self):
+        for recipient in ("CY", "GR", "PL", "RO", "ES", "HU"):
+            with self.subTest(recipient=recipient):
+                lane = self._country_lane("SE", recipient)
+
+                self.assertIsNotNone(lane)
+                self.assertTupleEqual(
+                    (
+                        lane.carrier_name,
+                        lane.shipper_country,
+                        lane.recipient_country,
+                    ),
+                    ("dhl_freight_sweden", "SE", recipient),
+                )
+
+    def test_lane_of_still_excludes_eu_vat_recipients(self):
+        for recipient in ("CY", "GR", "PL", "RO", "ES", "HU"):
+            with self.subTest(recipient=recipient):
+                self.assertIsNone(
+                    _lane(
+                        "SE",
+                        recipient,
+                        "dhl_freight_sweden_road_freight_standard",
+                        carrier="dhl_freight_sweden",
+                    )
+                )
+
+    def test_country_lane_keeps_the_scope_and_area_gates(self):
+        self.assertIsNone(self._country_lane("DK", "PL"))
+        self.assertIsNone(
+            lanes.country_lane_of(
+                fixture.shipment(
+                    "SE", "PL", "dhl_freight_sweden_road_freight_standard"
+                ),
+                fixture.context("dhl_freight_sweden", operation="rating"),
+            )
+        )
+        self.assertIsNone(self._country_lane("SE", "NO"))
+        self.assertIsNone(self._country_lane("SE", "IC"))
+
+
 class TestNordicConventionsProductGroups(unittest.TestCase):
     def test_postnord_product_groups_by_name_and_code(self):
         self.assertDictEqual(

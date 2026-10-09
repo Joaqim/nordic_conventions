@@ -12,7 +12,7 @@
 
 ## 3. Lane gate
 
-- [ ] 3.1 Test-first: add `test_lanes.py` cases asserting that the country gate yields a lane for SE to each of CY, GR, PL, RO, ES, HU while `lane_of` still returns none for the same addresses, watch them fail, then add the EU-admitting country gate to `karrio/plugins/advisor_nordic_conventions/lanes.py`; verify `test_lanes.py` passes and no existing lane test changes.
+- [x] 3.1 Test-first: add `test_lanes.py` cases asserting that the country gate yields a lane for SE to each of CY, GR, PL, RO, ES, HU while `lane_of` still returns none for the same addresses, watch them fail, then add the EU-admitting country gate to `karrio/plugins/advisor_nordic_conventions/lanes.py`; verify `test_lanes.py` passes and no existing lane test changes.
 
 ## 4. Country requirement rules
 

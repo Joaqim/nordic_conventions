@@ -354,16 +354,26 @@ def lane_of(request: typing.Any, context: typing.Any) -> typing.Optional[Lane]:
     country codes are read as the connector books them, a territory code as
     its parent country (``dhl_parent_country``), before any check.
     """
-    return _lane(request, context, recipient_outside_only=True)
+    return _lane(request, context, recipient_inside_eu=False)
 
 
 def shipper_lane_of(request: typing.Any, context: typing.Any) -> typing.Optional[Lane]:
     """The shipment lane as ``lane_of`` reads it, for a recipient inside or outside the EU VAT area."""
-    return _lane(request, context, recipient_outside_only=False)
+    return _lane(request, context, recipient_inside_eu=None)
+
+
+def country_lane_of(request: typing.Any, context: typing.Any) -> typing.Optional[Lane]:
+    """The shipment lane as ``lane_of`` reads it, for a recipient inside the EU VAT area.
+
+    The country-specific shipping requirements advise on lanes inside the
+    EU VAT area, which ``lane_of`` excludes; the shipper and carrier gates
+    stay as the scope requirement states them.
+    """
+    return _lane(request, context, recipient_inside_eu=True)
 
 
 def _lane(
-    request: typing.Any, context: typing.Any, recipient_outside_only: bool
+    request: typing.Any, context: typing.Any, recipient_inside_eu: typing.Optional[bool]
 ) -> typing.Optional[Lane]:
     if getattr(context, "operation", None) != "shipping":
         return None
@@ -380,9 +390,12 @@ def _lane(
         and territories.in_eu_vat_area(
             shipper_country, getattr(shipper, "postal_code", None)
         )
-        and not (
-            recipient_outside_only
-            and territories.in_eu_vat_area(recipient_country, getattr(recipient, "postal_code", None))
+        and (
+            recipient_inside_eu is None
+            or recipient_inside_eu
+            == territories.in_eu_vat_area(
+                recipient_country, getattr(recipient, "postal_code", None)
+            )
         )
     )
 
