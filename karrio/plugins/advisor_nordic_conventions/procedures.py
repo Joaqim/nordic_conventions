@@ -53,6 +53,7 @@ RULES: typing.Tuple[Rule, ...] = (
     customs_values.ch_discount_on_invoice,
     customs_values.zero_value_line,
     dhl_country_requirements.cyprus_documents,
+    dhl_country_requirements.greek_tax_ids,
 )
 
 AnsweringSet = typing.Callable[[lanes.Lane], typing.FrozenSet[Procedure]]

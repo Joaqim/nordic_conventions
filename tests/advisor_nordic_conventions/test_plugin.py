@@ -71,7 +71,7 @@ class TestNordicConventionsPlugin(unittest.TestCase):
             ],
             advisor_nordic_conventions.ADVISORS,
         )
-        self.assertEqual(len(advisor_nordic_conventions.ADVISORS), 19)
+        self.assertEqual(len(advisor_nordic_conventions.ADVISORS), 20)
 
     def test_messages_reach_the_sdk_runner(self):
         references.import_extensions()
@@ -206,7 +206,6 @@ class TestNordicConventionsMessages(unittest.TestCase):
             ("dhl_freight_sweden", "shipping", "DK", "NO", "109"),
             ("postnord", "shipping", "SE", "DE", "postnord_parcel"),
             ("dhl_freight_sweden", "shipping", "SE", "DE", "109"),
-            ("dhl_freight_sweden", "shipping", "SE", "GR", "202"),
             ("dhl_freight_sweden", "shipping", "SE", "XI", "202"),
             ("postnord", "shipping", "AX", "NO", "postnord_parcel"),
             ("postnord", "rating", "SE", "NO", "postnord_parcel"),
@@ -224,6 +223,18 @@ class TestNordicConventionsMessages(unittest.TestCase):
                 )
             ],
             [],
+        )
+
+    def test_intra_eu_shipment_with_a_country_requirement_receives_that_advice(self):
+        self.assertListEqual(
+            [
+                message["code"]
+                for message in _advise_all(
+                    fixture.shipment("SE", "GR", "202"),
+                    fixture.context("dhl_freight_sweden"),
+                )
+            ],
+            ["advisor_nordic_conventions_dhl_freight_sweden_greek_tax_ids"],
         )
 
     def test_return_from_norway_receives_no_advice(self):

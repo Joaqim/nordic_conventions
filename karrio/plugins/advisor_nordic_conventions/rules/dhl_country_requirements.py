@@ -48,6 +48,59 @@ def is_private_individual(recipient: typing.Any) -> bool:
     ).strip()
 
 
+def _tax_id_of(party: typing.Any) -> typing.Optional[str]:
+    return (
+        str(getattr(party, "federal_tax_id", None) or "").strip()
+        or str(getattr(party, "state_tax_id", None) or "").strip()
+        or None
+    )
+
+
+def greek_tax_ids(request, context) -> typing.List[models.Message]:
+    lane = lanes.country_lane_of(request, context)
+
+    if not (_dhl_freight_sweden(lane) and lane.recipient_country == GREECE):
+        return []
+
+    if lanes.dhl_product_code(lane.service) not in GREEK_TAX_ID_PRODUCTS:
+        return []
+
+    missing = " and ".join(
+        name
+        for name, party in (
+            ("the sender", request.shipper),
+            ("the recipient", request.recipient),
+        )
+        if _tax_id_of(party) is None
+    )
+
+    if not missing:
+        return []
+
+    return [
+        advisory(
+            AdvisoryClassification.dhl_freight_sweden_greek_tax_ids,
+            "warning",
+            " ".join(
+                [
+                    "DHL Freight Sweden requires a VAT number or TIN",
+                    f"from {missing} on shipments to Greece on this product,",
+                    f"and this booking provides none for {missing}.",
+                    "The connector reads each party's number from federal_tax_id or state_tax_id",
+                    "and refuses the booking without one;",
+                    "EL000000000 can be used for a private individual.",
+                ]
+            ),
+            lane,
+            [
+                sources.DHL_CSR_GREEK_TAX_IDS,
+                sources.DHL_MAN_GREEK_TAX_ID_PRODUCTS,
+                sources.DHL_CONNECTOR_GREEK_TAX_ID_PRODUCTS,
+            ],
+        )
+    ]
+
+
 def cyprus_documents(request, context) -> typing.List[models.Message]:
     lane = lanes.country_lane_of(request, context)
 

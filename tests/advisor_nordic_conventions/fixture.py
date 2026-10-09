@@ -6,6 +6,8 @@ import karrio.core.advisors as advisors
 
 ADDRESSES = dict(
     SE=dict(country_code="SE", postal_code="11122", city="Stockholm"),
+    SE_TAXED=dict(country_code="SE", postal_code="11122", city="Stockholm", federal_tax_id="SE556677889901"),
+    SE_STATE_TAXED=dict(country_code="SE", postal_code="11122", city="Stockholm", state_tax_id="SE202401987654"),
     NO=dict(country_code="NO", postal_code="0150", city="Oslo"),
     DK=dict(country_code="DK", postal_code="2100", city="København"),
     FI=dict(country_code="FI", postal_code="00100", city="Helsinki"),
@@ -14,6 +16,7 @@ ADDRESSES = dict(
     AX_PREFIXED=dict(country_code="AX", postal_code="AX-22100", city="Mariehamn"),
     DE=dict(country_code="DE", postal_code="10115", city="Berlin"),
     GR=dict(country_code="GR", postal_code="10431", city="Athens"),
+    GR_TAXED=dict(country_code="GR", postal_code="10431", city="Athens", federal_tax_id="EL998877665"),
     CY=dict(country_code="CY", postal_code="1010", city="Nicosia"),
     CY_BUSINESS=dict(
         country_code="CY", postal_code="1010", city="Nicosia", company_name="Ledra Trading Ltd"

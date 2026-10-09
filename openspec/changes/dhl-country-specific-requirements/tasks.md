@@ -17,7 +17,7 @@
 ## 4. Country requirement rules
 
 - [x] 4.1 Create `karrio/plugins/advisor_nordic_conventions/rules/dhl_country_requirements.py` with the shared helpers (copied product sets, kg weight sum, private-individual test) and the Cyprus rule, registered in the rules aggregation; test-first with the three delta scenarios (business recipient omits the ID sentence, private recipient includes it, Greece receives no Cyprus code) using a new CY fixture address; verify the new test class passes.
-- [ ] 4.2 Add the Greece rule (party tax id presence on the `PARTY_TAX_ID_PRODUCTS` copy, naming missing parties and the `EL000000000` fallback); test-first with the three delta scenarios, including product 205 outside the set; verify with a GR-mainland fixture.
+- [x] 4.2 Add the Greece rule (party tax id presence on the `PARTY_TAX_ID_PRODUCTS` copy, naming missing parties and the `EL000000000` fallback); test-first with the three delta scenarios, including product 205 outside the set; verify with a GR-mainland fixture.
 - [ ] 4.3 Add the SENT rule (info reminder on PL lanes for the transport declaration product set copy); test-first with the three delta scenarios, including a SENT-option-set shipment still receiving the reminder; verify with a PL fixture.
 - [ ] 4.4 Add the UIT rule (warning at or above, info below, the summed-kg threshold); test-first with the three delta scenarios at exactly 500 kg and 100 kg, including a product outside the set; verify with an RO fixture and a multi-parcel LB-weight case proving unit normalization.
 - [ ] 4.5 Add the EKAER rule mirroring UIT for HU; test-first with the three delta scenarios; verify with an HU fixture.
