@@ -26,7 +26,7 @@
 
 ## 5. README sync
 
-- [ ] 5.1 Add the six Codes list entries, the six Advisory reference rows under the DHL Freight Sweden from Sweden group (Destinations cells naming the country, Level cells stating the conditional UIT/EKAER split briefly, Trigger and Sources cells per the AGENTS.md rules, CSR footnote), and rewrite the "EU destinations, Northern Ireland included, need nothing" sentence to name the six countries and link their advisories; verify the four AGENTS.md diff and `comm` commands produce no output and the test suite still passes.
+- [x] 5.1 Add the six Codes list entries, the six Advisory reference rows under the DHL Freight Sweden from Sweden group (Destinations cells naming the country, Level cells stating the conditional UIT/EKAER split briefly, Trigger and Sources cells per the AGENTS.md rules, CSR footnote), and rewrite the "EU destinations, Northern Ireland included, need nothing" sentence to name the six countries and link their advisories; verify the four AGENTS.md diff and `comm` commands produce no output and the test suite still passes.
 
 ## 6. Integration verification
 
