@@ -20,7 +20,7 @@
 - [x] 4.2 Add the Greece rule (party tax id presence on the `PARTY_TAX_ID_PRODUCTS` copy, naming missing parties and the `EL000000000` fallback); test-first with the three delta scenarios, including product 205 outside the set; verify with a GR-mainland fixture.
 - [x] 4.3 Add the SENT rule (info reminder on PL lanes for the transport declaration product set copy); test-first with the three delta scenarios, including a SENT-option-set shipment still receiving the reminder; verify with a PL fixture.
 - [x] 4.4 Add the UIT rule (warning at or above, info below, the summed-kg threshold); test-first with the three delta scenarios at exactly 500 kg and 100 kg, including a product outside the set; verify with an RO fixture and a multi-parcel LB-weight case proving unit normalization.
-- [ ] 4.5 Add the EKAER rule mirroring UIT for HU; test-first with the three delta scenarios; verify with an HU fixture.
+- [x] 4.5 Add the EKAER rule mirroring UIT for HU; test-first with the three delta scenarios; verify with an HU fixture.
 - [ ] 4.6 Add the Spain rule (`dangerous_good` option on ES lanes); test-first with the three delta scenarios, pinning the universal option key; verify with a mainland-ES fixture (the existing ES entries are Canary Islands territory variants).
 - [ ] 4.7 Add parity tests comparing the copied product sets and the 500 kg limit against the connector's `units.py` via importlib, skipping when the connector is not importable; verify they pass with `PYTHONPATH` pointing at the connector and skip cleanly without it.
 

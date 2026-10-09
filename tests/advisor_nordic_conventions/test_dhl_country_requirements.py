@@ -298,5 +298,62 @@ class TestNordicConventionsDHLCountryRequirementsUitInformation(unittest.TestCas
         )
 
 
+class TestNordicConventionsDHLCountryRequirementsEkaerInformation(unittest.TestCase):
+    CODE = "advisor_nordic_conventions_dhl_freight_sweden_ekaer_information"
+
+    def _expected(self, level: str) -> list:
+        return [
+            dict(
+                code=self.CODE,
+                level=level,
+                message=(
+                    "DHL Freight Sweden requires an EKAER number on a shipment to Hungary on this product "
+                    "when the goods are subject to the Hungarian EKAER control system: "
+                    "over 500 kg gross weight, over HUF 1 000 000 in value, or risky goods. "
+                    "The number is obtained from the Hungarian party, EKAER FREE is entered when the goods "
+                    "are not subject, and the connector validates the declaration's consistency."
+                ),
+                details=dict(
+                    plugin="advisor_nordic_conventions",
+                    lane="SE-HU",
+                    sources=[
+                        sources.DHL_CONNECTOR_TRANSPORT_DECLARATION_PRODUCTS.to_dict(),
+                        sources.DHL_CONNECTOR_TRANSPORT_DECLARATION_DEFAULTS.to_dict(),
+                    ],
+                ),
+            )
+        ]
+
+    def test_hungarian_lane_at_500_kg_warns(self):
+        self.assertListEqual(
+            _advise(
+                dhl_country_requirements.ekaer_information,
+                recipient="HU",
+                parcels=[dict(weight=250.0, weight_unit="KG"), dict(weight=250.0, weight_unit="KG")],
+            ),
+            self._expected("warning"),
+        )
+
+    def test_hungarian_lane_below_the_weight_criterion_informs(self):
+        self.assertListEqual(
+            _advise(
+                dhl_country_requirements.ekaer_information,
+                recipient="HU",
+                parcels=[dict(weight=100.0, weight_unit="KG")],
+            ),
+            self._expected("info"),
+        )
+
+    def test_product_outside_the_set_receives_no_ekaer_advice(self):
+        self.assertListEqual(
+            _advise(
+                dhl_country_requirements.ekaer_information,
+                recipient="HU",
+                service=PARCEL_CONNECT,
+            ),
+            [],
+        )
+
+
 if __name__ == "__main__":
     unittest.main()

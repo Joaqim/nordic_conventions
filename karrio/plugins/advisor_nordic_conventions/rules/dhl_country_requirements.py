@@ -173,6 +173,37 @@ def uit_information(request, context) -> typing.List[models.Message]:
     ]
 
 
+def ekaer_information(request, context) -> typing.List[models.Message]:
+    lane = lanes.country_lane_of(request, context)
+
+    if not (_dhl_freight_sweden(lane) and lane.recipient_country == HUNGARY):
+        return []
+
+    if lanes.dhl_product_code(lane.service) not in TRANSPORT_DECLARATION_PRODUCTS:
+        return []
+
+    return [
+        advisory(
+            AdvisoryClassification.dhl_freight_sweden_ekaer_information,
+            _transport_declaration_level(request),
+            " ".join(
+                [
+                    "DHL Freight Sweden requires an EKAER number on a shipment to Hungary on this product",
+                    "when the goods are subject to the Hungarian EKAER control system:",
+                    "over 500 kg gross weight, over HUF 1 000 000 in value, or risky goods.",
+                    "The number is obtained from the Hungarian party, EKAER FREE is entered when the goods",
+                    "are not subject, and the connector validates the declaration's consistency.",
+                ]
+            ),
+            lane,
+            [
+                sources.DHL_CONNECTOR_TRANSPORT_DECLARATION_PRODUCTS,
+                sources.DHL_CONNECTOR_TRANSPORT_DECLARATION_DEFAULTS,
+            ],
+        )
+    ]
+
+
 def cyprus_documents(request, context) -> typing.List[models.Message]:
     lane = lanes.country_lane_of(request, context)
 
