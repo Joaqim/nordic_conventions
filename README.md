@@ -45,10 +45,11 @@ EU destinations, Northern Ireland included, need nothing, except that DHL Freigh
 ## When the plugin advises
 
 The plugin advises only at shipment creation, never at rating.
-It advises on `postnord` shipments from Sweden, Denmark, or Finland and on `dhl_freight_sweden` shipments from Sweden, when the shipper is inside and the recipient outside the EU VAT area; for return shipments the returning party is the shipper, because the SDK swaps shipper and recipient before advisors run.
+It advises on `postnord` shipments from Sweden, Denmark, or Finland and on `dhl_freight_sweden` shipments from Sweden, when the shipper is inside the EU VAT area; for return shipments the returning party is the shipper, because the SDK swaps shipper and recipient before advisors run.
+Each advisory covers the destinations its own requirement names: the general advisories a recipient outside the EU VAT area, the country-specific shipping advisories their named countries.
 The EU VAT area follows Tullverket's list of EU customs and fiscal territories for goods movements rather than karrio's `EUCountry`; Northern Ireland is inside for goods, while Åland, the Canary Islands, and the other special territories are outside.
 For `dhl_freight_sweden` shipments the plugin reads a territory country code as the DHL Freight Sweden connector books it, under its parent country, before any check: `AX` as `FI`, `FO` and `GL` as `DK`, `IC` and `EA` as `ES`, and `JE`, `GG`, `IM`, and `XI` as `GB`, so `XI` with a `BT` postcode is inside the EU VAT area and Jersey, Guernsey, and the Isle of Man receive the Great Britain advice; PostNord country codes are read as given.
-The one exception to the EU VAT area condition is [Territory postal code](#advisor_nordic_conventions_dhl_freight_sweden_territory_postal_code_mismatch), returned for a DHL Freight Sweden recipient territory code whose postal code lies outside the territory even when the parent's mainland is inside the area.
+Beyond the outside-EU recipient condition, the six country-specific shipping advisories above advise on their countries inside the EU VAT area, and [Territory postal code](#advisor_nordic_conventions_dhl_freight_sweden_territory_postal_code_mismatch) is returned for a DHL Freight Sweden recipient territory code whose postal code lies outside the territory even when the parent's mainland is inside the area.
 A shipment is commercial when it carries customs data and either `commercial_invoice` is true or its content is sale-like — a `content_type` that is omitted or none of gift, sample, documents, or return merchandise.
 The full territory table and the determinations above are specified in the [specification](openspec/specs/plugins/advisor-nordic-conventions/spec.md).
 

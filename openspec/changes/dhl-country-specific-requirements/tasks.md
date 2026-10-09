@@ -30,6 +30,6 @@
 
 ## 6. Integration verification
 
-- [ ] 6.1 Run the full local suite: `.venv/bin/python -m unittest discover -s tests` from the advisor repo root; verify it passes.
-- [ ] 6.2 Run the parity suite: `PYTHONPATH=../karrio-dhl-freight-sweden .venv/bin/python -m unittest discover -s tests`; verify it passes with the connector importable.
-- [ ] 6.3 Run `openspec validate dhl-country-specific-requirements --strict` and the AGENTS.md verification commands end to end; verify both are clean.
+- [x] 6.1 Run the full local suite: `.venv/bin/python -m unittest discover -s tests` from the advisor repo root; verify it passes.
+- [x] 6.2 Run the parity suite: `PYTHONPATH=../karrio-dhl-freight-sweden .venv/bin/python -m unittest discover -s tests`; verify it passes with the connector importable.
+- [x] 6.3 Run `openspec validate dhl-country-specific-requirements --strict` and the AGENTS.md verification commands end to end; verify both are clean.
